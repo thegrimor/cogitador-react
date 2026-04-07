@@ -4,6 +4,38 @@ Reglas y convenciones para el agente en este proyecto.
 
 ---
 
+## Contexto del proyecto
+
+**Dark Heresy Cogitator** — conjunto de herramientas web para el juego de rol Dark Heresy (Warhammer 40K).
+
+El proyecto nació como 3 HTMLs standalone con estética Adeptus Mechanicus (grimdark). El objetivo es migrarlos a React manteniendo el diseño y añadiendo interactividad.
+
+### Módulos planificados
+
+| Módulo | Descripción | Estado |
+|---|---|---|
+| `ficha` | Ficha del agente/personaje | Pendiente de migrar |
+| `proyectos` | Gestor de proyectos de campaña | Pendiente de migrar |
+| `sequito` | Gestión del séquito (acólitos y aliados) | Pendiente de migrar |
+
+Cada módulo existe como HTML funcional previo que sirve de referencia para la migración.
+
+### Diseño — Sistema visual
+
+Estética Adeptus Mechanicus. El sistema de diseño está definido en `src/index.css` como tema Tailwind v4:
+
+- **Colores clave:** `crimson` (#c41e1e), `gold` (#c8962a), `surface` (#080808), `parchment` (#e8dcc8)
+- **Fuentes:** Orbitron (display/títulos), Share Tech Mono (mono/body), Rajdhani (descripciones)
+- **Efectos:** scanline animado, grid de fondo, halo rojo superior, shimmer
+
+### Perfil del desarrollador
+
+- Perfil principalmente **backend**, acostumbrado a DDD y arquitectura por bounded contexts
+- Nuevo en React/frontend — cuando sea útil, explicar conceptos frontend en términos de backend
+- Puede y quiere hacer cambios manuales en el código sin necesidad de pedirlo al agente
+
+---
+
 ## Diseño — Mobile First
 
 - El proyecto está pensado **principalmente para móvil**
