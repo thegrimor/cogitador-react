@@ -4,6 +4,15 @@ Reglas y convenciones para el agente en este proyecto.
 
 ---
 
+## Diseño — Mobile First
+
+- El proyecto está pensado **principalmente para móvil**
+- Diseñar siempre mobile-first: pantallas pequeñas primero, luego adaptar a desktop
+- Respetar el responsive en todo momento — nunca romper el layout en móvil
+- PWA se implementará más adelante; tenerlo en mente al estructurar (sin bloquearlo)
+
+---
+
 ## Stack
 
 - React 19 + Vite + TypeScript
@@ -107,3 +116,6 @@ Si aparece un error de build, TypeScript o lint, el agente **notifica al usuario
 - Añadir barrel exports al `index.ts` del módulo en curso
 - Formatear con Prettier
 - Escribir tests del módulo en curso
+
+### Git — esperar confirmación explícita
+**El agente nunca hace `git add`, `git commit`, `git push` ni ninguna operación git sin que el usuario lo pida explícitamente.** Esto incluye commits de documentación, configuración o cualquier otro tipo.
