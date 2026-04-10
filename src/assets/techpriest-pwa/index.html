@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COGITATOR PERSONNEL // TECH-PRIEST</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c41e1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tech-Priest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #c41e1e;
+  --red-bright: #ff2222;
+  --red-dim: #7a0f0f;
+  --gold: #c8962a;
+  --gold-bright: #f0b840;
+  --bg: #080808;
+  --bg2: #0f0f0f;
+  --bg3: #161616;
+  --bg4: #1e1e1e;
+  --text: #e8dcc8;
+  --text-dim: #a89880;
+  --text-bright: #ffffff;
+  --green: #2aff6a;
+  --blue: #4ab8ff;
+  --border: #2a2218;
+  --border-bright: #4a3a28;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(196,30,30,0.012) 2px,rgba(196,30,30,0.012) 4px);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(196,30,30,0.07) 0%,transparent 60%);pointer-events:none;z-index:0;}
+.scanline{position:fixed;top:-100%;left:0;right:0;height:40%;background:linear-gradient(transparent,rgba(196,30,30,0.025),transparent);animation:scan 10s linear infinite;pointer-events:none;z-index:1;}
+@keyframes scan{0%{top:-40%}100%{top:100%}}
+
+/* LAYOUT */
+.app{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:16px;}
+
+/* HEADER */
+.header{border:1px solid var(--red-dim);border-bottom:3px solid var(--red);padding:16px 24px;margin-bottom:20px;background:linear-gradient(180deg,#1a0505 0%,var(--bg2) 100%);position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),var(--gold),var(--red),transparent);animation:shimmer 3s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+.header-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.header-left{display:flex;align-items:center;gap:14px;}
+.cog{font-size:36px;color:var(--red-dim);animation:rot 20s linear infinite;display:inline-block;text-shadow:0 0 15px rgba(196,30,30,.3);}
+@keyframes rot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.title-block .main{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--red-bright);letter-spacing:4px;text-shadow:0 0 20px rgba(255,34,34,.4);}
+.title-block .sub{font-size:10px;color:var(--gold);letter-spacing:5px;margin-top:3px;display:block;}
+.char-name-display{font-family:'Orbitron',sans-serif;font-size:14px;color:var(--text-bright);letter-spacing:2px;}
+.char-rank-display{font-size:11px;color:var(--text-dim);margin-top:4px;}
+
+/* TABS */
+.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--red-dim);overflow-x:auto;}
+.tab{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:10px 18px;cursor:pointer;background:var(--bg2);color:var(--text-dim);border:1px solid var(--border);border-bottom:none;transition:all .2s;white-space:nowrap;user-select:none;}
+.tab:hover{color:var(--text);background:var(--bg3);}
+.tab.active{background:var(--bg3);color:var(--red-bright);border-color:var(--red-dim);border-bottom:2px solid var(--bg3);margin-bottom:-2px;}
+
+/* PANELS */
+.panel{display:none;padding:20px 0;}
+.panel.active{display:block;}
+
+/* SECTION */
+.section{background:var(--bg2);border:1px solid var(--border);margin-bottom:16px;}
+.section-head{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:rgba(196,30,30,.05);}
+.section-head h3{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--red);letter-spacing:3px;}
+.section-body{padding:16px;}
+
+/* BUTTONS */
+.btn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:7px 14px;border:none;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{background:var(--red-bright);box-shadow:0 0 12px rgba(255,34,34,.35);}
+.btn-gold{background:var(--gold);color:#000;font-weight:700;}
+.btn-gold:hover{background:var(--gold-bright);}
+.btn-dark{background:var(--bg4);color:var(--text-dim);border:1px solid var(--border-bright);}
+.btn-dark:hover{color:var(--text);border-color:var(--text-dim);}
+.btn-sm{padding:4px 10px;font-size:8px;}
+.btn-icon{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:14px;padding:2px 6px;transition:color .2s;}
+.btn-icon:hover{color:var(--red-bright);}
+
+/* FORMS */
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:9px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;}
+.form-group input,.form-group select,.form-group textarea{background:var(--bg);border:1px solid var(--border-bright);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:7px 10px;outline:none;transition:border-color .2s;width:100%;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--red);box-shadow:0 0 8px rgba(196,30,30,.15);}
+.form-group select option{background:var(--bg2);}
+.form-row{display:grid;gap:10px;}
+.form-row-2{grid-template-columns:1fr 1fr;}
+.form-row-3{grid-template-columns:1fr 1fr 1fr;}
+.form-row-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+
+/* CHAR INFO */
+.char-info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.info-field{background:var(--bg);border:1px solid var(--border-bright);padding:10px 12px;}
+.info-field label{font-size:9px;color:var(--text-dim);letter-spacing:2px;display:block;margin-bottom:5px;}
+.info-field input{background:none;border:none;color:var(--text-bright);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;width:100%;outline:none;}
+
+/* ATTRIBUTES */
+.attrs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.attr-card{background:var(--bg);border:1px solid var(--border-bright);padding:12px 14px;position:relative;transition:border-color .2s;}
+.attr-card:hover{border-color:var(--red-dim);}
+.attr-name{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:10px;}
+.attr-inputs{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;}
+.attr-input-group{display:flex;flex-direction:column;gap:3px;flex:1;}
+.attr-input-group span{font-size:8px;color:var(--text-dim);letter-spacing:1px;}
+.attr-input-group input{background:var(--bg2);border:1px solid var(--border-bright);color:var(--text-bright);font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;padding:6px;text-align:center;width:100%;outline:none;}
+.attr-input-group input:focus{border-color:var(--gold);}
+.attr-total{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;color:var(--red-bright);text-align:center;padding:4px 0;text-shadow:0 0 10px rgba(255,34,34,.3);}
+.attr-bonus{font-size:10px;color:var(--text-dim);text-align:center;}
+.attr-mods-list{font-size:10px;color:var(--gold);line-height:1.6;min-height:16px;}
+.attr-separator{width:100%;height:1px;background:var(--border);margin:8px 0;}
+
+/* SKILLS */
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;}
+.skill-row{background:var(--bg);border:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:10px;transition:border-color .2s;}
+.skill-row:hover{border-color:var(--border-bright);}
+.skill-name{flex:1;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;color:var(--text);}
+.skill-attr{font-size:10px;color:var(--text-dim);width:30px;text-align:center;}
+.skill-level{display:flex;gap:4px;}
+.skill-dot{width:10px;height:10px;border:1px solid var(--border-bright);cursor:pointer;transition:all .2s;}
+.skill-dot.filled{background:var(--red);border-color:var(--red);}
+.skill-dot:hover{border-color:var(--red);}
+.skill-total{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--gold-bright);width:36px;text-align:right;}
+.skill-trained{font-size:9px;color:var(--text-dim);width:20px;text-align:center;}
+
+/* TALENTS */
+.talents-list{display:flex;flex-direction:column;gap:8px;}
+.talent-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--red-dim);padding:12px 14px;display:flex;gap:12px;align-items:flex-start;}
+.talent-card:hover{border-color:var(--border-bright);border-left-color:var(--red);}
+.talent-main{flex:1;}
+.talent-name{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--text-bright);margin-bottom:4px;}
+.talent-type{font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
+.talent-desc{font-size:11px;color:var(--text-dim);line-height:1.6;font-family:'Rajdhani',sans-serif;font-weight:300;}
+.talent-effect{font-size:11px;color:var(--green);margin-top:6px;font-family:'Share Tech Mono',monospace;}
+
+/* ARMORY */
+.armory-section{margin-bottom:20px;}
+.armory-section h4{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.weapon-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--red-dim);padding:12px 14px;margin-bottom:8px;}
+.weapon-name{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--text-bright);margin-bottom:8px;}
+.weapon-stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;}
+.wstat{display:flex;flex-direction:column;gap:2px;}
+.wstat-label{font-size:8px;color:var(--text-dim);letter-spacing:1px;}
+.wstat-value{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--gold-bright);}
+.weapon-notes{font-size:11px;color:var(--text-dim);font-family:'Rajdhani',sans-serif;}
+.armor-card{background:var(--bg);border:1px solid var(--border);padding:12px 14px;margin-bottom:8px;}
+.armor-locations{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:10px;}
+.armor-loc{background:var(--bg2);border:1px solid var(--border-bright);padding:6px 10px;text-align:center;}
+.armor-loc-name{font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+.armor-loc-val{font-family:'Orbitron',sans-serif;font-size:18px;color:var(--blue);font-weight:700;}
+.gear-list{display:flex;flex-direction:column;gap:6px;}
+.gear-item{background:var(--bg);border:1px solid var(--border);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}
+.gear-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;}
+.gear-qty{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold);}
+.gear-notes{font-size:10px;color:var(--text-dim);}
+
+/* MECHADENDRITES */
+.mech-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--gold);padding:14px 16px;margin-bottom:10px;}
+.mech-name{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--gold-bright);margin-bottom:4px;}
+.mech-type{font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px;}
+.mech-desc{font-size:12px;color:var(--text);line-height:1.6;font-family:'Rajdhani',sans-serif;margin-bottom:8px;}
+.mech-abilities{display:flex;flex-direction:column;gap:4px;}
+.mech-ability{font-size:11px;color:var(--green);font-family:'Share Tech Mono',monospace;}
+.mech-ability::before{content:'► ';}
+.augment-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--blue);padding:12px 14px;margin-bottom:8px;}
+.augment-name{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--blue);margin-bottom:4px;}
+.augment-bonus{font-size:11px;color:var(--green);font-family:'Share Tech Mono',monospace;margin-top:6px;}
+
+/* ADD FORMS */
+.add-form{background:var(--bg3);border:1px solid var(--border-bright);border-top:2px solid var(--red);padding:16px;margin-top:12px;display:none;}
+.add-form.open{display:block;}
+.form-actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--red);border-top:3px solid var(--red-bright);padding:28px;max-width:520px;width:92%;max-height:90vh;overflow-y:auto;}
+.modal h3{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--red-bright);letter-spacing:3px;margin-bottom:18px;}
+.modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--red);border-left:4px solid var(--red-bright);padding:10px 18px;font-size:11px;color:var(--text);z-index:1000;transform:translateX(200%);transition:transform .3s ease;max-width:280px;}
+.toast.show{transform:translateX(0);}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px;color:var(--text-dim);border:1px dashed var(--border);}
+.empty .icon{font-size:36px;opacity:.3;margin-bottom:12px;}
+.empty p{font-size:11px;letter-spacing:1px;}
+
+/* MISC */
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.tag{display:inline-block;font-size:8px;padding:2px 7px;border:1px solid;letter-spacing:1px;font-family:'Orbitron',sans-serif;}
+.tag-red{color:var(--red);border-color:var(--red);}
+.tag-gold{color:var(--gold);border-color:var(--gold);}
+.tag-blue{color:var(--blue);border-color:var(--blue);}
+.tag-green{color:var(--green);border-color:var(--green);}
+
+@media(max-width:600px){
+  .attrs-grid{grid-template-columns:1fr 1fr;}
+  .form-row-3,.form-row-4{grid-template-columns:1fr 1fr;}
+  .form-row-2{grid-template-columns:1fr;}
+  .title-block .main{font-size:15px;}
+}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <span class="cog">⚙</span>
+      <div class="title-block">
+        <span class="main">COGITATOR PERSONNEL</span>
+        <span class="sub">// FICHA DE ACÓLITO — DARK HERESY I EDICIÓN</span>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="char-name-display" id="hdrName">SIN DESIGNACIÓN</div>
+      <div class="char-rank-display" id="hdrRank">Rango 1 // Tech-Priest</div>
+      <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <button class="btn btn-dark btn-sm" onclick="exportData()">⬇ EXPORTAR</button>
+        <button class="btn btn-dark btn-sm" onclick="document.getElementById('importFile').click()">⬆ IMPORTAR</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('attrs')">⚡ ATRIBUTOS</div>
+  <div class="tab" onclick="switchTab('skills')">📋 HABILIDADES</div>
+  <div class="tab" onclick="switchTab('talents')">✦ TALENTOS</div>
+  <div class="tab" onclick="switchTab('armory')">⚔ ARMERÍA</div>
+  <div class="tab" onclick="switchTab('mechadendrites')">🔩 MEJORAS</div>
+</div>
+
+<!-- ==================== PANEL: ATRIBUTOS ==================== -->
+<div class="panel active" id="panel-attrs">
+
+  <!-- CHAR INFO -->
+  <div class="section">
+    <div class="section-head"><h3>// DATOS DE IDENTIFICACIÓN</h3></div>
+    <div class="section-body">
+      <div class="char-info-grid" id="charInfoGrid"></div>
+    </div>
+  </div>
+
+  <!-- ATTRIBUTES -->
+  <div class="section">
+    <div class="section-head">
+      <h3>// CARACTERÍSTICAS</h3>
+      <span style="font-size:10px;color:var(--text-dim)">BASE + AVANCES + BONUS EXTERNOS = TOTAL</span>
+    </div>
+    <div class="section-body">
+      <div class="attrs-grid" id="attrsGrid"></div>
+    </div>
+  </div>
+
+  <!-- WOUNDS / FATE -->
+  <div class="section">
+    <div class="section-head"><h3>// ESTADO VITAL</h3></div>
+    <div class="section-body">
+      <div class="form-row form-row-4">
+        <div class="form-group">
+          <label>Heridas Actuales</label>
+          <input type="number" id="woundsCurrent" min="0" onchange="saveChar()">
+        </div>
+        <div class="form-group">
+          <label>Heridas Máximas</label>
+          <input type="number" id="woundsMax" min="0" onchange="saveChar()">
+        </div>
+        <div class="form-group">
+          <label>Puntos de Destino</label>
+          <input type="number" id="fatePoints" min="0" onchange="saveChar()">
+        </div>
+        <div class="form-group">
+          <label>Destino Máximo</label>
+          <input type="number" id="fateMax" min="0" onchange="saveChar()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== PANEL: HABILIDADES ==================== -->
+<div class="panel" id="panel-skills">
+  <div class="section">
+    <div class="section-head">
+      <h3>// REGISTRO DE HABILIDADES</h3>
+      <button class="btn btn-red btn-sm" onclick="toggleForm('skillForm')">+ AÑADIR</button>
+    </div>
+    <div class="add-form" id="skillForm">
+      <div class="form-row form-row-3" style="margin-bottom:10px">
+        <div class="form-group">
+          <label>Nombre de la Habilidad</label>
+          <input type="text" id="skName" placeholder="Ej: Tech-Use">
+        </div>
+        <div class="form-group">
+          <label>Característica Base</label>
+          <select id="skAttr">
+            <option value="WS">WS - Armas</option>
+            <option value="BS">BS - Disparo</option>
+            <option value="S">S - Fuerza</option>
+            <option value="T">T - Resistencia</option>
+            <option value="Ag">Ag - Agilidad</option>
+            <option value="Int">Int - Inteligencia</option>
+            <option value="Per">Per - Percepción</option>
+            <option value="WP">WP - Voluntad</option>
+            <option value="Fel">Fel - Carisma</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nivel (0-3 dots)</label>
+          <select id="skLevel">
+            <option value="0">0 - No entrenado (-20)</option>
+            <option value="1">1 - Entrenado (+0)</option>
+            <option value="2">2 - Avanzado (+10)</option>
+            <option value="3">3 - Maestro (+20)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label>Bonus adicional (talentos, equipamiento...)</label>
+          <input type="number" id="skBonus" value="0">
+        </div>
+        <div class="form-group">
+          <label>Notas</label>
+          <input type="text" id="skNotes" placeholder="Notas opcionales">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark btn-sm" onclick="toggleForm('skillForm')">CANCELAR</button>
+        <button class="btn btn-red btn-sm" onclick="addSkill()">REGISTRAR</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div style="font-size:9px;color:var(--text-dim);margin-bottom:12px;letter-spacing:1px">
+        NIVEL: ○○○ No entrenado (-20) &nbsp;|&nbsp; ●○○ Entrenado (+0) &nbsp;|&nbsp; ●●○ Avanzado (+10) &nbsp;|&nbsp; ●●● Maestro (+20)
+      </div>
+      <div class="skills-grid" id="skillsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PANEL: TALENTOS ==================== -->
+<div class="panel" id="panel-talents">
+  <div class="section">
+    <div class="section-head">
+      <h3>// REGISTRO DE TALENTOS</h3>
+      <button class="btn btn-red btn-sm" onclick="toggleForm('talentForm')">+ AÑADIR</button>
+    </div>
+    <div class="add-form" id="talentForm">
+      <div class="form-row form-row-2" style="margin-bottom:10px">
+        <div class="form-group">
+          <label>Nombre del Talento</label>
+          <input type="text" id="talName" placeholder="Ej: Mechadendrite Use">
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="talType">
+            <option value="COMBATE">COMBATE</option>
+            <option value="MECÁNICO">MECÁNICO</option>
+            <option value="PSÍQUICO">PSÍQUICO</option>
+            <option value="GENERAL">GENERAL</option>
+            <option value="BENEDICTION">BENEDICTION</option>
+            <option value="TECH">TECH</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Descripción</label>
+        <textarea id="talDesc" rows="2" placeholder="Descripción del talento..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Efecto en juego (bonus, modificadores...)</label>
+        <input type="text" id="talEffect" placeholder="Ej: +10 a Tech-Use, puede usar Mechadendrites de combate">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark btn-sm" onclick="toggleForm('talentForm')">CANCELAR</button>
+        <button class="btn btn-red btn-sm" onclick="addTalent()">REGISTRAR</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="talents-list" id="talentsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PANEL: ARMERÍA ==================== -->
+<div class="panel" id="panel-armory">
+
+  <!-- WEAPONS -->
+  <div class="section">
+    <div class="section-head">
+      <h3>// ARSENAL</h3>
+      <button class="btn btn-red btn-sm" onclick="toggleForm('weaponForm')">+ ARMA</button>
+    </div>
+    <div class="add-form" id="weaponForm">
+      <div class="form-row form-row-3" style="margin-bottom:10px">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="wpName" placeholder="Ej: Lascannon">
+        </div>
+        <div class="form-group">
+          <label>Clase</label>
+          <select id="wpClass">
+            <option>Básica</option><option>Pesada</option><option>Pistola</option>
+            <option>CaC</option><option>Lanzadora</option><option>Especial</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Daño</label>
+          <select id="wpDmgType">
+            <option>E (Energía)</option><option>I (Impacto)</option>
+            <option>X (Explosivo)</option><option>R (Rending)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-4" style="margin-bottom:10px">
+        <div class="form-group"><label>Alcance</label><input type="text" id="wpRange" placeholder="100m"></div>
+        <div class="form-group"><label>ROF (S/S/A)</label><input type="text" id="wpRof" placeholder="S/-/-"></div>
+        <div class="form-group"><label>Daño</label><input type="text" id="wpDmg" placeholder="3d10+10"></div>
+        <div class="form-group"><label>Penetración</label><input type="number" id="wpPen" value="0"></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Cargador</label><input type="text" id="wpClip" placeholder="1"></div>
+        <div class="form-group"><label>Rasgos / Notas</label><input type="text" id="wpNotes" placeholder="Unwieldy, Tearing..."></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark btn-sm" onclick="toggleForm('weaponForm')">CANCELAR</button>
+        <button class="btn btn-red btn-sm" onclick="addWeapon()">REGISTRAR</button>
+      </div>
+    </div>
+    <div class="section-body" id="weaponList"></div>
+  </div>
+
+  <!-- ARMOR -->
+  <div class="section">
+    <div class="section-head">
+      <h3>// ARMADURA</h3>
+      <button class="btn btn-red btn-sm" onclick="toggleForm('armorForm')">+ ARMADURA</button>
+    </div>
+    <div class="add-form" id="armorForm">
+      <div class="form-row form-row-2" style="margin-bottom:10px">
+        <div class="form-group"><label>Nombre</label><input type="text" id="arName" placeholder="Ej: Carapace Armour"></div>
+        <div class="form-group"><label>Notas</label><input type="text" id="arNotes" placeholder="Rasgos especiales..."></div>
+      </div>
+      <div class="form-row form-row-4">
+        <div class="form-group"><label>Cabeza</label><input type="number" id="arHead" value="0" min="0"></div>
+        <div class="form-group"><label>Cuerpo</label><input type="number" id="arBody" value="0" min="0"></div>
+        <div class="form-group"><label>Brazos</label><input type="number" id="arArms" value="0" min="0"></div>
+        <div class="form-group"><label>Piernas</label><input type="number" id="arLegs" value="0" min="0"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark btn-sm" onclick="toggleForm('armorForm')">CANCELAR</button>
+        <button class="btn btn-red btn-sm" onclick="addArmor()">REGISTRAR</button>
+      </div>
+    </div>
+    <div class="section-body" id="armorList"></div>
+  </div>
+
+  <!-- GEAR -->
+  <div class="section">
+    <div class="section-head">
+      <h3>// EQUIPO & PERTRECHOS</h3>
+      <button class="btn btn-red btn-sm" onclick="toggleForm('gearForm')">+ OBJETO</button>
+    </div>
+    <div class="add-form" id="gearForm">
+      <div class="form-row form-row-3">
+        <div class="form-group"><label>Nombre</label><input type="text" id="grName" placeholder="Ej: Auspex"></div>
+        <div class="form-group"><label>Cantidad</label><input type="number" id="grQty" value="1" min="1"></div>
+        <div class="form-group"><label>Notas</label><input type="text" id="grNotes" placeholder="Descripción o efecto..."></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark btn-sm" onclick="toggleForm('gearForm')">CANCELAR</button>
+        <button class="btn btn-red btn-sm" onclick="addGear()">REGISTRAR</button>
+      </div>
+    </div>
+    <div class="section-body" id="gearList"></div>
+  </div>
+
+</div>
+
+<!-- ==================== PANEL: MEJORAS ==================== -->
+<div class="panel" id="panel-mechadendrites">
+
+  <!-- MECHADENDRITES -->
+  <div class="section">
+    <div class="section-head">
+      <h3>// MECHADENDRITES</h3>
+      <button class="btn btn-red btn-sm" onclick="toggleForm('mechForm')">+ MECHADENDRITE</button>
+    </div>
+    <div class="add-form" id="mechForm">
+      <div class="form-row form-row-2" style="margin-bottom:10px">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="mchName" placeholder="Ej: Mechadendrite de Manipulación">
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="mchType">
+            <option>MANIPULACIÓN</option><option>COMBATE</option>
+            <option>UTILITAS</option><option>MEDICAE</option>
+            <option>OPTICAL</option><option>OTRO</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Descripción</label>
+        <textarea id="mchDesc" rows="2" placeholder="Descripción del mechadendrite..."></textarea>
+      </div>
+      <div id="mchAbilitiesContainer">
+        <div class="form-group">
+          <label>Capacidades (una por línea)</label>
+          <textarea id="mchAbilities" rows="3" placeholder="Puede reparar equipamiento básico&#10;Bonus +10 a Tech-Use&#10;Alcance 1,5m"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark btn-sm" onclick="toggleForm('mechForm')">CANCELAR</button>
+        <button class="btn btn-red btn-sm" onclick="addMechadendrite()">REGISTRAR</button>
+      </div>
+    </div>
+    <div class="section-body" id="mechList"></div>
+  </div>
+
+  <!-- AUGMENTATIONS -->
+  <div class="section">
+    <div class="section-head">
+      <h3>// AUMENTACIONES CIBERNÉTICAS</h3>
+      <button class="btn btn-red btn-sm" onclick="toggleForm('augForm')">+ AUMENTACIÓN</button>
+    </div>
+    <div class="add-form" id="augForm">
+      <div class="form-row form-row-2" style="margin-bottom:10px">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="augName" placeholder="Ej: Bionic Eye">
+        </div>
+        <div class="form-group">
+          <label>Localización</label>
+          <select id="augLoc">
+            <option>Ojo / Visión</option><option>Brazo / Mano</option>
+            <option>Pierna</option><option>Torso / Interno</option>
+            <option>Cerebro / Neural</option><option>Piel / Externo</option><option>Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Descripción</label>
+        <textarea id="augDesc" rows="2" placeholder="Descripción de la aumentación..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Bonus / Efecto en juego</label>
+        <input type="text" id="augBonus" placeholder="Ej: +10 Percepción, visión nocturna, ignora penalizadores de oscuridad">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-dark btn-sm" onclick="toggleForm('augForm')">CANCELAR</button>
+        <button class="btn btn-red btn-sm" onclick="addAugmentation()">REGISTRAR</button>
+      </div>
+    </div>
+    <div class="section-body" id="augList"></div>
+  </div>
+
+</div>
+
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL EDIT -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3 id="editModalTitle">EDITAR</h3>
+    <div id="editModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-dark" onclick="closeModal()">CANCELAR</button>
+      <button class="btn btn-red" id="editModalSave">GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// DATA
+// =====================================================================
+const ATTR_DEFS = [
+  {key:'WS',  name:'WEAPON SKILL',    short:'WS'},
+  {key:'BS',  name:'BALLISTIC SKILL', short:'BS'},
+  {key:'S',   name:'STRENGTH',        short:'S'},
+  {key:'T',   name:'TOUGHNESS',       short:'T'},
+  {key:'Ag',  name:'AGILITY',         short:'Ag'},
+  {key:'Int', name:'INTELLIGENCE',    short:'Int'},
+  {key:'Per', name:'PERCEPTION',      short:'Per'},
+  {key:'WP',  name:'WILLPOWER',       short:'WP'},
+  {key:'Fel', name:'FELLOWSHIP',      short:'Fel'},
+];
+
+const CHAR_FIELDS = [
+  {key:'name',       label:'Designación / Nombre'},
+  {key:'rank',       label:'Rango'},
+  {key:'career',     label:'Carrera'},
+  {key:'homeworld',  label:'Mundo de Origen'},
+  {key:'experience', label:'XP Total'},
+  {key:'xpSpent',    label:'XP Gastado'},
+];
+
+let state = {
+  char: { name:'', rank:'1', career:'Tech-Priest', homeworld:'', experience:'0', xpSpent:'0' },
+  attrs: {},       // { WS: { base:0, advances:0, bonuses:[], bonusNote:'' }, ... }
+  wounds: { current:0, max:0 },
+  fate:   { current:0, max:0 },
+  skills: [],
+  talents: [],
+  weapons: [],
+  armors: [],
+  gear: [],
+  mechadendrites: [],
+  augmentations: [],
+};
+
+// Init attrs
+ATTR_DEFS.forEach(a => {
+  state.attrs[a.key] = { base: 0, advances: 0, bonuses: 0, bonusNote: '' };
+});
+
+// =====================================================================
+// PERSISTENCE
+// =====================================================================
+function save() {
+  localStorage.setItem('dh_techpriest', JSON.stringify(state));
+  updateHeader();
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('dh_techpriest');
+    if (raw) {
+      const loaded = JSON.parse(raw);
+      // Merge to avoid missing keys
+      state.char = { ...state.char, ...(loaded.char || {}) };
+      ATTR_DEFS.forEach(a => {
+        if (loaded.attrs && loaded.attrs[a.key])
+          state.attrs[a.key] = { ...state.attrs[a.key], ...loaded.attrs[a.key] };
+      });
+      state.wounds = loaded.wounds || state.wounds;
+      state.fate   = loaded.fate   || state.fate;
+      state.skills         = loaded.skills         || [];
+      state.talents        = loaded.talents        || [];
+      state.weapons        = loaded.weapons        || [];
+      state.armors         = loaded.armors         || [];
+      state.gear           = loaded.gear           || [];
+      state.mechadendrites = loaded.mechadendrites || [];
+      state.augmentations  = loaded.augmentations  || [];
+    }
+  } catch(e) { console.warn('Load error', e); }
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `techpriest_${(state.char.name||'personaje').replace(/\s+/g,'_')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Datos exportados');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.char !== undefined) {
+        state = data;
+        // Ensure attrs exist
+        ATTR_DEFS.forEach(a => {
+          if (!state.attrs[a.key]) state.attrs[a.key] = {base:0,advances:0,bonuses:0,bonusNote:''};
+        });
+        save();
+        renderAll();
+        showToast('Datos importados correctamente');
+      }
+    } catch(err) { showToast('ERROR: Archivo inválido'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// =====================================================================
+// TABS
+// =====================================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const panels = ['attrs','skills','talents','armory','mechadendrites'];
+    t.classList.toggle('active', panels[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+// =====================================================================
+// HEADER
+// =====================================================================
+function updateHeader() {
+  document.getElementById('hdrName').textContent = state.char.name || 'SIN DESIGNACIÓN';
+  document.getElementById('hdrRank').textContent =
+    `Rango ${state.char.rank || '1'} // ${state.char.career || 'Acólito'}`;
+}
+
+// =====================================================================
+// CHAR INFO
+// =====================================================================
+function renderCharInfo() {
+  const g = document.getElementById('charInfoGrid');
+  g.innerHTML = CHAR_FIELDS.map(f => `
+    <div class="info-field">
+      <label>${f.label.toUpperCase()}</label>
+      <input type="text" value="${escHtml(state.char[f.key]||'')}"
+        oninput="state.char['${f.key}']=this.value;save()" placeholder="—">
+    </div>`).join('');
+
+  // Wounds & Fate
+  document.getElementById('woundsCurrent').value = state.wounds.current;
+  document.getElementById('woundsMax').value     = state.wounds.max;
+  document.getElementById('fatePoints').value    = state.fate.current;
+  document.getElementById('fateMax').value       = state.fate.max;
+}
+
+document.getElementById('woundsCurrent').addEventListener('input', e => { state.wounds.current = +e.target.value; save(); });
+document.getElementById('woundsMax').addEventListener('input', e => { state.wounds.max = +e.target.value; save(); });
+document.getElementById('fatePoints').addEventListener('input', e => { state.fate.current = +e.target.value; save(); });
+document.getElementById('fateMax').addEventListener('input', e => { state.fate.max = +e.target.value; save(); });
+
+// =====================================================================
+// ATTRIBUTES
+// =====================================================================
+function attrTotal(key) {
+  const a = state.attrs[key];
+  return (a.base||0) + (a.advances||0) + (a.bonuses||0);
+}
+
+function renderAttrs() {
+  const g = document.getElementById('attrsGrid');
+  g.innerHTML = ATTR_DEFS.map(def => {
+    const a   = state.attrs[def.key];
+    const tot = attrTotal(def.key);
+    const bon = Math.floor(tot / 10);
+    return `
+    <div class="attr-card">
+      <div class="attr-name">${def.name} <span style="color:var(--text-dim)">(${def.short})</span></div>
+      <div class="attr-inputs">
+        <div class="attr-input-group">
+          <span>BASE</span>
+          <input type="number" value="${a.base||0}" min="0" max="99"
+            onchange="state.attrs['${def.key}'].base=+this.value;save();renderAttrs()">
+        </div>
+        <div style="font-size:18px;color:var(--text-dim);padding-bottom:6px">+</div>
+        <div class="attr-input-group">
+          <span>AVANCES</span>
+          <input type="number" value="${a.advances||0}" min="0" max="99"
+            onchange="state.attrs['${def.key}'].advances=+this.value;save();renderAttrs()">
+        </div>
+        <div style="font-size:18px;color:var(--text-dim);padding-bottom:6px">+</div>
+        <div class="attr-input-group">
+          <span>BONUS EXT</span>
+          <input type="number" value="${a.bonuses||0}" min="-99" max="99"
+            onchange="state.attrs['${def.key}'].bonuses=+this.value;save();renderAttrs()">
+        </div>
+      </div>
+      <div class="attr-separator"></div>
+      <div class="attr-total">${tot}</div>
+      <div class="attr-bonus">Bonus: ${bon} &nbsp;|&nbsp; Tirada objetivo: ${tot}%</div>
+      ${a.bonuses ? `<div class="attr-mods-list" style="margin-top:6px">
+        <input type="text" value="${escHtml(a.bonusNote||'')}" placeholder="Origen del bonus..."
+          style="background:none;border:none;border-bottom:1px solid var(--border);color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:10px;width:100%;outline:none;padding:2px 0"
+          oninput="state.attrs['${def.key}'].bonusNote=this.value;save()">
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// =====================================================================
+// SKILLS
+// =====================================================================
+const SKILL_LEVEL_BONUS = [-20, 0, 10, 20];
+
+function addSkill() {
+  const name  = document.getElementById('skName').value.trim();
+  const attr  = document.getElementById('skAttr').value;
+  const level = +document.getElementById('skLevel').value;
+  const bonus = +document.getElementById('skBonus').value || 0;
+  const notes = document.getElementById('skNotes').value.trim();
+  if (!name) { showToast('ERROR: Introduce el nombre de la habilidad'); return; }
+  state.skills.push({ id: Date.now(), name, attr, level, bonus, notes });
+  save();
+  renderSkills();
+  ['skName','skNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('skBonus').value = '0';
+  document.getElementById('skLevel').value = '1';
+  showToast(`Habilidad "${name}" registrada`);
+}
+
+function deleteSkill(id) {
+  state.skills = state.skills.filter(s => s.id !== id);
+  save(); renderSkills();
+}
+
+function skillTotal(sk) {
+  const base = attrTotal(sk.attr);
+  return base + SKILL_LEVEL_BONUS[sk.level] + (sk.bonus || 0);
+}
+
+function renderSkills() {
+  const el = document.getElementById('skillsList');
+  if (!state.skills.length) {
+    el.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="icon">📋</div><p>SIN HABILIDADES REGISTRADAS</p></div>`;
+    return;
+  }
+  const sorted = [...state.skills].sort((a,b) => a.name.localeCompare(b.name));
+  el.innerHTML = sorted.map(sk => {
+    const tot  = skillTotal(sk);
+    const dots = [0,1,2].map(i =>
+      `<div class="skill-dot ${i < sk.level ? 'filled' : ''}" onclick="cycleSkillLevel(${sk.id},${i})"></div>`
+    ).join('');
+    const levelNames = ['No entrenado','Entrenado','Avanzado','Maestro'];
+    return `
+    <div class="skill-row">
+      <div>
+        <div class="skill-name">${escHtml(sk.name)}</div>
+        ${sk.notes ? `<div style="font-size:10px;color:var(--text-dim)">${escHtml(sk.notes)}</div>` : ''}
+      </div>
+      <div class="skill-attr">${sk.attr}</div>
+      <div class="skill-level" title="${levelNames[sk.level]}">${dots}</div>
+      ${sk.bonus ? `<div style="font-size:10px;color:var(--gold);width:30px;text-align:center">+${sk.bonus}</div>` : '<div style="width:30px"></div>'}
+      <div class="skill-total">${tot}%</div>
+      <button class="btn-icon" onclick="deleteSkill(${sk.id})" title="Eliminar">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function cycleSkillLevel(id, dot) {
+  const sk = state.skills.find(s => s.id === id);
+  if (!sk) return;
+  // clicking dot i sets level to i+1 if not already, else i
+  const newLevel = (sk.level === dot + 1) ? dot : dot + 1;
+  sk.level = Math.min(3, Math.max(0, newLevel));
+  save(); renderSkills();
+}
+
+// =====================================================================
+// TALENTS
+// =====================================================================
+function addTalent() {
+  const name   = document.getElementById('talName').value.trim();
+  const type   = document.getElementById('talType').value;
+  const desc   = document.getElementById('talDesc').value.trim();
+  const effect = document.getElementById('talEffect').value.trim();
+  if (!name) { showToast('ERROR: Introduce el nombre del talento'); return; }
+  state.talents.push({ id: Date.now(), name, type, desc, effect });
+  save(); renderTalents();
+  ['talName','talDesc','talEffect'].forEach(id => document.getElementById(id).value = '');
+  showToast(`Talento "${name}" registrado`);
+}
+
+function deleteTalent(id) {
+  state.talents = state.talents.filter(t => t.id !== id);
+  save(); renderTalents();
+}
+
+function renderTalents() {
+  const el = document.getElementById('talentsList');
+  if (!state.talents.length) {
+    el.innerHTML = `<div class="empty"><div class="icon">✦</div><p>SIN TALENTOS REGISTRADOS</p></div>`;
+    return;
+  }
+  const typeColors = {COMBATE:'tag-red',MECÁNICO:'tag-gold',PSÍQUICO:'tag-blue',GENERAL:'',BENEDICTION:'tag-green',TECH:'tag-gold'};
+  el.innerHTML = state.talents.map(t => `
+    <div class="talent-card">
+      <div class="talent-main">
+        <div class="talent-name">${escHtml(t.name)} <span class="tag ${typeColors[t.type]||'tag-red'}" style="margin-left:8px">${t.type}</span></div>
+        ${t.desc   ? `<div class="talent-desc">${escHtml(t.desc)}</div>` : ''}
+        ${t.effect ? `<div class="talent-effect">► ${escHtml(t.effect)}</div>` : ''}
+      </div>
+      <button class="btn-icon" onclick="deleteTalent(${t.id})">✕</button>
+    </div>`).join('');
+}
+
+// =====================================================================
+// WEAPONS
+// =====================================================================
+function addWeapon() {
+  const obj = {
+    id: Date.now(),
+    name:    document.getElementById('wpName').value.trim(),
+    cls:     document.getElementById('wpClass').value,
+    dmgType: document.getElementById('wpDmgType').value,
+    range:   document.getElementById('wpRange').value.trim(),
+    rof:     document.getElementById('wpRof').value.trim(),
+    dmg:     document.getElementById('wpDmg').value.trim(),
+    pen:     +document.getElementById('wpPen').value || 0,
+    clip:    document.getElementById('wpClip').value.trim(),
+    notes:   document.getElementById('wpNotes').value.trim(),
+  };
+  if (!obj.name) { showToast('ERROR: Introduce el nombre del arma'); return; }
+  state.weapons.push(obj);
+  save(); renderWeapons();
+  ['wpName','wpRange','wpRof','wpDmg','wpClip','wpNotes'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('wpPen').value='0';
+  showToast(`Arma "${obj.name}" registrada`);
+}
+
+function deleteWeapon(id) { state.weapons = state.weapons.filter(w => w.id !== id); save(); renderWeapons(); }
+
+function renderWeapons() {
+  const el = document.getElementById('weaponList');
+  if (!state.weapons.length) {
+    el.innerHTML = `<div class="empty"><div class="icon">⚔</div><p>SIN ARMAS REGISTRADAS</p></div>`;
+    return;
+  }
+  el.innerHTML = state.weapons.map(w => `
+    <div class="weapon-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="weapon-name">${escHtml(w.name)}
+          <span class="tag tag-red" style="margin-left:8px">${w.cls}</span>
+          <span class="tag" style="margin-left:4px;color:var(--text-dim);border-color:var(--text-dim)">${w.dmgType}</span>
+        </div>
+        <button class="btn-icon" onclick="deleteWeapon(${w.id})">✕</button>
+      </div>
+      <div class="weapon-stats">
+        ${w.range ? `<div class="wstat"><div class="wstat-label">ALCANCE</div><div class="wstat-value">${escHtml(w.range)}</div></div>` : ''}
+        ${w.rof   ? `<div class="wstat"><div class="wstat-label">ROF</div><div class="wstat-value">${escHtml(w.rof)}</div></div>` : ''}
+        ${w.dmg   ? `<div class="wstat"><div class="wstat-label">DAÑO</div><div class="wstat-value">${escHtml(w.dmg)}</div></div>` : ''}
+        <div class="wstat"><div class="wstat-label">PEN</div><div class="wstat-value">${w.pen}</div></div>
+        ${w.clip  ? `<div class="wstat"><div class="wstat-label">CARGADOR</div><div class="wstat-value">${escHtml(w.clip)}</div></div>` : ''}
+      </div>
+      ${w.notes ? `<div class="weapon-notes">${escHtml(w.notes)}</div>` : ''}
+    </div>`).join('');
+}
+
+// =====================================================================
+// ARMOR
+// =====================================================================
+function addArmor() {
+  const obj = {
+    id: Date.now(),
+    name:  document.getElementById('arName').value.trim(),
+    notes: document.getElementById('arNotes').value.trim(),
+    head:  +document.getElementById('arHead').value||0,
+    body:  +document.getElementById('arBody').value||0,
+    arms:  +document.getElementById('arArms').value||0,
+    legs:  +document.getElementById('arLegs').value||0,
+  };
+  if (!obj.name) { showToast('ERROR: Introduce el nombre de la armadura'); return; }
+  state.armors.push(obj);
+  save(); renderArmors();
+  ['arName','arNotes'].forEach(id=>document.getElementById(id).value='');
+  ['arHead','arBody','arArms','arLegs'].forEach(id=>document.getElementById(id).value='0');
+  showToast(`Armadura "${obj.name}" registrada`);
+}
+
+function deleteArmor(id) { state.armors = state.armors.filter(a=>a.id!==id); save(); renderArmors(); }
+
+function renderArmors() {
+  const el = document.getElementById('armorList');
+  if (!state.armors.length) {
+    el.innerHTML = `<div class="empty"><div class="icon">🛡</div><p>SIN ARMADURA REGISTRADA</p></div>`;
+    return;
+  }
+  el.innerHTML = state.armors.map(a => `
+    <div class="armor-card">
+      <div style="display:flex;justify-content:space-between">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--text-bright)">${escHtml(a.name)}</div>
+        <button class="btn-icon" onclick="deleteArmor(${a.id})">✕</button>
+      </div>
+      ${a.notes ? `<div style="font-size:11px;color:var(--text-dim);margin:4px 0">${escHtml(a.notes)}</div>` : ''}
+      <div class="armor-locations">
+        <div class="armor-loc"><div class="armor-loc-name">CABEZA</div><div class="armor-loc-val">${a.head}</div></div>
+        <div class="armor-loc"><div class="armor-loc-name">CUERPO</div><div class="armor-loc-val">${a.body}</div></div>
+        <div class="armor-loc"><div class="armor-loc-name">BRAZOS</div><div class="armor-loc-val">${a.arms}</div></div>
+        <div class="armor-loc"><div class="armor-loc-name">PIERNAS</div><div class="armor-loc-val">${a.legs}</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// =====================================================================
+// GEAR
+// =====================================================================
+function addGear() {
+  const obj = {
+    id: Date.now(),
+    name:  document.getElementById('grName').value.trim(),
+    qty:   +document.getElementById('grQty').value||1,
+    notes: document.getElementById('grNotes').value.trim(),
+  };
+  if (!obj.name) { showToast('ERROR: Introduce el nombre del objeto'); return; }
+  state.gear.push(obj);
+  save(); renderGear();
+  ['grName','grNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('grQty').value='1';
+  showToast(`"${obj.name}" añadido al equipo`);
+}
+
+function deleteGear(id) { state.gear = state.gear.filter(g=>g.id!==id); save(); renderGear(); }
+
+function renderGear() {
+  const el = document.getElementById('gearList');
+  if (!state.gear.length) {
+    el.innerHTML = `<div class="empty"><div class="icon">🎒</div><p>SIN EQUIPO REGISTRADO</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="gear-list">${state.gear.map(g=>`
+    <div class="gear-item">
+      <div>
+        <div class="gear-name">${escHtml(g.name)}</div>
+        ${g.notes ? `<div class="gear-notes">${escHtml(g.notes)}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="gear-qty">×${g.qty}</div>
+        <button class="btn-icon" onclick="deleteGear(${g.id})">✕</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// =====================================================================
+// MECHADENDRITES
+// =====================================================================
+function addMechadendrite() {
+  const name      = document.getElementById('mchName').value.trim();
+  const type      = document.getElementById('mchType').value;
+  const desc      = document.getElementById('mchDesc').value.trim();
+  const abilities = document.getElementById('mchAbilities').value.trim().split('\n').filter(l=>l.trim());
+  if (!name) { showToast('ERROR: Introduce el nombre del mechadendrite'); return; }
+  state.mechadendrites.push({ id: Date.now(), name, type, desc, abilities });
+  save(); renderMechadendrites();
+  ['mchName','mchDesc','mchAbilities'].forEach(id=>document.getElementById(id).value='');
+  showToast(`Mechadendrite "${name}" registrado`);
+}
+
+function deleteMechadendrite(id) { state.mechadendrites = state.mechadendrites.filter(m=>m.id!==id); save(); renderMechadendrites(); }
+
+function renderMechadendrites() {
+  const el = document.getElementById('mechList');
+  if (!state.mechadendrites.length) {
+    el.innerHTML = `<div class="empty"><div class="icon">🔩</div><p>SIN MECHADENDRITES REGISTRADOS</p></div>`;
+    return;
+  }
+  el.innerHTML = state.mechadendrites.map(m => `
+    <div class="mech-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="mech-name">${escHtml(m.name)}</div>
+          <div class="mech-type">${m.type}</div>
+        </div>
+        <button class="btn-icon" onclick="deleteMechadendrite(${m.id})">✕</button>
+      </div>
+      ${m.desc ? `<div class="mech-desc">${escHtml(m.desc)}</div>` : ''}
+      ${m.abilities && m.abilities.length ? `
+        <div class="mech-abilities">
+          ${m.abilities.map(ab=>`<div class="mech-ability">${escHtml(ab)}</div>`).join('')}
+        </div>` : ''}
+    </div>`).join('');
+}
+
+// =====================================================================
+// AUGMENTATIONS
+// =====================================================================
+function addAugmentation() {
+  const obj = {
+    id: Date.now(),
+    name:  document.getElementById('augName').value.trim(),
+    loc:   document.getElementById('augLoc').value,
+    desc:  document.getElementById('augDesc').value.trim(),
+    bonus: document.getElementById('augBonus').value.trim(),
+  };
+  if (!obj.name) { showToast('ERROR: Introduce el nombre de la aumentación'); return; }
+  state.augmentations.push(obj);
+  save(); renderAugmentations();
+  ['augName','augDesc','augBonus'].forEach(id=>document.getElementById(id).value='');
+  showToast(`Aumentación "${obj.name}" registrada`);
+}
+
+function deleteAugmentation(id) { state.augmentations = state.augmentations.filter(a=>a.id!==id); save(); renderAugmentations(); }
+
+function renderAugmentations() {
+  const el = document.getElementById('augList');
+  if (!state.augmentations.length) {
+    el.innerHTML = `<div class="empty"><div class="icon">🦾</div><p>SIN AUMENTACIONES REGISTRADAS</p></div>`;
+    return;
+  }
+  el.innerHTML = state.augmentations.map(a => `
+    <div class="augment-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="augment-name">${escHtml(a.name)}</div>
+          <div style="font-size:9px;color:var(--text-dim);letter-spacing:2px">${a.loc}</div>
+        </div>
+        <button class="btn-icon" onclick="deleteAugmentation(${a.id})">✕</button>
+      </div>
+      ${a.desc  ? `<div style="font-size:12px;color:var(--text);margin-top:8px;font-family:'Rajdhani',sans-serif;line-height:1.6">${escHtml(a.desc)}</div>` : ''}
+      ${a.bonus ? `<div class="augment-bonus">► ${escHtml(a.bonus)}</div>` : ''}
+    </div>`).join('');
+}
+
+// =====================================================================
+// UTILS
+// =====================================================================
+function toggleForm(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('active');
+}
+
+document.getElementById('editModal').onclick = e => {
+  if (e.target === e.currentTarget) closeModal();
+};
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+function saveChar() {
+  state.wounds.current = +document.getElementById('woundsCurrent').value||0;
+  state.wounds.max     = +document.getElementById('woundsMax').value||0;
+  state.fate.current   = +document.getElementById('fatePoints').value||0;
+  state.fate.max       = +document.getElementById('fateMax').value||0;
+  save();
+}
+
+// =====================================================================
+// RENDER ALL
+// =====================================================================
+function renderAll() {
+  updateHeader();
+  renderCharInfo();
+  renderAttrs();
+  renderSkills();
+  renderTalents();
+  renderWeapons();
+  renderArmors();
+  renderGear();
+  renderMechadendrites();
+  renderAugmentations();
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+loadState();
+renderAll();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
