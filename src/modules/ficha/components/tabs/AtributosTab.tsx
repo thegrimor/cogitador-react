@@ -1,6 +1,5 @@
 import { useAppSelector } from '@/core/store/hooks'
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
-import { CharInfoGrid } from './atributos/CharInfoGrid'
 import { AttributeCard } from './atributos/AttributeCard'
 import { WoundsPanel } from './atributos/WoundsPanel'
 
@@ -23,8 +22,6 @@ export function AtributosTab() {
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4">
-      {/* Info del personaje */}
-      <CharInfoGrid char={char} />
 
       {/* Atributos */}
       <div className="bg-surface-2 border border-rim">
@@ -32,9 +29,6 @@ export function AtributosTab() {
           <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">
             // Características
           </h3>
-          <span className="font-mono text-[9px] text-parchment-dim">
-            BASE + AVANCES + BONUS = TOTAL
-          </span>
         </div>
         <div className="grid grid-cols-1 gap-px bg-rim p-px sm:grid-cols-2">
           {ATTRIBUTES.map(def => (
