@@ -12,3 +12,6 @@ export type { TalentDefinition } from './talents'
 
 export { PSYCHIC_POWERS } from './psychicPowers'
 export type { PsychicPowerDefinition } from './psychicPowers'
+
+export { CATALOG, CATEGORY_LABELS } from './equipment'
+export type { CatalogItem, CatalogWeapon, CatalogArmor, CatalogGear, EquipmentCategory } from './equipment'
