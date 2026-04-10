@@ -9,9 +9,23 @@ function buildDefaultAttrs() {
   )
 }
 
+function buildDefaultCharacter(id: string, name: string): Character {
+  return {
+    id,
+    info: { name, rank: '1', career: '', homeworld: '', experience: '0', xpSpent: '0' },
+    attrs: buildDefaultAttrs(),
+    wounds: { current: 0, max: 0 },
+    fate:   { current: 0, max: 0 },
+    xpLog:  [],
+  }
+}
+
 const initialState: FichaState = {
-  characters: [],
-  activeCharacterId: null,
+  characters: [
+    buildDefaultCharacter('inquisidor', 'Inquisidor'),
+    buildDefaultCharacter('sequito',    'Séquito'),
+  ],
+  activeCharacterId: 'inquisidor',
 }
 
 export const fichaSlice = createSlice({
@@ -102,6 +116,30 @@ export const fichaSlice = createSlice({
       const current = parseInt(char.info.experience) || 0
       char.info.experience = Math.max(0, current - entry.amount).toString()
     },
+
+    // DH1 costs per advance dot: dot1=100, dot2=250, dot3=500, dot4=750, dot5=1000
+    advanceAttribute(
+      state,
+      action: PayloadAction<{ id: string; key: string; oldDots: number; newDots: number }>
+    ) {
+      const DOT_COSTS = [100, 250, 500, 750, 1000]
+      const char = state.characters.find(c => c.id === action.payload.id)
+      if (!char || !char.attrs[action.payload.key]) return
+
+      const { oldDots, newDots } = action.payload
+      let xpDelta = 0
+      if (newDots > oldDots) {
+        // spending: sum costs of dots being added
+        for (let i = oldDots; i < newDots; i++) xpDelta += DOT_COSTS[i] ?? 0
+      } else {
+        // refunding: sum costs of dots being removed
+        for (let i = newDots; i < oldDots; i++) xpDelta -= DOT_COSTS[i] ?? 0
+      }
+
+      const currentSpent = parseInt(char.info.xpSpent) || 0
+      char.info.xpSpent = Math.max(0, currentSpent + xpDelta).toString()
+      char.attrs[action.payload.key].advances = newDots * 10
+    },
   },
 })
 
@@ -114,6 +152,7 @@ export const {
   updateFate,
   addXpEntry,
   removeXpEntry,
+  advanceAttribute,
 } = fichaSlice.actions
 
 export default fichaSlice.reducer
