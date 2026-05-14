@@ -8,6 +8,7 @@ import { ArmeriaTab } from './tabs/ArmeriaTab'
 import { EquipoTab } from './tabs/EquipoTab'
 import { MejorasTab } from './tabs/MejorasTab'
 import { PoderesPsiquicosTab } from './tabs/PoderesPsiquicosTab'
+import { XpTab } from './tabs/XpTab'
 
 type FichaTabId =
   | 'atributos'
@@ -17,6 +18,7 @@ type FichaTabId =
   | 'equipo'
   | 'mejoras'
   | 'poderes'
+  | 'xp'
 
 interface FichaTab {
   id: FichaTabId
@@ -31,6 +33,7 @@ const TABS: FichaTab[] = [
   { id: 'equipo',      label: 'Equipo'   },
   { id: 'mejoras',     label: 'Mejoras'  },
   { id: 'poderes',     label: 'Psíq.'    },
+  { id: 'xp',          label: 'XP'       },
 ]
 
 const TAB_CONTENT: Record<FichaTabId, React.ReactNode> = {
@@ -41,6 +44,7 @@ const TAB_CONTENT: Record<FichaTabId, React.ReactNode> = {
   equipo:      <EquipoTab />,
   mejoras:     <MejorasTab />,
   poderes:     <PoderesPsiquicosTab />,
+  xp:          <XpTab />,
 }
 
 export function FichaView() {

@@ -1,11 +1,178 @@
-// Fuente: Dark Heresy 2ª Edición — Capítulo 5: Talentos y Rasgos
-// Rellenar con la lista completa cuando se implemente
-
 export interface TalentDefinition {
-  key: string
-  label: string
-  prerequisites?: string
-  description?: string
+  name: string
+  type: string
+  req: string
+  desc: string
+  effect: string
 }
 
-export const TALENTS: TalentDefinition[] = []
+export const TALENTS: TalentDefinition[] = [
+  {
+    name: 'Acrobacia',
+    type: 'Physical',
+    req: 'Ag 30',
+    desc: 'Movimiento ágil',
+    effect: '+10 Ag para acciones acrobáticas, trepar, saltar',
+  },
+  {
+    name: 'Aguante',
+    type: 'Combat',
+    req: 'T 35',
+    desc: 'Resistencia al dolor',
+    effect: 'Ignora penalizadores por heridas críticas 1 vez/sesión',
+  },
+  {
+    name: 'Ataque Relámpago',
+    type: 'Combat',
+    req: 'Ag 40',
+    desc: 'Ataque ultrarrápido',
+    effect: '+1 ataque adicional en acción de ataque',
+  },
+  {
+    name: 'Ataque Veloz',
+    type: 'Combat',
+    req: 'WS 30',
+    desc: 'Golpe ágil',
+    effect: 'Puede esquivar después de atacar',
+  },
+  {
+    name: 'Combate Ambidiestro',
+    type: 'Combat',
+    req: 'Arma en cada mano',
+    desc: 'Lucha sin penalizador de mano débil',
+    effect: '-10 en lugar de -20 a ataques con mano débil',
+  },
+  {
+    name: 'Defensa Total',
+    type: 'Combat',
+    req: 'WS 30',
+    desc: 'Guardia completa',
+    effect: 'Puede esquivar o parar ataques adicionales',
+  },
+  {
+    name: 'Destreza Marcial',
+    type: 'Combat',
+    req: 'WS 35',
+    desc: 'Maestría en CaC',
+    effect: '+10 a tiradas de WS',
+  },
+  {
+    name: 'Disparo Preciso',
+    type: 'Combat',
+    req: 'BS 35',
+    desc: 'Puntería certera',
+    effect: 'Puede apuntar a localizaciones específicas con -20',
+  },
+  {
+    name: 'Disparo Rápido',
+    type: 'Combat',
+    req: 'Ag 35',
+    desc: 'Disparo veloz',
+    effect: 'Dispara en semi o full auto sin penalizador de movimiento',
+  },
+  {
+    name: 'Estoicismo',
+    type: 'Social',
+    req: 'WP 30',
+    desc: 'Mente de acero',
+    effect: 'Inmune a efectos de miedo nivel 1',
+  },
+  {
+    name: 'Esquiva Mejorada',
+    type: 'Combat',
+    req: 'Ag 40, Esquivar',
+    desc: 'Evasión experta',
+    effect: '+10 a tiradas de Esquivar',
+  },
+  {
+    name: 'Fe de Acero',
+    type: 'Social',
+    req: 'WP 35',
+    desc: 'Voluntad inquebrantable',
+    effect: 'Re-tira 1 prueba de Templanza/sesión',
+  },
+  {
+    name: 'Frenesí',
+    type: 'Combat',
+    req: '-',
+    desc: 'Ira de batalla',
+    effect: '+10 WS, +10 S, +10 T pero no puede esquivar ni parar',
+  },
+  {
+    name: 'Guardaespaldas',
+    type: 'Combat',
+    req: 'WS 35',
+    desc: 'Escudo viviente',
+    effect: 'Puede interponerse para proteger aliado adyacente',
+  },
+  {
+    name: 'Intuición',
+    type: 'Mental',
+    req: 'Per 30',
+    desc: 'Sexto sentido',
+    effect: '+10 Per para detectar emboscadas',
+  },
+  {
+    name: 'Maestría en Armas',
+    type: 'Combat',
+    req: 'Varía según tipo de arma',
+    desc: 'Dominio de tipo de arma',
+    effect: '+10 WS o BS con ese tipo de arma',
+  },
+  {
+    name: 'Matar sin Ruido',
+    type: 'Stealth',
+    req: 'Ag 35, Sigilo',
+    desc: 'Ejecución silenciosa',
+    effect: 'Asalto sigiloso no alerta a otros enemigos',
+  },
+  {
+    name: 'Percepción Aumentada',
+    type: 'Mental',
+    req: 'Per 35',
+    desc: 'Sentidos agudizados',
+    effect: '+10 Per, nunca sorprendido',
+  },
+  {
+    name: 'Pistolero',
+    type: 'Combat',
+    req: 'BS 35',
+    desc: 'Experto en pistolas',
+    effect: '+10 BS con pistolas, puede portar dos',
+  },
+  {
+    name: 'Presencia Imponente',
+    type: 'Social',
+    req: 'Fel 30',
+    desc: 'Aura de autoridad',
+    effect: '+10 a tiradas de Intimidar e Interrogar',
+  },
+  {
+    name: 'Resistencia a Poderes',
+    type: 'Mental',
+    req: 'WP 30',
+    desc: 'Escudo mental',
+    effect: '+10 a tiradas de resistencia a poderes psíquicos',
+  },
+  {
+    name: 'Tácticas de Combate',
+    type: 'Combat',
+    req: 'Int 30',
+    desc: 'Estratega nato',
+    effect: '+10 a iniciativa y primeras tiradas de combate',
+  },
+  {
+    name: 'Tecnoerético',
+    type: 'Tech',
+    req: 'Int 30, Tecnología',
+    desc: 'Maña mecánica',
+    effect: '+10 a tiradas de reparación y modificación',
+  },
+  {
+    name: 'Temple',
+    type: 'Mental',
+    req: 'WP 30',
+    desc: 'Voluntad de hierro',
+    effect: '+10 WP contra efectos de miedo y terror',
+  },
+]

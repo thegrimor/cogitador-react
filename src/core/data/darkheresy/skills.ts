@@ -1,11 +1,76 @@
-// Fuente: Dark Heresy 2ª Edición — Capítulo 4: Habilidades
-// Rellenar con la lista completa cuando se implemente
-
 export interface SkillDefinition {
-  key: string
-  label: string
-  linkedAttribute: string
-  specialisations?: string[]
+  name: string
+  attr: string
+  notes?: string
 }
 
-export const SKILLS: SkillDefinition[] = []
+export const SKILLS: SkillDefinition[] = [
+  { name: 'Atletismo', attr: 'Ag' },
+  { name: 'Charlatanería', attr: 'Fel' },
+  { name: 'Comercio', attr: 'Fel' },
+  { name: 'Conducir', attr: 'Ag' },
+  { name: 'Conocimiento Común', attr: 'Int', notes: 'Subtipo requerido' },
+  { name: 'Conocimiento Común (Adeptus Mechanicus)', attr: 'Int' },
+  { name: 'Conocimiento Común (Guerra)', attr: 'Int' },
+  { name: 'Conocimiento Común (Imperio)', attr: 'Int' },
+  { name: 'Conocimiento Común (Infraestructura)', attr: 'Int' },
+  { name: 'Conocimiento Común (Mundos Primitivos)', attr: 'Int' },
+  { name: 'Conocimiento Común (Submundo)', attr: 'Int' },
+  { name: 'Conocimiento Común (Tech)', attr: 'Int' },
+  { name: 'Conocimiento Prohibido', attr: 'Int', notes: 'Subtipo requerido' },
+  { name: 'Conocimiento Prohibido (Caos)', attr: 'Int' },
+  { name: 'Conocimiento Prohibido (Cultos)', attr: 'Int' },
+  { name: 'Conocimiento Prohibido (Hereje)', attr: 'Int' },
+  { name: 'Conocimiento Prohibido (Mutantes)', attr: 'Int' },
+  { name: 'Conocimiento Prohibido (Psíquicos)', attr: 'Int' },
+  { name: 'Conocimiento Prohibido (Xenos)', attr: 'Int' },
+  { name: 'Criptografía', attr: 'Int' },
+  { name: 'Diplomacia', attr: 'Fel' },
+  { name: 'Descifrar', attr: 'Int' },
+  { name: 'Despistar', attr: 'Ag' },
+  { name: 'Engañar', attr: 'Fel' },
+  { name: 'Escalar', attr: 'S' },
+  { name: 'Esquivar', attr: 'Ag' },
+  { name: 'Evaluación', attr: 'Int' },
+  { name: 'Explosivos', attr: 'Int' },
+  { name: 'Fabricar', attr: 'Int' },
+  { name: 'Fuerza Psíquica', attr: 'WP' },
+  { name: 'Hablar Idioma', attr: 'Int', notes: 'Subtipo requerido' },
+  { name: 'Hablar Idioma (Alto Gótico)', attr: 'Int' },
+  { name: 'Hablar Idioma (Bajo Gótico)', attr: 'Int' },
+  { name: 'Hablar Idioma (Dialecto Tribal)', attr: 'Int' },
+  { name: 'Hablar Idioma (Eldar)', attr: 'Int' },
+  { name: 'Hablar Idioma (Jerga Criminal)', attr: 'Int' },
+  { name: 'Hablar Idioma (Tech)', attr: 'Int' },
+  { name: 'Intimidar', attr: 'S' },
+  { name: 'Interrogar', attr: 'WP' },
+  { name: 'Jerga Secreta', attr: 'Int', notes: 'Subtipo requerido' },
+  { name: 'Jerga Secreta (Adeptus Arbites)', attr: 'Int' },
+  { name: 'Jerga Secreta (Inquisición)', attr: 'Int' },
+  { name: 'Jerga Secreta (Submundo)', attr: 'Int' },
+  { name: 'Juego', attr: 'Fel' },
+  { name: 'Leer Labios', attr: 'Per' },
+  { name: 'Mecánica', attr: 'Int' },
+  { name: 'Medicae', attr: 'Int' },
+  { name: 'Mimetismo', attr: 'Ag' },
+  { name: 'Montar', attr: 'Ag' },
+  { name: 'Nado', attr: 'S' },
+  { name: 'Navegar', attr: 'Int' },
+  { name: 'Operador de Vehículo', attr: 'Ag' },
+  { name: 'Orientación', attr: 'Int' },
+  { name: 'Paliar', attr: 'Fel' },
+  { name: 'Percibir', attr: 'Per', notes: 'Siempre básica' },
+  { name: 'Perspicacia', attr: 'Per' },
+  { name: 'Pilotar', attr: 'Ag', notes: 'Subtipo requerido' },
+  { name: 'Pilotar (Aeronave)', attr: 'Ag' },
+  { name: 'Pilotar (Nave Espacial)', attr: 'Ag' },
+  { name: 'Pilotar (Vehículo Personal)', attr: 'Ag' },
+  { name: 'Rastrear', attr: 'Int' },
+  { name: 'Registrar', attr: 'Per' },
+  { name: 'Seducir', attr: 'Fel' },
+  { name: 'Sigilo', attr: 'Ag' },
+  { name: 'Supervivencia', attr: 'Int' },
+  { name: 'Tecnología', attr: 'Int' },
+  { name: 'Trato con Animales', attr: 'Int' },
+  { name: 'Trepar', attr: 'S' },
+]
