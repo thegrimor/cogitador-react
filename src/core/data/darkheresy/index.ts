@@ -1,4 +1,5 @@
 export * from './attributes'
+export * from './careers'
 export * from './skills'
 export * from './talents'
 export * from './psychicPowers'

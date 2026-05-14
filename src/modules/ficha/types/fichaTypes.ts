@@ -117,6 +117,7 @@ export interface Character {
   wounds: VitalState
   fate: VitalState
   xpLog: XpLogEntry[]
+  filterCareer: boolean
   // Vital extras
   insanity: number
   corruption: number
@@ -144,7 +145,13 @@ export interface Character {
   influencePlanetary: string
 }
 
+export interface FallenCharacter extends Character {
+  diedAt: string
+  xpInherited: number
+}
+
 export interface FichaState {
   characters: Character[]
   activeCharacterId: string | null
+  fallen: FallenCharacter[]
 }

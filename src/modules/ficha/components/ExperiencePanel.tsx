@@ -1,5 +1,6 @@
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { updateCharInfo } from '../services/fichaSlice'
+import { computeXpSpent } from '../services/fichaComputed'
 
 export function ExperiencePanel() {
   const dispatch = useAppDispatch()
@@ -7,12 +8,12 @@ export function ExperiencePanel() {
   const char = characters.find(c => c.id === activeCharacterId)
 
   const total     = parseInt(char?.info.experience ?? '0') || 0
-  const spent     = parseInt(char?.info.xpSpent    ?? '0') || 0
+  const spent     = char ? computeXpSpent(char) : 0
   const available = total - spent
 
-  function updateXP(field: 'experience' | 'xpSpent', value: string) {
+  function updateXP(value: string) {
     if (!char) return
-    dispatch(updateCharInfo({ id: char.id, field, value }))
+    dispatch(updateCharInfo({ id: char.id, field: 'experience', value }))
   }
 
   return (
@@ -23,18 +24,14 @@ export function ExperiencePanel() {
         <input
           type="number"
           value={char?.info.experience ?? '0'}
-          onChange={e => updateXP('experience', e.target.value)}
+          onChange={e => updateXP(e.target.value)}
           disabled={!char}
           className="w-16 bg-transparent font-display text-lg font-bold text-gold-bright text-center outline-none disabled:opacity-40 leading-none"
         />
         <span className="text-parchment-dim text-xs">/</span>
-        <input
-          type="number"
-          value={char?.info.xpSpent ?? '0'}
-          onChange={e => updateXP('xpSpent', e.target.value)}
-          disabled={!char}
-          className="w-16 bg-transparent font-display text-lg font-bold text-parchment text-center outline-none disabled:opacity-40 leading-none"
-        />
+        <span className="w-16 font-display text-lg font-bold text-parchment text-center leading-none">
+          {spent}
+        </span>
         <span className="text-parchment-dim text-xs">=</span>
         <span className={[
           'font-display text-lg font-bold w-16 text-center leading-none',

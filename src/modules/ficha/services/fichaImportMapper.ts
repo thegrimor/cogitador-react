@@ -207,6 +207,7 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
       max: asNumber((fate as Record<string, unknown>)['max']),
     },
     xpLog: [],
+    filterCareer: false,
     insanity: asNumber(r['insanity']),
     corruption: asNumber(r['corruption']),
     skills,

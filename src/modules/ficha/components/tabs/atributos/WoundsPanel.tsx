@@ -1,5 +1,6 @@
 import { useAppDispatch } from '@/core/store/hooks'
 import { updateWounds, updateFate, updateVital } from '../../../services/fichaSlice'
+import { computeMovement } from '../../../services/fichaComputed'
 import type { Character } from '../../../types/fichaTypes'
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 
 export function WoundsPanel({ char }: Props) {
   const dispatch = useAppDispatch()
+  const mov = computeMovement(char)
 
   const vitals = [
     {
@@ -108,6 +110,30 @@ export function WoundsPanel({ char }: Props) {
                 onChange={e => v.onChange(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
                 className="w-20 bg-surface-2 border border-rim-bright font-mono text-xs text-center py-1 outline-none focus:border-crimson transition-colors text-parchment"
               />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Movimiento derivado de Ag */}
+      <div className="bg-surface-2 border border-rim">
+        <div className="flex items-center border-b border-rim bg-crimson/5 px-4 py-2">
+          <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">
+            // Movimiento
+          </h3>
+        </div>
+        <div className="grid grid-cols-4 gap-px bg-rim p-px">
+          {[
+            { label: 'Paso', value: `${mov.step}m` },
+            { label: 'Mov', value: `${mov.move}m` },
+            { label: 'Carga', value: `${mov.charge}m` },
+            { label: 'Comp.', value: `${mov.full}m` },
+          ].map(m => (
+            <div key={m.label} className="bg-surface flex flex-col items-center gap-1 px-2 py-2">
+              <span className="font-display text-[7px] uppercase tracking-[1px] text-parchment-dim">
+                {m.label}
+              </span>
+              <span className="font-display text-base font-bold text-neon">{m.value}</span>
             </div>
           ))}
         </div>

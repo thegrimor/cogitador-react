@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type {
-  FichaState, Character, AttributeValues, XpLogEntry,
+  FichaState, Character, FallenCharacter, AttributeValues, XpLogEntry,
   Skill, Talent, Weapon, Armor, GearItem,
   Mechadendrite, Augmentation, PsychicPower, CustomCurrency,
 } from '../types/fichaTypes'
@@ -25,6 +25,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
     wounds: { current: 0, max: 0 },
     fate:   { current: 0, max: 0 },
     xpLog:  [],
+    filterCareer: false,
     insanity: 0,
     corruption: 0,
     skills: [],
@@ -50,6 +51,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
 const initialState: FichaState = {
   characters: [],
   activeCharacterId: null,
+  fallen: [],
 }
 
 export const fichaSlice = createSlice({
@@ -248,6 +250,34 @@ export const fichaSlice = createSlice({
       const char = state.characters.find(c => c.id === action.payload.charId)
       if (char) char[action.payload.field] = action.payload.value
     },
+
+    deleteCharacter(state, action: PayloadAction<string>) {
+      state.characters = state.characters.filter(c => c.id !== action.payload)
+      if (state.activeCharacterId === action.payload) {
+        state.activeCharacterId = state.characters[0]?.id ?? null
+      }
+    },
+
+    toggleFilterCareer(state, action: PayloadAction<string>) {
+      const char = state.characters.find(c => c.id === action.payload)
+      if (char) char.filterCareer = !char.filterCareer
+    },
+
+    killCharacter(state, action: PayloadAction<string>) {
+      const idx = state.characters.findIndex(c => c.id === action.payload)
+      if (idx === -1) return
+      const char = state.characters[idx]
+      const fallen: FallenCharacter = {
+        ...char,
+        diedAt: new Date().toLocaleDateString('es-ES'),
+        xpInherited: Math.floor((parseInt(char.info.experience) || 0) * 0.5),
+      }
+      state.fallen.push(fallen)
+      state.characters.splice(idx, 1)
+      if (state.activeCharacterId === action.payload) {
+        state.activeCharacterId = state.characters[0]?.id ?? null
+      }
+    },
   },
 })
 
@@ -265,6 +295,7 @@ export const {
   addPower, removePower, updatePsychic,
   updateMoney, addCurrency, updateCurrency, removeCurrency,
   updateNotes,
+  deleteCharacter, toggleFilterCareer, killCharacter,
 } = fichaSlice.actions
 
 export default fichaSlice.reducer

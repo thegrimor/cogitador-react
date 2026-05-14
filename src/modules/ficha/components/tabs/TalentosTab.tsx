@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
-import { addTalent, removeTalent } from '../../services/fichaSlice'
+import { addTalent, removeTalent, toggleFilterCareer } from '../../services/fichaSlice'
 import { TALENTS } from '@/core/data/darkheresy'
+import { getRankForXP, getAvailableItemsForRank, normalizeName } from '@/core/data/darkheresy/careers'
+import { computeXpSpent } from '../../services/fichaComputed'
 
 type ManualForm = {
   name: string
@@ -45,6 +47,13 @@ export function TalentosTab() {
 
   if (!char) return <NoChar />
 
+  const xpSpent      = computeXpSpent(char)
+  const rankInfo     = getRankForXP(char.info.career, xpSpent)
+  const available    = rankInfo ? getAvailableItemsForRank(char.info.career, rankInfo.rank) : null
+  const filteredTalents = (char.filterCareer && available)
+    ? TALENTS.filter(t => available.has(normalizeName(t.name)))
+    : TALENTS
+
   const selectedDef = TALENTS.find(t => t.name === selectedTalentName)
 
   function handleQuickAdd() {
@@ -86,6 +95,20 @@ export function TalentosTab() {
       </div>
 
       <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
+        <div className="flex gap-2 items-center">
+          <button
+            onClick={() => dispatch(toggleFilterCareer(char!.id))}
+            className={[
+              'font-display text-[8px] uppercase tracking-[1px] border px-2 py-1.5 transition-colors shrink-0',
+              char.filterCareer
+                ? 'border-crimson text-crimson bg-crimson/10'
+                : 'border-rim-bright text-parchment-dim hover:border-gold hover:text-gold',
+            ].join(' ')}
+            title={char.filterCareer ? 'Mostrar todos los talentos' : 'Solo talentos de carrera'}
+          >
+            {char.filterCareer ? '🔒 Carrera' : '◻ Carrera'}
+          </button>
+        </div>
         <div className="flex gap-2">
           <select
             value={selectedTalentName}
@@ -93,7 +116,7 @@ export function TalentosTab() {
             className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
           >
             <option value="">— Seleccionar talento —</option>
-            {TALENTS.map(t => (
+            {filteredTalents.map(t => (
               <option key={t.name} value={t.name}>{t.name} [{t.type}]</option>
             ))}
           </select>

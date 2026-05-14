@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
-import { selectCharacter, importCharacter } from '../services/fichaSlice'
+import { selectCharacter, importCharacter, deleteCharacter, killCharacter } from '../services/fichaSlice'
 import { CharacterCreateModal } from './CharacterCreateModal'
 import { showToast } from '@/shared/components/Toast'
 import { isLegacyExport, mapLegacyHtmlToCharacter } from '../services/fichaImportMapper'
@@ -86,6 +86,34 @@ export function CharacterHeader() {
             className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-gold hover:text-gold transition-colors"
           >
             ↑ Imp
+          </button>
+          <button
+            onClick={() => {
+              if (!activeChar) return
+              if (confirm(`¿Marcar a ${activeChar.info.name} como Caído?`)) {
+                dispatch(killCharacter(activeChar.id))
+                showToast(`${activeChar.info.name} ha caído en el olvido`)
+              }
+            }}
+            disabled={!activeChar}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-crimson hover:text-crimson disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            title="Marcar como caído"
+          >
+            ⚰
+          </button>
+          <button
+            onClick={() => {
+              if (!activeChar) return
+              if (confirm(`¿Eliminar permanentemente a ${activeChar.info.name}?`)) {
+                dispatch(deleteCharacter(activeChar.id))
+                showToast('Personaje eliminado')
+              }
+            }}
+            disabled={!activeChar}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-crimson-bright hover:text-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            title="Eliminar personaje"
+          >
+            ✕
           </button>
           <input
             ref={fileInputRef}

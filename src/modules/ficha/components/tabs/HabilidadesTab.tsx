@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
-import { addSkill, updateSkill, removeSkill } from '../../services/fichaSlice'
+import { addSkill, updateSkill, removeSkill, toggleFilterCareer } from '../../services/fichaSlice'
 import { SKILLS } from '@/core/data/darkheresy'
 import { ATTRIBUTES } from '@/core/data/darkheresy'
+import { getRankForXP, getAvailableItemsForRank, normalizeName } from '@/core/data/darkheresy/careers'
+import { computeXpSpent } from '../../services/fichaComputed'
 import type { Skill } from '../../types/fichaTypes'
 
 const LEVEL_OPTIONS: { value: number; label: string }[] = [
@@ -61,6 +63,14 @@ export function HabilidadesTab() {
 
   if (!char) return <NoChar />
 
+  const xpSpent   = computeXpSpent(char)
+  const rankInfo  = getRankForXP(char.info.career, xpSpent)
+  const available = rankInfo ? getAvailableItemsForRank(char.info.career, rankInfo.rank) : null
+
+  const filteredSkills = (char.filterCareer && available)
+    ? SKILLS.filter(s => available.has(normalizeName(s.name)))
+    : SKILLS
+
   const selectedDef = SKILLS.find(s => s.name === selectedSkillName)
 
   function getAttrTotal(attrKey: string): number {
@@ -115,6 +125,20 @@ export function HabilidadesTab() {
       </div>
 
       <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
+        <div className="flex gap-2 items-center">
+          <button
+            onClick={() => dispatch(toggleFilterCareer(char!.id))}
+            className={[
+              'font-display text-[8px] uppercase tracking-[1px] border px-2 py-1.5 transition-colors shrink-0',
+              char.filterCareer
+                ? 'border-crimson text-crimson bg-crimson/10'
+                : 'border-rim-bright text-parchment-dim hover:border-gold hover:text-gold',
+            ].join(' ')}
+            title={char.filterCareer ? 'Mostrar todas las habilidades' : 'Solo habilidades de carrera'}
+          >
+            {char.filterCareer ? '🔒 Carrera' : '◻ Carrera'}
+          </button>
+        </div>
         <div className="flex gap-2">
           <select
             value={selectedSkillName}
@@ -122,7 +146,7 @@ export function HabilidadesTab() {
             className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
           >
             <option value="">— Seleccionar habilidad —</option>
-            {SKILLS.map(s => (
+            {filteredSkills.map(s => (
               <option key={s.name} value={s.name}>{s.name} ({s.attr})</option>
             ))}
           </select>
