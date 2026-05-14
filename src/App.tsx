@@ -23,7 +23,7 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
   const activeChar = characters.find(c => c.id === activeCharacterId)
 
   const subtitle = activeTab === 'ficha'
-    ? `Rango ${activeChar?.rank ?? 1} // ${activeChar?.role ?? 'Acólito'} — ${activeChar?.name ?? 'Sin Designación'}`
+    ? `Rango ${activeChar?.info.rank ?? 1} // ${activeChar?.info.career ?? 'Acólito'} — ${activeChar?.info.name ?? 'Sin Designación'}`
     : TAB_SUBTITLES[activeTab]
 
   return (

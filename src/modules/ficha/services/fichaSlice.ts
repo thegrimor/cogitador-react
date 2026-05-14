@@ -20,7 +20,7 @@ function buildDefaultAttrs() {
 function buildDefaultCharacter(info: Character['info']): Character {
   return {
     id: uid(),
-    info: { experience: '0', xpSpent: '0', ...info },
+    info: { ...info, experience: info.experience || '0', xpSpent: info.xpSpent || '0' },
     attrs: buildDefaultAttrs(),
     wounds: { current: 0, max: 0 },
     fate:   { current: 0, max: 0 },

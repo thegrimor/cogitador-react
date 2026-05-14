@@ -3,7 +3,6 @@ import {
   setProjectStatus,
   updateElapsedDays,
   updateTotalDays,
-  deleteProject,
 } from '@/modules/proyectos/services/proyectosSlice'
 import { showToast } from '@/shared/components/Toast'
 import type { Project, ProjectStatus } from '@/modules/proyectos/types/proyectosTypes'

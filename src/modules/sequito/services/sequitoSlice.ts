@@ -168,7 +168,7 @@ export const sequitoSlice = createSlice({
       item.stock = Math.max(equipped, item.stock + delta)
     },
 
-    importState(state, action: PayloadAction<SequitoState>) {
+    importState(_state, action: PayloadAction<SequitoState>) {
       return action.payload
     },
   },
