@@ -227,3 +227,17 @@ Si aparece un error de build, TypeScript o lint, el agente **notifica al usuario
 
 ### Git — esperar confirmación explícita
 **El agente nunca hace `git add`, `git commit`, `git push` ni ninguna operación git sin que el usuario lo pida explícitamente.** Esto incluye commits de documentación, configuración o cualquier otro tipo.
+
+---
+
+## Output Rules
+- Respuestas concisas. Sin explicaciones no solicitadas.
+- No repitas código ya mostrado, solo los cambios.
+- Sin preámbulos ni confirmaciones ("Claro!", "Por supuesto", etc.).
+- Formato: solo lo necesario. Sin markdown decorativo.
+- Si la tarea es clara, ejecuta directamente sin preguntar.
+
+## Code Output
+- Muestra solo el bloque modificado, no el archivo completo.
+- Sin comentarios obvios en el código.
+- TypeScript estricto, sin `any`.
