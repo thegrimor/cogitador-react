@@ -1,13 +1,12 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useGameData } from '@/hooks/useGameData'
 import { usePanelState } from '@/hooks/usePanelState'
 import { UnitPanel } from '@/components/UnitPanel/UnitPanel'
 import { DamageCalculator } from '@/components/DamageCalculator/DamageCalculator'
-import type { Weapon, ModelProfile, CombatModifiers } from '@/types'
+import { resolveModifiers } from '@/utils/mathhammer'
+import type { Weapon, ModelProfile } from '@/types'
 
 type MobileTab = 'attacker' | 'result' | 'defender'
-
-const DEFAULT_MODS: CombatModifiers = { hitMod: 0, rerollHitsOf1: false, rerollAllHits: false }
 
 export default function App() {
   const gameData = useGameData()
@@ -17,7 +16,60 @@ export default function App() {
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null)
   const [defenderModel, setDefenderModel] = useState<ModelProfile | null>(null)
   const [mobileTab, setMobileTab] = useState<MobileTab>('attacker')
-  const [combatMods, setCombatMods] = useState<CombatModifiers>(DEFAULT_MODS)
+  const [combatType, setCombatType] = useState<'ranged' | 'melee'>('ranged')
+  const [attackerActiveIds, setAttackerActiveIds] = useState<Set<string>>(new Set())
+  const [defenderActiveIds, setDefenderActiveIds] = useState<Set<string>>(new Set())
+
+  // Sync combatType from selected weapon
+  useEffect(() => {
+    if (selectedWeapon) {
+      setCombatType(selectedWeapon.range === 'Melee' ? 'melee' : 'ranged')
+    }
+  }, [selectedWeapon])
+
+  // Reset attacker modifiers when faction/detachment changes
+  useEffect(() => {
+    setAttackerActiveIds(new Set())
+  }, [leftPanel.selection.factionId, leftPanel.selection.detachmentId])
+
+  // Reset defender modifiers when faction/detachment changes
+  useEffect(() => {
+    setDefenderActiveIds(new Set())
+  }, [rightPanel.selection.factionId, rightPanel.selection.detachmentId])
+
+  const toggleAttackerMod = useCallback((id: string) => {
+    setAttackerActiveIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }, [])
+
+  const toggleDefenderMod = useCallback((id: string) => {
+    setDefenderActiveIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }, [])
+
+  const attackerMods = useMemo(() => resolveModifiers(
+    attackerActiveIds,
+    selectedWeapon,
+    leftPanel.selection.factionId,
+    leftPanel.selection.detachmentId,
+    'attacker',
+    combatType,
+  ), [attackerActiveIds, selectedWeapon, leftPanel.selection.factionId, leftPanel.selection.detachmentId, combatType])
+
+  const defenderMods = useMemo(() => resolveModifiers(
+    defenderActiveIds,
+    null,
+    rightPanel.selection.factionId,
+    rightPanel.selection.detachmentId,
+    'defender',
+    combatType,
+  ), [defenderActiveIds, rightPanel.selection.factionId, rightPanel.selection.detachmentId, combatType])
 
   const effectiveDefenderModel = defenderModel ?? rightPanel.selectedUnit?.models[0] ?? null
   const attackerName = leftPanel.selectedUnit?.name ?? ''
@@ -108,6 +160,9 @@ export default function App() {
             gameData={gameData}
             panel={leftPanel}
             side="left"
+            combatType={combatType}
+            activeModIds={attackerActiveIds}
+            onModToggle={toggleAttackerMod}
             onWeaponChange={setSelectedWeapon}
             selectedWeapon={selectedWeapon}
           />
@@ -118,8 +173,10 @@ export default function App() {
             defenderModel={effectiveDefenderModel}
             attackerName={attackerName}
             defenderName={defenderName}
-            mods={combatMods}
-            onModsChange={setCombatMods}
+            attackerMods={attackerMods}
+            defenderMods={defenderMods}
+            combatType={combatType}
+            onCombatTypeChange={setCombatType}
           />
         )}
         {mobileTab === 'defender' && (
@@ -127,6 +184,9 @@ export default function App() {
             gameData={gameData}
             panel={rightPanel}
             side="right"
+            combatType={combatType}
+            activeModIds={defenderActiveIds}
+            onModToggle={toggleDefenderMod}
             onModelChange={setDefenderModel}
           />
         )}
@@ -139,6 +199,9 @@ export default function App() {
             gameData={gameData}
             panel={leftPanel}
             side="left"
+            combatType={combatType}
+            activeModIds={attackerActiveIds}
+            onModToggle={toggleAttackerMod}
             onWeaponChange={setSelectedWeapon}
             selectedWeapon={selectedWeapon}
           />
@@ -150,8 +213,10 @@ export default function App() {
               defenderModel={effectiveDefenderModel}
               attackerName={attackerName}
               defenderName={defenderName}
-              mods={combatMods}
-              onModsChange={setCombatMods}
+              attackerMods={attackerMods}
+              defenderMods={defenderMods}
+              combatType={combatType}
+              onCombatTypeChange={setCombatType}
             />
           </div>
         </div>
@@ -160,6 +225,9 @@ export default function App() {
             gameData={gameData}
             panel={rightPanel}
             side="right"
+            combatType={combatType}
+            activeModIds={defenderActiveIds}
+            onModToggle={toggleDefenderMod}
             onModelChange={setDefenderModel}
           />
         </div>

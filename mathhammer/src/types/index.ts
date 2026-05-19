@@ -174,13 +174,42 @@ export interface Weapon {
   isBlast: boolean
   isDevastatingWounds: boolean
   isLethalHits: boolean
-  sustainedHitsValue: number  // 0 if none; average for dice (D3→2)
+  isHeavy: boolean
+  sustainedHitsValue: number
 }
 
 export interface CombatModifiers {
-  hitMod: number           // +1 = easier to hit (threshold -1), covers faction rules
+  // hit side
+  hitMod: number
   rerollHitsOf1: boolean
   rerollAllHits: boolean
+  critThreshold: number       // default 6; lower = crits on lower rolls
+  sustainedHitsBonus: number  // extra sustained hits on top of weapon's own value
+  lethalHitsBonus: boolean    // grants lethal hits even if weapon doesn't have it
+  // wound side
+  strengthMod: number         // +/-1 to effective S for S vs T comparison
+  rerollWoundsOf1: boolean
+  rerollAllWounds: boolean
+  woundMod: number            // +/-1 to wound roll threshold (positive = easier to wound)
+  apMod: number               // +/-1 AP bonus (attacker-side debuffs use negative from defender)
+  // save / defender
+  saveMod: number             // positive = improve save (cover); negative = worsen (contagion)
+  feelNoPainThreshold: number | null  // 3/4/5/6; null if no FNP
+}
+
+export type WeaponFilter = 'ranged' | 'melee' | 'all'
+
+export interface ModifierRule {
+  id: string
+  label: string
+  appliesTo: WeaponFilter
+  side: 'attacker' | 'defender' | 'both'
+  effect: Partial<CombatModifiers>
+}
+
+export interface ModifierRules {
+  factions: Record<string, ModifierRule[]>
+  detachments: Record<string, ModifierRule[]>
 }
 
 export interface Ability {
@@ -253,5 +282,6 @@ export interface DamageBreakdown {
   saveFailProbability: number
   expectedFailedSaves: number
   avgDamagePerWound: number
+  feelNoPainReduction: number
   expectedTotalDamage: number
 }

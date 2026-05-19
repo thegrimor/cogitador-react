@@ -62,6 +62,7 @@ function parseWeapon(raw: RawDatasheetWargear): Weapon {
     isBlast: desc.includes('blast'),
     isDevastatingWounds: desc.includes('devastating wounds'),
     isLethalHits: desc.includes('lethal hits'),
+    isHeavy: (raw.type ?? '').toLowerCase().includes('heavy') || desc.includes('[heavy]'),
     sustainedHitsValue: parseSustainedHits(desc),
   }
 }

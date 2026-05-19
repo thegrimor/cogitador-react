@@ -49,12 +49,16 @@ export function WeaponCard({ weapon, isSelected, onSelect }: Props) {
         </span>
       </div>
 
-      {(weapon.isTorrent || weapon.isBlast || weapon.isDevastatingWounds || weapon.isLethalHits) && (
+      {(weapon.isTorrent || weapon.isBlast || weapon.isDevastatingWounds || weapon.isLethalHits || weapon.isHeavy || weapon.sustainedHitsValue > 0) && (
         <div className="flex gap-1 mt-1 flex-wrap">
-          {weapon.isTorrent          && <Badge label="Torrent" />}
-          {weapon.isBlast            && <Badge label="Blast" />}
+          {weapon.isTorrent           && <Badge label="Torrent" />}
+          {weapon.isBlast             && <Badge label="Blast" />}
           {weapon.isDevastatingWounds && <Badge label="Dev. Wounds" />}
-          {weapon.isLethalHits       && <Badge label="Lethal Hits" />}
+          {weapon.isLethalHits        && <Badge label="Lethal Hits" />}
+          {weapon.isHeavy             && <Badge label="Heavy" />}
+          {weapon.sustainedHitsValue > 0 && (
+            <Badge label={`Sustained ${weapon.sustainedHitsValue % 1 === 0 ? weapon.sustainedHitsValue : '~' + weapon.sustainedHitsValue}`} />
+          )}
         </div>
       )}
     </button>

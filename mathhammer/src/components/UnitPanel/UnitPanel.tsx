@@ -4,6 +4,7 @@ import { StatsBar } from '@/components/StatsBar/StatsBar'
 import { WeaponCard } from '@/components/WeaponCard/WeaponCard'
 import { AbilityList } from '@/components/AbilityList/AbilityList'
 import { StratList } from '@/components/StratList/StratList'
+import { ModifierPanel } from '@/components/ModifierPanel/ModifierPanel'
 import type { GameData, Weapon, ModelProfile } from '@/types'
 import type { PanelState } from '@/hooks/usePanelState'
 
@@ -11,12 +12,18 @@ interface Props {
   gameData: GameData
   panel: PanelState
   side: 'left' | 'right'
+  combatType: 'ranged' | 'melee'
+  activeModIds: Set<string>
+  onModToggle: (id: string) => void
   onWeaponChange?: (w: Weapon | null) => void
   onModelChange?: (m: ModelProfile | null) => void
   selectedWeapon?: Weapon | null
 }
 
-export function UnitPanel({ gameData, panel, side, onWeaponChange, onModelChange, selectedWeapon }: Props) {
+export function UnitPanel({
+  gameData, panel, side, combatType, activeModIds, onModToggle,
+  onWeaponChange, onModelChange, selectedWeapon,
+}: Props) {
   const [modelIdx, setModelIdx] = useState(0)
   const { selectedUnit, detachmentAbilities, applicableStratagems } = panel
   const isAttacker = side === 'left'
@@ -56,7 +63,7 @@ export function UnitPanel({ gameData, panel, side, onWeaponChange, onModelChange
             onSelectIndex={handleModelSelect}
           />
 
-          {/* Weapons section */}
+          {/* Weapons */}
           <div>
             <div className="px-3 py-1.5 text-[9px] font-display uppercase tracking-widest text-gold border-b border-rim-bright bg-surface-2">
               Armamento
@@ -81,6 +88,17 @@ export function UnitPanel({ gameData, panel, side, onWeaponChange, onModelChange
               ))
             )}
           </div>
+
+          {/* Contextual modifiers */}
+          <ModifierPanel
+            factionId={panel.selection.factionId}
+            detachmentId={panel.selection.detachmentId}
+            weapon={isAttacker ? (selectedWeapon ?? null) : null}
+            side={isAttacker ? 'attacker' : 'defender'}
+            combatType={combatType}
+            activeIds={activeModIds}
+            onToggle={onModToggle}
+          />
 
           <AbilityList
             abilities={selectedUnit.abilities}
