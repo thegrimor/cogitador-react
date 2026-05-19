@@ -14,8 +14,10 @@ export function parseDiceAverage(expr: string): number {
   return isNaN(fixed) ? 1 : fixed
 }
 
+// CSV stores BS_WS and inv_sv as plain numbers ("3") or "3+" — accept both
 export function parseStat(stat: string): number | null {
-  const match = stat.trim().match(/^(\d+)\+$/)
+  if (!stat || stat.trim() === '' || stat.trim() === '-') return null
+  const match = stat.trim().match(/^(\d+)\+?$/)
   return match ? parseInt(match[1]) : null
 }
 
