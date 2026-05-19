@@ -174,6 +174,13 @@ export interface Weapon {
   isBlast: boolean
   isDevastatingWounds: boolean
   isLethalHits: boolean
+  sustainedHitsValue: number  // 0 if none; average for dice (D3→2)
+}
+
+export interface CombatModifiers {
+  hitMod: number           // +1 = easier to hit (threshold -1), covers faction rules
+  rerollHitsOf1: boolean
+  rerollAllHits: boolean
 }
 
 export interface Ability {
@@ -239,8 +246,10 @@ export interface DamageBreakdown {
   avgAttacks: number
   hitProbability: number
   expectedHits: number
+  sustainedExtraHits: number
   woundProbability: number
   expectedWounds: number
+  autoWoundsFromCrits: number
   saveFailProbability: number
   expectedFailedSaves: number
   avgDamagePerWound: number

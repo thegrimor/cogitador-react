@@ -3,9 +3,11 @@ import { useGameData } from '@/hooks/useGameData'
 import { usePanelState } from '@/hooks/usePanelState'
 import { UnitPanel } from '@/components/UnitPanel/UnitPanel'
 import { DamageCalculator } from '@/components/DamageCalculator/DamageCalculator'
-import type { Weapon, ModelProfile } from '@/types'
+import type { Weapon, ModelProfile, CombatModifiers } from '@/types'
 
 type MobileTab = 'attacker' | 'result' | 'defender'
+
+const DEFAULT_MODS: CombatModifiers = { hitMod: 0, rerollHitsOf1: false, rerollAllHits: false }
 
 export default function App() {
   const gameData = useGameData()
@@ -15,6 +17,7 @@ export default function App() {
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null)
   const [defenderModel, setDefenderModel] = useState<ModelProfile | null>(null)
   const [mobileTab, setMobileTab] = useState<MobileTab>('attacker')
+  const [combatMods, setCombatMods] = useState<CombatModifiers>(DEFAULT_MODS)
 
   const effectiveDefenderModel = defenderModel ?? rightPanel.selectedUnit?.models[0] ?? null
   const attackerName = leftPanel.selectedUnit?.name ?? ''
@@ -115,6 +118,8 @@ export default function App() {
             defenderModel={effectiveDefenderModel}
             attackerName={attackerName}
             defenderName={defenderName}
+            mods={combatMods}
+            onModsChange={setCombatMods}
           />
         )}
         {mobileTab === 'defender' && (
@@ -145,6 +150,8 @@ export default function App() {
               defenderModel={effectiveDefenderModel}
               attackerName={attackerName}
               defenderName={defenderName}
+              mods={combatMods}
+              onModsChange={setCombatMods}
             />
           </div>
         </div>

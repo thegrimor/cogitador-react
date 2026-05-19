@@ -33,6 +33,18 @@ function splitIds(raw: string): string[] {
   return raw.split(',').map(s => s.trim()).filter(Boolean)
 }
 
+function parseSustainedHits(desc: string): number {
+  // e.g. "sustained hits 2", "sustained hits d3"
+  const m = desc.match(/sustained hits (\d+|d\d+)/i)
+  if (!m) return 0
+  const val = parseInt(m[1])
+  if (!isNaN(val)) return val
+  // dice expression (rare): D3→2, D6→3.5
+  if (m[1].toUpperCase() === 'D3') return 2
+  if (m[1].toUpperCase() === 'D6') return 3.5
+  return 0
+}
+
 function parseWeapon(raw: RawDatasheetWargear): Weapon {
   const desc = (raw.description ?? '').toLowerCase()
   return {
@@ -50,6 +62,7 @@ function parseWeapon(raw: RawDatasheetWargear): Weapon {
     isBlast: desc.includes('blast'),
     isDevastatingWounds: desc.includes('devastating wounds'),
     isLethalHits: desc.includes('lethal hits'),
+    sustainedHitsValue: parseSustainedHits(desc),
   }
 }
 
