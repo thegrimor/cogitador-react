@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
-import { selectCharacter } from '../services/fichaSlice'
+import { selectCharacter, importCharacter, deleteCharacter, killCharacter } from '../services/fichaSlice'
 import { CharacterCreateModal } from './CharacterCreateModal'
+import { showToast } from '@/shared/components/Toast'
+import { isLegacyExport, mapLegacyHtmlToCharacter } from '../services/fichaImportMapper'
+import type { Character } from '../types/fichaTypes'
 
 type OverlayMode = 'selector' | 'create' | null
 
@@ -10,6 +13,47 @@ export function CharacterHeader() {
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
   const [overlay, setOverlay] = useState<OverlayMode>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function handleExport() {
+    if (!activeChar) return
+    const json = JSON.stringify(activeChar, null, 2)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `dh_char_${activeChar.info.name.replace(/\s+/g, '_') || 'personaje'}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    showToast('Personaje exportado')
+  }
+
+  function handleImportClick() {
+    fileInputRef.current?.click()
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = evt => {
+      try {
+        const raw: unknown = JSON.parse(evt.target?.result as string)
+        let character: Character
+        if (isLegacyExport(raw)) {
+          character = mapLegacyHtmlToCharacter(raw)
+        } else {
+          character = raw as Character
+        }
+        dispatch(importCharacter(character))
+        showToast('Personaje importado correctamente')
+      } catch {
+        showToast('Error al importar el fichero')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
 
   return (
     <>
@@ -30,12 +74,55 @@ export function CharacterHeader() {
         </button>
 
         <div className="flex gap-1 shrink-0">
-          <button className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-gold hover:text-gold transition-colors">
+          <button
+            onClick={handleExport}
+            disabled={!activeChar}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-gold hover:text-gold disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
             ↓ Exp
           </button>
-          <button className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-gold hover:text-gold transition-colors">
+          <button
+            onClick={handleImportClick}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-gold hover:text-gold transition-colors"
+          >
             ↑ Imp
           </button>
+          <button
+            onClick={() => {
+              if (!activeChar) return
+              if (confirm(`¿Marcar a ${activeChar.info.name} como Caído?`)) {
+                dispatch(killCharacter(activeChar.id))
+                showToast(`${activeChar.info.name} ha caído en el olvido`)
+              }
+            }}
+            disabled={!activeChar}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-crimson hover:text-crimson disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            title="Marcar como caído"
+          >
+            ⚰
+          </button>
+          <button
+            onClick={() => {
+              if (!activeChar) return
+              if (confirm(`¿Eliminar permanentemente a ${activeChar.info.name}?`)) {
+                dispatch(deleteCharacter(activeChar.id))
+                showToast('Personaje eliminado')
+              }
+            }}
+            disabled={!activeChar}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-crimson-bright hover:text-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            title="Eliminar personaje"
+          >
+            ✕
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleFileChange}
+            className="sr-only"
+            aria-label="Importar personaje"
+          />
         </div>
       </div>
 
