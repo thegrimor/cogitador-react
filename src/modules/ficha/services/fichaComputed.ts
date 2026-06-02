@@ -7,6 +7,7 @@ export function computeXpSpent(char: Character): number {
 
   char.skills.forEach(s => { total += s.xp || 0 })
   char.talents.forEach(t => { total += t.xp || 0 })
+  char.inqTalents?.forEach(t => { if ((t.xp ?? 0) > 0) total += t.xp })
 
   const costs = ATTR_ADVANCE_COSTS[char.info.career]
   if (costs) {

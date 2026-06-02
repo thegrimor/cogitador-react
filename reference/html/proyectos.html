@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMNISSIAH COGITATOR // PROJECT TRACKER</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c41e1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cogitator">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #c41e1e;
+    --red-bright: #ff2222;
+    --red-dim: #7a0f0f;
+    --gold: #c8962a;
+    --gold-bright: #f0b840;
+    --bg: #080808;
+    --bg2: #0f0f0f;
+    --bg3: #161616;
+    --bg4: #1e1e1e;
+    --text: #e8dcc8;
+    --text-dim: #a89880;
+    --text-bright: #ffffff;
+    --green: #2aff6a;
+    --border: #2a2218;
+    --border-bright: #4a3a28;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(196,30,30,0.015) 2px, rgba(196,30,30,0.015) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(200,150,42,0.02) 80px, rgba(200,150,42,0.02) 81px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(196,30,30,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* SCANLINE */
+  .scanline {
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(transparent, rgba(196,30,30,0.03), transparent);
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes scan {
+    0% { top: -40%; }
+    100% { top: 100%; }
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* HEADER */
+  .header {
+    border: 1px solid var(--red-dim);
+    border-bottom: 3px solid var(--red);
+    padding: 20px 30px;
+    margin-bottom: 30px;
+    background: linear-gradient(180deg, #1a0505 0%, var(--bg2) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--gold), var(--red), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .header-title .main {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--red-bright);
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(255,34,34,0.5);
+    display: block;
+  }
+
+  .header-title .sub {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 6px;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .header-meta {
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .header-meta .day-counter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    color: var(--gold-bright);
+    display: block;
+    text-shadow: 0 0 10px rgba(240,184,64,0.4);
+  }
+
+  .cog-symbol {
+    font-size: 40px;
+    color: var(--red-dim);
+    animation: rotate 20s linear infinite;
+    display: inline-block;
+    margin-right: 15px;
+    vertical-align: middle;
+    text-shadow: 0 0 15px rgba(196,30,30,0.3);
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ADVANCE TIME PANEL */
+  .time-panel {
+    background: var(--bg2);
+    border: 1px solid var(--gold);
+    border-left: 4px solid var(--gold-bright);
+    padding: 16px 20px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .time-panel label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 3px;
+  }
+
+  .time-panel input[type="number"] {
+    background: var(--bg);
+    border: 1px solid var(--gold);
+    color: var(--gold-bright);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    padding: 8px 12px;
+    width: 100px;
+    text-align: center;
+    outline: none;
+  }
+
+  .time-panel input[type="number"]:focus {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 10px rgba(240,184,64,0.2);
+  }
+
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-gold {
+    background: var(--gold);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .btn-gold:hover {
+    background: var(--gold-bright);
+    box-shadow: 0 0 15px rgba(240,184,64,0.4);
+  }
+
+  .btn-red {
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .btn-red:hover {
+    background: var(--red-bright);
+    box-shadow: 0 0 15px rgba(255,34,34,0.4);
+  }
+
+  .btn-dark {
+    background: var(--bg4);
+    color: var(--text-dim);
+    border: 1px solid var(--border-bright);
+  }
+
+  .btn-dark:hover {
+    background: var(--bg3);
+    color: var(--text);
+    border-color: var(--text-dim);
+  }
+
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 9px;
+  }
+
+  /* ADD PROJECT FORM */
+  .add-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    border-top: 3px solid var(--red);
+    padding: 20px 25px;
+    margin-bottom: 25px;
+  }
+
+  .add-panel h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .form-group input, .form-group select, .form-group textarea {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 8px rgba(196,30,30,0.15);
+  }
+
+  .form-group select option {
+    background: var(--bg2);
+  }
+
+  /* PROJECTS GRID */
+  .projects-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .projects-header h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 4px;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  /* PROJECT CARD */
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+  }
+
+  .project-card.status-pending::before { background: var(--text-dim); }
+  .project-card.status-active::before { background: var(--red); animation: pulse-border 2s ease-in-out infinite; }
+  .project-card.status-completed::before { background: var(--green); }
+  .project-card.status-paused::before { background: var(--gold); }
+
+  @keyframes pulse-border {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .project-card.status-active {
+    border-color: var(--red-dim);
+  }
+
+  .project-card.status-completed {
+    border-color: #1a3a1a;
+    opacity: 0.8;
+  }
+
+  .card-header {
+    padding: 14px 16px 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-bright);
+    line-height: 1.2;
+    flex: 1;
+  }
+
+  .card-category {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 3px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .status-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border: 1px solid;
+    white-space: nowrap;
+    margin-left: 10px;
+  }
+
+  .badge-pending { color: var(--text-dim); border-color: var(--text-dim); }
+  .badge-active { color: var(--red-bright); border-color: var(--red); background: rgba(196,30,30,0.1); }
+  .badge-completed { color: var(--green); border-color: var(--green); background: rgba(42,255,106,0.05); }
+  .badge-paused { color: var(--gold); border-color: var(--gold); }
+
+  .card-body {
+    padding: 14px 16px 14px 20px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-section {
+    margin-bottom: 12px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+
+  .progress-label { color: var(--text-dim); }
+  .progress-days {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    color: var(--text-bright);
+  }
+
+  .progress-bar-bg {
+    height: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    transition: width 0.5s ease;
+    position: relative;
+  }
+
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 3px;
+    height: 100%;
+    background: rgba(255,255,255,0.4);
+  }
+
+  .fill-active {
+    background: linear-gradient(90deg, var(--red-dim), var(--red));
+    animation: pulse-fill 2s ease-in-out infinite;
+  }
+
+  .fill-completed { background: var(--green); }
+  .fill-paused { background: var(--gold); }
+  .fill-pending { background: var(--text-dim); }
+
+  @keyframes pulse-fill {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .progress-percent {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-top: 8px;
+  }
+
+  .progress-percent.complete { color: var(--green); text-shadow: 0 0 10px rgba(42,255,106,0.4); }
+  .progress-percent.active { color: var(--red-bright); }
+
+  /* EDIT INLINE */
+  .edit-days-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .edit-days-row input {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    padding: 5px 8px;
+    width: 70px;
+    outline: none;
+    text-align: center;
+  }
+
+  .edit-days-row input:focus { border-color: var(--gold); }
+  .edit-days-row label { font-size: 10px; color: var(--text-dim); }
+
+  .card-actions {
+    padding: 10px 16px 12px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+
+  /* DESCRIPTION */
+  .card-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 300;
+  }
+
+  /* COMPLETED OVERLAY */
+  .completed-stamp {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%) rotate(12deg);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--green);
+    border: 2px solid var(--green);
+    padding: 4px 10px;
+    opacity: 0.25;
+    letter-spacing: 3px;
+    pointer-events: none;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+    border: 1px dashed var(--border);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+  .empty-state h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .empty-state p { font-size: 12px; }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 40px;
+    padding: 15px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--bg3);
+    border: 1px solid var(--red);
+    border-left: 4px solid var(--red-bright);
+    padding: 12px 20px;
+    font-size: 12px;
+    color: var(--text);
+    z-index: 1000;
+    transform: translateX(200%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .toast.show { transform: translateX(0); }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+
+  .stat-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold-bright);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--red);
+    border-top: 3px solid var(--red-bright);
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+  }
+
+  .modal h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    color: var(--red-bright);
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .header-title .main { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div style="display:flex;align-items:center;">
+        <span class="cog-symbol">⚙</span>
+        <div class="header-title">
+          <span class="main">OMNISSIAH COGITATOR</span>
+          <span class="sub">// MINISTERIO DE TECNOLOGÍA — SUBSECRETARÍA OPERACIONAL</span>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="day-counter" id="globalDay">DÍA 0</span>
+        <span>DÍA DE CAMPAÑA ACTUAL</span>
+        <br>
+        <span id="activeCount">0 PROYECTOS ACTIVOS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-box">
+      <span class="stat-value" id="statTotal">0</span>
+      <span class="stat-label">TOTAL PROYECTOS</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-value" id="statActive" style="color:var(--red-bright)">0</span>
+      <span class="stat-label">EN PROGRESO</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-value" id="statCompleted" style="color:var(--green)">0</span>
+      <span class="stat-label">COMPLETADOS</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-value" id="statPending" style="color:var(--text-dim)">0</span>
+      <span class="stat-label">EN ESPERA</span>
+    </div>
+  </div>
+
+  <!-- ADVANCE TIME PANEL -->
+  <div class="time-panel">
+    <label>⚡ AVANZAR TIEMPO</label>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <input type="number" id="daysInput" value="1" min="1" max="9999">
+      <span style="font-size:11px;color:var(--text-dim)">DÍAS</span>
+    </div>
+    <button class="btn btn-gold" onclick="advanceTime()">AVANZAR</button>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button class="btn btn-dark btn-sm" onclick="exportJSON()">⬇ EXPORTAR JSON</button>
+      <button class="btn btn-dark btn-sm" onclick="importJSON()">⬆ IMPORTAR JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+    </div>
+  </div>
+
+  <!-- ADD PROJECT -->
+  <div class="add-panel">
+    <h2>⚙ REGISTRAR NUEVO PROYECTO</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Denominación del Proyecto</label>
+        <input type="text" id="newName" placeholder="Ej: Academia Nacional de Tecnología">
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="newCategory">
+          <option value="MILITAR">MILITAR</option>
+          <option value="ENERGÍA">ENERGÍA</option>
+          <option value="INDUSTRIA">INDUSTRIA</option>
+          <option value="ESPIONAJE">ESPIONAJE</option>
+          <option value="CIVIL">CIVIL</option>
+          <option value="CULTO">CULTO [CLASIFICADO]</option>
+          <option value="OTRO">OTRO</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Días Totales Requeridos</label>
+        <input type="number" id="newDays" placeholder="180" min="1">
+      </div>
+      <button class="btn btn-red" onclick="addProject()">+ REGISTRAR</button>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="form-group">
+        <label>Notas / Descripción (opcional)</label>
+        <input type="text" id="newDesc" placeholder="Observaciones del Omnissiah...">
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="projects-header">
+    <h2>// REGISTRO DE PROYECTOS ACTIVOS</h2>
+    <div style="display:flex;gap:8px;">
+      <select id="filterStatus" onchange="renderProjects()" style="background:var(--bg2);border:1px solid var(--border-bright);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;">
+        <option value="all">TODOS</option>
+        <option value="active">ACTIVOS</option>
+        <option value="pending">EN ESPERA</option>
+        <option value="completed">COMPLETADOS</option>
+        <option value="paused">PAUSADOS</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="projects-grid" id="projectsGrid"></div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>OMNISSIAH COGITATOR v1.0 // ADEPTUS MECHANICUS MINISTERIUM</span>
+    <span id="footerSave">DATOS GUARDADOS EN COGITADOR LOCAL</span>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3>⚠ CONFIRMACIÓN REQUERIDA</h3>
+    <p id="confirmText" style="font-size:13px;color:var(--text);line-height:1.6;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-dark" onclick="closeModal()">CANCELAR</button>
+      <button class="btn btn-red" id="confirmBtn">CONFIRMAR</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  globalDay: 0,
+  projects: []
+};
+
+let confirmCallback = null;
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+function save() {
+  try {
+    localStorage.setItem('mechanicus_tracker', JSON.stringify(state));
+    document.getElementById('footerSave').textContent = 
+      'GUARDADO: ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    showToast('ERROR: No se pudo guardar en cogitador local');
+  }
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('mechanicus_tracker');
+    if (raw) state = JSON.parse(raw);
+  } catch(e) {
+    state = { globalDay: 0, projects: [] };
+  }
+}
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mechanicus_tracker_dia${state.globalDay}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Datos exportados al archive local');
+}
+
+function importJSON() {
+  document.getElementById('importFile').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.projects && data.globalDay !== undefined) {
+        confirmAction(
+          `¿Importar datos del archivo "${file.name}"? Esto sobreescribirá el estado actual (Día ${state.globalDay}, ${state.projects.length} proyectos).`,
+          () => {
+            state = data;
+            save();
+            render();
+            showToast('Datos importados correctamente');
+          }
+        );
+      } else {
+        showToast('ERROR: Formato de archivo inválido');
+      }
+    } catch(e) {
+      showToast('ERROR: No se pudo parsear el archivo');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ============================================================
+// TIME
+// ============================================================
+function advanceTime() {
+  const days = parseInt(document.getElementById('daysInput').value) || 0;
+  if (days <= 0) { showToast('ERROR: Introduce un número de días válido'); return; }
+
+  state.globalDay += days;
+
+  // Advance active projects
+  let completedNames = [];
+  state.projects.forEach(p => {
+    if (p.status === 'active') {
+      p.daysElapsed = Math.min(p.daysElapsed + days, p.daysTotal);
+      if (p.daysElapsed >= p.daysTotal) {
+        p.status = 'completed';
+        completedNames.push(p.name);
+      }
+    }
+  });
+
+  save();
+  render();
+
+  if (completedNames.length > 0) {
+    showToast(`✓ PROYECTOS COMPLETADOS: ${completedNames.join(', ')}`, 4000);
+  } else {
+    showToast(`+${days} días. Día actual: ${state.globalDay}`);
+  }
+}
+
+// ============================================================
+// PROJECTS CRUD
+// ============================================================
+function addProject() {
+  const name = document.getElementById('newName').value.trim();
+  const category = document.getElementById('newCategory').value;
+  const days = parseInt(document.getElementById('newDays').value);
+  const desc = document.getElementById('newDesc').value.trim();
+
+  if (!name) { showToast('ERROR: Se requiere denominación del proyecto'); return; }
+  if (!days || days < 1) { showToast('ERROR: Se requiere duración en días'); return; }
+
+  const project = {
+    id: Date.now(),
+    name,
+    category,
+    daysTotal: days,
+    daysElapsed: 0,
+    status: 'pending', // pending | active | paused | completed
+    desc,
+    createdDay: state.globalDay
+  };
+
+  state.projects.unshift(project);
+  save();
+  render();
+
+  // Clear form
+  document.getElementById('newName').value = '';
+  document.getElementById('newDays').value = '';
+  document.getElementById('newDesc').value = '';
+
+  showToast(`Proyecto "${name}" registrado en el cogitador`);
+}
+
+function deleteProject(id) {
+  const p = state.projects.find(x => x.id === id);
+  confirmAction(
+    `¿Purgar el proyecto "${p.name}" del registro? Esta acción es irreversible.`,
+    () => {
+      state.projects = state.projects.filter(x => x.id !== id);
+      save();
+      render();
+      showToast('Proyecto purgado del cogitador');
+    }
+  );
+}
+
+function setStatus(id, status) {
+  const p = state.projects.find(x => x.id === id);
+  if (!p) return;
+  p.status = status;
+  if (status === 'active' && p.daysElapsed >= p.daysTotal) {
+    p.daysElapsed = p.daysTotal - 1;
+  }
+  save();
+  render();
+  showToast(`Proyecto "${p.name}": estado → ${status.toUpperCase()}`);
+}
+
+function updateTotalDays(id, newTotal) {
+  const p = state.projects.find(x => x.id === id);
+  if (!p) return;
+  const val = parseInt(newTotal);
+  if (!val || val < 1) return;
+  p.daysTotal = val;
+  if (p.daysElapsed > p.daysTotal) p.daysElapsed = p.daysTotal;
+  if (p.daysElapsed >= p.daysTotal && p.status === 'active') p.status = 'completed';
+  save();
+  render();
+  showToast(`Duración actualizada: ${val} días`);
+}
+
+function updateElapsedDays(id, newElapsed) {
+  const p = state.projects.find(x => x.id === id);
+  if (!p) return;
+  const val = parseInt(newElapsed);
+  if (isNaN(val) || val < 0) return;
+  p.daysElapsed = Math.min(val, p.daysTotal);
+  if (p.daysElapsed >= p.daysTotal) p.status = 'completed';
+  save();
+  render();
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  // Header
+  document.getElementById('globalDay').textContent = `DÍA ${state.globalDay}`;
+  const active = state.projects.filter(p => p.status === 'active').length;
+  document.getElementById('activeCount').textContent = `${active} PROYECTO${active !== 1 ? 'S' : ''} ACTIVO${active !== 1 ? 'S' : ''}`;
+
+  // Stats
+  document.getElementById('statTotal').textContent = state.projects.length;
+  document.getElementById('statActive').textContent = state.projects.filter(p => p.status === 'active').length;
+  document.getElementById('statCompleted').textContent = state.projects.filter(p => p.status === 'completed').length;
+  document.getElementById('statPending').textContent = state.projects.filter(p => p.status === 'pending').length;
+
+  renderProjects();
+}
+
+function renderProjects() {
+  const filter = document.getElementById('filterStatus').value;
+  const grid = document.getElementById('projectsGrid');
+
+  let filtered = state.projects;
+  if (filter !== 'all') filtered = state.projects.filter(p => p.status === filter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="icon">⚙</div>
+        <h3>SIN PROYECTOS REGISTRADOS</h3>
+        <p>El cogitador no contiene datos de proyectos${filter !== 'all' ? ' con ese estado' : ''}.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const pct = p.daysTotal > 0 ? Math.round((p.daysElapsed / p.daysTotal) * 100) : 0;
+    const remaining = p.daysTotal - p.daysElapsed;
+    const isCompleted = p.status === 'completed';
+
+    const statusLabels = {
+      pending: 'EN ESPERA', active: 'ACTIVO',
+      completed: 'COMPLETADO', paused: 'PAUSADO'
+    };
+
+    const fillClass = {
+      active: 'fill-active', completed: 'fill-completed',
+      paused: 'fill-paused', pending: 'fill-pending'
+    }[p.status];
+
+    const pctClass = isCompleted ? 'complete' : (p.status === 'active' ? 'active' : '');
+
+    return `
+    <div class="project-card status-${p.status}">
+      ${isCompleted ? '<div class="completed-stamp">COMPLETADO</div>' : ''}
+      <div class="card-header">
+        <div>
+          <div class="card-name">${escapeHtml(p.name)}</div>
+          <div class="card-category">${p.category} // DÍA ${p.createdDay}</div>
+        </div>
+        <div class="status-badge badge-${p.status}">${statusLabels[p.status]}</div>
+      </div>
+      <div class="card-body">
+        ${p.desc ? `<div class="card-desc">${escapeHtml(p.desc)}</div>` : ''}
+        <div class="progress-section">
+          <div class="progress-info">
+            <span class="progress-label">PROGRESO</span>
+            <span class="progress-days">${p.daysElapsed} / ${p.daysTotal} días</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill ${fillClass}" style="width:${pct}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="progress-percent ${pctClass}">${pct}%</div>
+            <div style="font-size:10px;color:var(--text-dim)">
+              ${isCompleted ? '✓ OPERATIVO' : `${remaining} días restantes`}
+            </div>
+          </div>
+        </div>
+
+        <div class="edit-days-row">
+          <label>DÍAS TRANSCURRIDOS:</label>
+          <input type="number" value="${p.daysElapsed}" min="0" max="${p.daysTotal}"
+            onchange="updateElapsedDays(${p.id}, this.value)">
+          <label style="margin-left:8px">DÍAS TOTALES:</label>
+          <input type="number" value="${p.daysTotal}" min="1"
+            onchange="updateTotalDays(${p.id}, this.value)">
+        </div>
+      </div>
+      <div class="card-actions">
+        ${p.status !== 'active' && !isCompleted ? 
+          `<button class="btn btn-red btn-sm" onclick="setStatus(${p.id},'active')">▶ INICIAR</button>` : ''}
+        ${p.status === 'active' ? 
+          `<button class="btn btn-dark btn-sm" onclick="setStatus(${p.id},'paused')">⏸ PAUSAR</button>` : ''}
+        ${p.status === 'paused' ? 
+          `<button class="btn btn-gold btn-sm" onclick="setStatus(${p.id},'active')">▶ REANUDAR</button>` : ''}
+        ${!isCompleted ? 
+          `<button class="btn btn-dark btn-sm" onclick="setStatus(${p.id},'completed')">✓ COMPLETAR</button>` : ''}
+        ${isCompleted ? 
+          `<button class="btn btn-dark btn-sm" onclick="setStatus(${p.id},'active')">↺ REABRIR</button>` : ''}
+        <button class="btn btn-dark btn-sm" style="margin-left:auto;color:var(--red-dim);border-color:var(--red-dim)" 
+          onclick="deleteProject(${p.id})">✕ PURGAR</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function confirmAction(text, callback) {
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmModal').classList.add('active');
+  confirmCallback = callback;
+}
+
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('active');
+  confirmCallback = null;
+}
+
+document.getElementById('confirmBtn').onclick = () => {
+  if (confirmCallback) confirmCallback();
+  closeModal();
+};
+
+document.getElementById('confirmModal').onclick = (e) => {
+  if (e.target === e.currentTarget) closeModal();
+};
+
+// Enter key on days input
+document.getElementById('daysInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') advanceTime();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+load();
+render();
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

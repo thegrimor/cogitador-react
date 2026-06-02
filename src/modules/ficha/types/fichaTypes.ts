@@ -110,6 +110,25 @@ export interface CustomCurrency {
   amount: number
 }
 
+export type InqTalentType =
+  | 'Talento de Influencia'
+  | 'Talento de Prestigio'
+  | 'Habilidad Maestra'
+  | 'Talento de Fe'
+  | 'Otros Talentos'
+  | 'Talento'
+  | 'Habilidad'
+  | 'Rasgo'
+
+export interface InquisidorTalent {
+  id: string
+  name: string
+  tipo: InqTalentType
+  xp: number
+  req: string
+  desc: string
+}
+
 export interface Character {
   id: string
   info: CharacterInfo
@@ -143,6 +162,7 @@ export interface Character {
   quickNotes: string
   influenceGeneral: string
   influencePlanetary: string
+  inqTalents: InquisidorTalent[]
 }
 
 export interface FallenCharacter extends Character {

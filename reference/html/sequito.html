@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="/manifest-sequito.json">
+<meta name="theme-color" content="#c41e1e">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SÉQUITO // GESTIÓN DE ACÓLITOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080808; --bg2:#0f0f0f; --bg3:#161616; --bg4:#1e1e1e;
+  --red:#c41e1e; --red-bright:#ff2222; --red-dim:#7a0f0f;
+  --gold:#c8962a; --gold-bright:#f0b840;
+  --text:#e8dcc8; --text-dim:#a89880; --text-bright:#ffffff;
+  --green:#2aff6a; --blue:#4ab8ff;
+  --border:#2a2218; --border-bright:#3a3228;
+  --layer-w:280px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:auto;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(196,30,30,.01) 2px,rgba(196,30,30,.01) 4px);pointer-events:none;z-index:0;}
+
+/* ---- HEADER ---- */
+.header{background:linear-gradient(180deg,#1a0505,var(--bg2));border-bottom:2px solid var(--red-dim);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),var(--gold),var(--red),transparent);animation:shimmer 3s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+.logo{display:flex;align-items:center;gap:12px;}
+.cog{font-size:28px;color:var(--red-dim);animation:rot 20s linear infinite;display:inline-block;}
+@keyframes rot{to{transform:rotate(360deg)}}
+.logo-text .main{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:var(--red-bright);letter-spacing:3px;}
+.logo-text .sub{font-size:9px;color:var(--gold);letter-spacing:4px;display:block;margin-top:2px;}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+/* ---- TABS ---- */
+.nav-tabs{display:flex;gap:0;border-bottom:2px solid var(--red-dim);background:var(--bg2);padding:0 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.nav-tab{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:10px 12px;cursor:pointer;color:var(--text-dim);border:1px solid transparent;border-bottom:none;transition:all .2s;user-select:none;white-space:nowrap;flex-shrink:0;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--red-bright);border-color:var(--red-dim);border-bottom:2px solid var(--bg2);margin-bottom:-2px;background:var(--bg3);}
+
+/* ---- VIEWS ---- */
+.view{display:none;}
+.view.active{display:block;width:100%;}
+
+/* ---- STATS BAR ---- */
+.stats-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:20px;flex-wrap:wrap;font-size:10px;color:var(--text-dim);flex-shrink:0;}
+.stat-item{display:flex;gap:6px;align-items:center;}
+.stat-val{font-family:'Orbitron',sans-serif;font-size:13px;}
+.stat-val.alive{color:var(--green);}
+.stat-val.dead{color:var(--red-bright);}
+.stat-val.total{color:var(--gold);}
+
+/* ---- BOARD ---- */
+#board{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  box-sizing:border-box;
+}
+
+/* ---- LAYER ---- */
+.layer{
+  background:var(--bg2);
+  border-top:1px solid var(--border-bright);
+  border-bottom:2px solid var(--border-bright);
+  border-left:4px solid var(--red-dim);
+  user-select:none;
+  margin-bottom:6px;
+  box-sizing:border-box;
+}
+.layer.drag-over{border-left-color:var(--gold-bright);background:#1a1500;}
+.layer.dragging-layer{opacity:.4;}
+.layer-head{
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(196,30,30,.04);
+  cursor:grab;
+  border-bottom:1px solid var(--border);
+  box-sizing:border-box;
+}
+.layer-head:active{cursor:grabbing;}
+.layer-drag-handle{color:var(--border-bright);font-size:14px;flex-shrink:0;}
+.layer-name-input{background:none;border:none;color:var(--gold-bright);font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;flex:1;min-width:0;outline:none;cursor:text;}
+.layer-name-input:focus{border-bottom:1px solid var(--gold);}
+.layer-count{font-size:9px;color:var(--text-dim);white-space:nowrap;flex-shrink:0;}
+.layer-body{
+  padding:8px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:5px;
+  min-height:44px;
+  box-sizing:border-box;
+}
+.layer-footer{padding:4px 8px 8px;box-sizing:border-box;}
+.layer-del{background:none;border:none;cursor:pointer;color:#3a1a1a;font-size:13px;padding:2px 4px;transition:color .2s;}
+.layer-del:hover{color:var(--red-bright);}
+
+/* ---- ADD LAYER ---- */
+.add-layer-btn{
+  display:block;
+  height:44px;
+  background:none;
+  border:none;
+  border-top:2px dashed var(--border-bright);
+  color:var(--text-dim);
+  font-family:'Orbitron',sans-serif;
+  font-size:9px;
+  letter-spacing:2px;
+  cursor:pointer;
+  margin-top:4px;
+  box-sizing:border-box;
+}
+.add-layer-btn:hover{border-color:var(--red-dim);color:var(--red);}
+
+/* ---- SÉQUITO CARD ---- */
+.seq-card{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--border-bright);padding:8px 10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;position:relative;}
+.seq-card:hover{border-color:var(--border-bright);border-left-color:var(--gold);background:var(--bg4);}
+.seq-card.dead{opacity:.5;border-left-color:#3a0a0a;}
+.seq-card.dead .seq-name{text-decoration:line-through;color:var(--text-dim);}
+.seq-card.dragging{opacity:.3;}
+.seq-card.drag-target{border-top:2px solid var(--gold);}
+.seq-status{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.seq-status.alive{background:var(--green);box-shadow:0 0 6px rgba(42,255,106,.4);}
+.seq-status.dead{background:#3a1a1a;border:1px solid #7a1a1a;}
+.seq-info{flex:1;min-width:0;}
+.seq-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.seq-role{font-size:9px;color:var(--text-dim);letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.seq-equip-count{font-size:8px;color:var(--gold);white-space:nowrap;flex-shrink:0;}
+.seq-drag-handle{color:var(--border-bright);font-size:10px;cursor:grab;padding:0 2px;flex-shrink:0;}
+.seq-drag-handle:active{cursor:grabbing;}
+
+/* ---- ARMORY VIEW ---- */
+.armory-view{flex:1;overflow-y:auto;padding:20px;}
+.armory-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.armory-table{width:100%;border-collapse:collapse;}
+.armory-table th{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:var(--text-dim);text-align:left;padding:8px 12px;border-bottom:2px solid var(--red-dim);background:var(--bg2);white-space:nowrap;}
+.armory-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;}
+.armory-table tr:hover td{background:var(--bg3);}
+.armory-table .item-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--border-bright);}
+.armory-table .item-name:hover{color:var(--gold-bright);}
+.stock-cell{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--gold-bright);}
+.equipped-cell{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--blue);}
+.avail-cell{font-family:'Orbitron',sans-serif;font-size:13px;}
+.avail-ok{color:var(--green);}
+.avail-low{color:var(--gold);}
+.avail-zero{color:var(--red-bright);}
+
+/* ---- BUTTONS ---- */
+.btn{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;padding:7px 12px;border:none;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap;}
+.btn-red{background:var(--red);color:#fff;}.btn-red:hover{background:var(--red-bright);}
+.btn-gold{background:var(--gold);color:#000;font-weight:700;}.btn-gold:hover{background:var(--gold-bright);}
+.btn-dark{background:var(--bg3);color:var(--text-dim);border:1px solid var(--border-bright);}.btn-dark:hover{color:var(--text);border-color:var(--text-dim);}
+.btn-sm{padding:4px 9px;font-size:7px;}
+.btn-icon{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:13px;padding:2px 5px;transition:color .2s;}.btn-icon:hover{color:var(--red-bright);}
+
+/* ---- MODAL ---- */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal{background:var(--bg2);border:1px solid var(--border-bright);border-top:3px solid var(--red);max-width:480px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.modal-head h3{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--red);letter-spacing:3px;}
+.modal-body{padding:18px;overflow-y:auto;flex:1;}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+
+/* ---- FORMS ---- */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.form-group label{font-size:8px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;}
+.form-group input,.form-group select,.form-group textarea{background:var(--bg);border:1px solid var(--border-bright);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:7px 10px;outline:none;width:100%;}
+.form-group input:focus,.form-group select:focus{border-color:var(--red);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ---- EQUIP LIST ---- */
+.equip-item{background:var(--bg);border:1px solid var(--border);padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.equip-item-name{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;}
+.equip-item-qty{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold);}
+
+/* ---- TOAST ---- */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--red);border-left:4px solid var(--red-bright);padding:9px 16px;font-size:11px;z-index:9999;transform:translateX(200%);transition:transform .3s;max-width:260px;}
+.toast.show{transform:translateX(0);}
+
+/* ---- SEARCH ---- */
+.search-input{background:var(--bg);border:1px solid var(--border-bright);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;outline:none;width:180px;}
+.search-input:focus{border-color:var(--gold);}
+
+/* ---- EMPTY ---- */
+.empty-layer{text-align:center;padding:10px;color:var(--border-bright);font-size:9px;letter-spacing:1px;border:1px dashed var(--border);grid-column:1/-1;}
+
+@media(max-width:600px){
+  .layer-body{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <span class="cog">⚙</span>
+    <div class="logo-text">
+      <span class="main">GESTIÓN DE SÉQUITO</span>
+      <span class="sub">// COGITATOR PERSONAL — DARK HERESY</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <input type="text" class="search-input" id="searchInput" placeholder="Buscar séquito..." oninput="applySearch()">
+    <button class="btn btn-dark btn-sm" onclick="exportAll()">⬇ EXPORTAR</button>
+    <button class="btn btn-dark btn-sm" onclick="document.getElementById('importFile').click()">⬆ IMPORTAR</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importAll(event)">
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" data-view="sequito" onclick="switchView('sequito')">☠ SÉQUITO</div>
+  <div class="nav-tab" data-view="armory" onclick="switchView('armory')">⚔ ARMAS</div>
+  <div class="nav-tab" data-view="implants" onclick="switchView('implants')">🦾 IMPLANTES</div>
+  <div class="nav-tab" data-view="mechadendrites" onclick="switchView('mechadendrites')">🔩 MECADENDRITES</div>
+  <div class="nav-tab" data-view="equipment" onclick="switchView('equipment')">🎒 EQUIPO</div>
+  <div class="nav-tab" data-view="armor" onclick="switchView('armor')">🛡 ARMADURAS</div>
+</div>
+
+<!-- ====== SÉQUITO VIEW ====== -->
+<div class="view active" id="view-sequito">
+  <div class="stats-bar" id="statsBar"></div>
+  <div id="board" style="display:block;width:100%;padding:0;margin:0;">
+    <button class="add-layer-btn" style="width:100%" onclick="addLayer()">+ NUEVO GRUPO</button>
+  </div>
+</div>
+
+<!-- ====== ARMORY VIEW ====== -->
+<div class="view" id="view-armory">
+  <div class="armory-view">
+    <div class="armory-toolbar">
+      <span style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px">// ARSENAL</span>
+      <button class="btn btn-red btn-sm" onclick="openAddFromBook()">+ DEL LIBRO</button>
+      <button class="btn btn-dark btn-sm" onclick="openAddItemManual()">+ MANUAL</button>
+    </div>
+    <table class="armory-table" id="armoryTable">
+      <thead>
+        <tr>
+          <th>OBJETO</th><th>STOCK</th><th>EQUIPADOS</th><th>DISPONIBLES</th><th>ACCIONES</th>
+        </tr>
+      </thead>
+      <tbody id="armoryBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ====== IMPLANTES VIEW ====== -->
+<div class="view" id="view-implants">
+  <div class="armory-view">
+    <div class="armory-toolbar">
+      <span style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px">// IMPLANTES CIBERNÉTICOS</span>
+      <button class="btn btn-red btn-sm" onclick="openCatalogModal('implants')">+ DEL LIBRO</button>
+      <button class="btn btn-dark btn-sm" onclick="openManualModal('implants')">+ MANUAL</button>
+    </div>
+    <table class="armory-table"><thead><tr><th>IMPLANTE</th><th>STOCK</th><th>EQUIPADOS</th><th>DISPONIBLES</th><th>ACCIONES</th></tr></thead>
+    <tbody id="implants-body"></tbody></table>
+  </div>
+</div>
+
+<!-- ====== MECADENDRITES VIEW ====== -->
+<div class="view" id="view-mechadendrites">
+  <div class="armory-view">
+    <div class="armory-toolbar">
+      <span style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px">// MECADENDRITES</span>
+      <button class="btn btn-red btn-sm" onclick="openCatalogModal('mechadendrites')">+ DEL LIBRO</button>
+      <button class="btn btn-dark btn-sm" onclick="openManualModal('mechadendrites')">+ MANUAL</button>
+    </div>
+    <table class="armory-table"><thead><tr><th>MECADENDRITE</th><th>STOCK</th><th>EQUIPADOS</th><th>DISPONIBLES</th><th>ACCIONES</th></tr></thead>
+    <tbody id="mechadendrites-body"></tbody></table>
+  </div>
+</div>
+
+<!-- ====== EQUIPO VIEW ====== -->
+<div class="view" id="view-equipment">
+  <div class="armory-view">
+    <div class="armory-toolbar">
+      <span style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px">// EQUIPO GENERAL</span>
+      <button class="btn btn-red btn-sm" onclick="openCatalogModal('equipment')">+ DEL LIBRO</button>
+      <button class="btn btn-dark btn-sm" onclick="openManualModal('equipment')">+ MANUAL</button>
+    </div>
+    <table class="armory-table"><thead><tr><th>OBJETO</th><th>STOCK</th><th>EQUIPADOS</th><th>DISPONIBLES</th><th>ACCIONES</th></tr></thead>
+    <tbody id="equipment-body"></tbody></table>
+  </div>
+</div>
+
+<!-- ====== ARMADURAS VIEW ====== -->
+<div class="view" id="view-armor">
+  <div class="armory-view">
+    <div class="armory-toolbar">
+      <span style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px">// ARMADURAS</span>
+      <button class="btn btn-red btn-sm" onclick="openCatalogModal('armor')">+ DEL LIBRO</button>
+      <button class="btn btn-dark btn-sm" onclick="openManualModal('armor')">+ MANUAL</button>
+    </div>
+    <table class="armory-table"><thead><tr><th>ARMADURA</th><th>STOCK</th><th>EQUIPADOS</th><th>DISPONIBLES</th><th>ACCIONES</th></tr></thead>
+    <tbody id="armor-body"></tbody></table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================================================================
+// BOOK CATALOGS
+// ================================================================
+const BOOK_IMPLANTS = [
+  {name:'Ojo biónico',cat:'Visión',notes:'Visión normal + modo oscuridad. +10 Percepción visual. Precio: 500'},
+  {name:'Ojo biónico (avanzado)',cat:'Visión',notes:'Visión térmica, nocturna y telescópica. +20 Per visual. Precio: 1.000'},
+  {name:'Ojo de puntería',cat:'Visión',notes:'+10 HP en acciones de apuntado. Precio: 750'},
+  {name:'Sentido de peligro mecánico',cat:'Visión',notes:'Detecta amenazas mecánicas. No puede ser sorprendido por máquinas. Precio: 500'},
+  {name:'Brazo biatatante',cat:'Extremidades',notes:'Reemplaza brazo. Fuerza del brazo = F×2. Precio: 1.000'},
+  {name:'Brazo de combate',cat:'Extremidades',notes:'Daño CaC 1d10+3 I. Sirve de escudo. Precio: 1.500'},
+  {name:'Mano de ladrón',cat:'Extremidades',notes:'+20 a Trucos de manos y Seguridad. Precio: 500'},
+  {name:'Pierna biónica',cat:'Extremidades',notes:'Velocidad +1. No penalización por cojear. Precio: 1.000'},
+  {name:'Huesos de acero',cat:'Esqueleto',notes:'+2 Heridas. Inmune a fracturas. Precio: 2.000'},
+  {name:'Exoesqueleto muscular',cat:'Esqueleto',notes:'+10 Fuerza. Precio: 1.500'},
+  {name:'Corazón biótido',cat:'Órganos',notes:'Doble tiempo sin aire. +10 Resistencia a venenos. Precio: 750'},
+  {name:'Pulmón biótido',cat:'Órganos',notes:'Respira en atmósferas tóxicas. +20 resist. ambiental. Precio: 1.000'},
+  {name:'Hígado biótido',cat:'Órganos',notes:'Inmune a venenos ingeridos. Precio: 500'},
+  {name:'Circuitos craneales',cat:'Neural',notes:'Memoria perfecta. +10 Int en habilidades de conocimiento. Precio: 1.000'},
+  {name:'Interfaz de datos',cat:'Neural',notes:'Conexión directa con terminales y máquinas. Precio: 750'},
+  {name:'Reflejos mejorados',cat:'Neural',notes:'+10 Ag. +5 Iniciativa. Precio: 2.000'},
+  {name:'Piel subdermal',cat:'Piel',notes:'Reduce daño recibido en 1. Precio: 1.500'},
+  {name:'Implante de voz',cat:'Vocal',notes:'Modula voz. +10 Carisma e Intimidar vocal. Precio: 300'},
+  {name:'Respirador integrado',cat:'Respiración',notes:'Filtra toxinas. Inmune a gases. Precio: 500'},
+  {name:'Estabilizadores sanguíneos',cat:'Circulatorio',notes:'Se cura el doble de rápido. Heridas leves sanan en 1 día. Precio: 1.000'},
+];
+
+const BOOK_MECHADENDRITES = [
+  {name:'Mecadendrite de manipulación',cat:'Utilidad',notes:'Brazo extra de 1.5m. Fuerza 20. Acciones adicionales de manipulación. Precio: 1.500'},
+  {name:'Mecadendrite de herramientas',cat:'Utilidad',notes:'Herramientas mecánicas integradas. +20 Competencia tecnológica. Precio: 1.000'},
+  {name:'Mecadendrite de combate',cat:'Combate',notes:'Ataque CaC: 1d10+2 E. Alcance 2m. Precio: 2.000'},
+  {name:'Mecadendrite de combate (sierra)',cat:'Combate',notes:'Ataque CaC: 1d10+4 A. Desgarrador. Precio: 2.500'},
+  {name:'Mecadendrite medicae',cat:'Medicae',notes:'+20 Medicae. Puede realizar cirugía sin instrumental. Precio: 1.500'},
+  {name:'Mecadendrite óptica',cat:'Sensorial',notes:'Cámara con zoom ×20. Visión nocturna. Graba vídeo. Precio: 1.000'},
+  {name:'Mecadendrite de carga',cat:'Utilidad',notes:'Taser integrado: 1d10 I, conmoción. Precio: 1.200'},
+  {name:'Mecadendrite de escudo',cat:'Combate',notes:'Bloquea ataques como escudo. +10 a paradas. Precio: 1.800'},
+  {name:'Mecadendrite de interfaz',cat:'Datos',notes:'Acceso directo a cogitadores. +20 Comp. tecnológica en hackeo. Precio: 800'},
+];
+
+const BOOK_EQUIPMENT = [
+  {name:'Respirador',cat:'Supervivencia',notes:'Filtra gases y ambientes tóxicos durante 6h. Precio: 25'},
+  {name:'Binoculares',cat:'Visión',notes:'×10 aumento. Precio: 75'},
+  {name:'Visión nocturna',cat:'Visión',notes:'Ve en oscuridad total durante 4h. Precio: 150'},
+  {name:'Cuerda (10m)',cat:'Movimiento',notes:'Resistencia 200kg. Precio: 10'},
+  {name:'Arnés de escalada',cat:'Movimiento',notes:'+20 Trepar. Precio: 25'},
+  {name:'Medikit',cat:'Médico',notes:'+20 Medicae. 3 usos. Precio: 150'},
+  {name:'Estimulantes',cat:'Médico',notes:'Elimina un nivel de fatiga. Precio: 25 por dosis'},
+  {name:'Antídoto',cat:'Médico',notes:'Neutraliza un veneno. Precio: 50 por dosis'},
+  {name:'Comisario de campo',cat:'Médico',notes:'Estabiliza heridas críticas. Precio: 100'},
+  {name:'Comunicador personal',cat:'Comunicación',notes:'Alcance 1km en campo abierto. Precio: 50'},
+  {name:'Comunicador largo alcance',cat:'Comunicación',notes:'Alcance planetario. Precio: 500'},
+  {name:'Detector de vida',cat:'Detección',notes:'Detecta seres vivos a 30m. Precio: 200'},
+  {name:'Escáner de movimiento',cat:'Detección',notes:'Detecta movimiento a 50m. Precio: 150'},
+  {name:'Ganzúas',cat:'Infiltración',notes:'+10 Seguridad. Precio: 25'},
+  {name:'Equipo de disfraz',cat:'Infiltración',notes:'+20 Disfraz. Precio: 200'},
+  {name:'Explosivo demolición',cat:'Explosivos',notes:'1d10+4 X, radio 3m. Precio: 50 por carga'},
+  {name:'Granada de fragmentación',cat:'Explosivos',notes:'2d10 X, radio 4m. Precio: 30'},
+  {name:'Granada de humo',cat:'Explosivos',notes:'Nube de humo radio 6m durante 3 asaltos. Precio: 15'},
+  {name:'Mochila de reacción',cat:'Movimiento',notes:'Vuelo durante 5 minutos. Precio: 1.500'},
+  {name:'Luz de bengala',cat:'Iluminación',notes:'Ilumina área 20m durante 10 minutos. Precio: 5'},
+  {name:'Linterna',cat:'Iluminación',notes:'Ilumina cono de 30m. Precio: 10'},
+  {name:'Cogitador personal',cat:'Tecnología',notes:'+10 Int en tareas de cálculo/memoria. Precio: 500'},
+  {name:'Auspex/Escáner',cat:'Detección',notes:'Detecta calor, metales y vida a 50m. Precio: 500'},
+  {name:'Traje ambiental',cat:'Protección',notes:'Protege contra vacío y ambientes hostiles 4h. Precio: 2.000'},
+];
+
+const BOOK_ARMORS = [
+  {name:'Ropa de calle',cat:'Sin categoría',notes:'PA: 0 todo. Precio: 10'},
+  {name:'Cuero endurecido',cat:'Primitiva',notes:'PA: 1 brazos/piernas, 1 cuerpo. Precio: 10'},
+  {name:'Cota de malla',cat:'Primitiva',notes:'PA: 2 todo. Precio: 30'},
+  {name:'Armadura de escamas',cat:'Primitiva',notes:'PA: 3 cuerpo, 2 brazos/piernas. Precio: 50'},
+  {name:'Armadura de placas',cat:'Primitiva',notes:'PA: 4 todo. Primitiva. Precio: 100'},
+  {name:'Armadura Flak',cat:'Imperial',notes:'PA: 2 todo. Armadura estándar de la Guardia. Precio: 100'},
+  {name:'Armadura Flak mejorada',cat:'Imperial',notes:'PA: 3 todo. Precio: 250'},
+  {name:'Casco Flak',cat:'Imperial',notes:'PA: 2 cabeza. Precio: 25'},
+  {name:'Armadura de malla',cat:'Imperial',notes:'PA: 4 todo. Ligera. Precio: 600'},
+  {name:'Armadura Carapace ligera',cat:'Imperial',notes:'PA: 5 todo. Precio: 2.500'},
+  {name:'Armadura Carapace',cat:'Imperial',notes:'PA: 6 todo. Pesada. Precio: 5.000'},
+  {name:'Armadura Carapace de asalto',cat:'Imperial',notes:'PA: 7 cuerpo/brazos, 6 piernas, 5 cabeza. Precio: 10.000'},
+  {name:'Armadura de Power',cat:'Especial',notes:'PA: 8 todo. Requiere entrenamiento. Precio: sin precio'},
+  {name:'Manto de piel',cat:'Primitiva',notes:'PA: 1 cuerpo. Precio: 5'},
+  {name:'Guardapolvo reforzado',cat:'Imperial',notes:'PA: 1 todo. Oculta armadura subyacente. Precio: 75'},
+  {name:'Traje antifragmentación',cat:'Imperial',notes:'PA: 3 cuerpo, 2 brazos. Precio: 400'},
+];
+
+const BOOK_CATALOGS = { implants: BOOK_IMPLANTS, mechadendrites: BOOK_MECHADENDRITES, equipment: BOOK_EQUIPMENT, armor: BOOK_ARMORS };
+const CATALOG_LABELS = { implants:'IMPLANTE', mechadendrites:'MECADENDRITE', equipment:'OBJETO', armor:'ARMADURA' };
+
+// ================================================================
+// BOOK WEAPONS DATA
+// ================================================================
+const BOOK_WEAPONS=[
+  {g:'Láser',name:'Pistola láser',cls:'Pistola',range:'30m',rof:'T/-/-',dmg:'1d10+2',dmgType:'E',pen:0,clip:30,reload:'Completa',special:'Fiable',price:50},
+  {g:'Láser',name:'Carabina láser',cls:'Básica',range:'60m',rof:'T/-/-',dmg:'1d10+2',dmgType:'E',pen:0,clip:40,reload:'Completa',special:'Fiable',price:75},
+  {g:'Láser',name:'Rifle láser',cls:'Básica',range:'100m',rof:'T/3/-',dmg:'1d10+3',dmgType:'E',pen:0,clip:60,reload:'Completa',special:'Fiable',price:75},
+  {g:'Láser',name:'Rifle láser largo alcance',cls:'Básica',range:'150m',rof:'T/-/-',dmg:'1d10+3',dmgType:'E',pen:1,clip:40,reload:'Completa',special:'Fiable, Preciso',price:100},
+  {g:'Láser',name:'Cañón láser portátil',cls:'Pesada',range:'300m',rof:'T/-/-',dmg:'5d10+10',dmgType:'E',pen:10,clip:5,reload:'2 completos',special:'—',price:5000},
+  {g:'Proyectiles sólidos',name:'Pistola automática',cls:'Pistola',range:'30m',rof:'T/-/6',dmg:'1d10+2',dmgType:'I',pen:0,clip:18,reload:'Completa',special:'—',price:75},
+  {g:'Proyectiles sólidos',name:'Revólver',cls:'Pistola',range:'30m',rof:'T/-/-',dmg:'1d10+3',dmgType:'I',pen:0,clip:6,reload:'2 completos',special:'Fiable',price:40},
+  {g:'Proyectiles sólidos',name:'Pistola pesada',cls:'Pistola',range:'35m',rof:'T/-/-',dmg:'1d10+4',dmgType:'I',pen:2,clip:5,reload:'2 completos',special:'—',price:65},
+  {g:'Proyectiles sólidos',name:'Rifle automático',cls:'Básica',range:'90m',rof:'T/3/10',dmg:'1d10+3',dmgType:'I',pen:0,clip:30,reload:'Completa',special:'—',price:100},
+  {g:'Proyectiles sólidos',name:'Fusil de caza',cls:'Básica',range:'150m',rof:'T/-/-',dmg:'1d10+3',dmgType:'I',pen:0,clip:5,reload:'Completa',special:'Preciso',price:100},
+  {g:'Proyectiles sólidos',name:'Escopeta',cls:'Básica',range:'30m',rof:'T/-/-',dmg:'1d10+4',dmgType:'I',pen:0,clip:2,reload:'2 completos',special:'Dispersión, Fiable',price:60},
+  {g:'Proyectiles sólidos',name:'Escopeta de combate',cls:'Básica',range:'30m',rof:'T/3/-',dmg:'1d10+4',dmgType:'I',pen:0,clip:18,reload:'Completa',special:'Dispersión',price:150},
+  {g:'Proyectiles sólidos',name:'Ametralladora pesada',cls:'Pesada',range:'120m',rof:'-/-/10',dmg:'1d10+4',dmgType:'I',pen:3,clip:200,reload:'2 completos',special:'—',price:750},
+  {g:'Bólter',name:'Pistola bólter',cls:'Pistola',range:'30m',rof:'T/2/-',dmg:'1d10+5',dmgType:'X',pen:4,clip:8,reload:'Completa',special:'Desgarradora',price:250},
+  {g:'Bólter',name:'Bólter',cls:'Básica',range:'90m',rof:'T/2/4',dmg:'1d10+5',dmgType:'X',pen:4,clip:24,reload:'Completa',special:'Desgarrador',price:500},
+  {g:'Bólter',name:'Bólter pesado',cls:'Pesada',range:'120m',rof:'-/-/10',dmg:'2d10',dmgType:'X',pen:5,clip:60,reload:'2 completos',special:'Desgarrador',price:2000},
+  {g:'Fusión',name:'Pistola infierno',cls:'Pistola',range:'10m',rof:'T/-/-',dmg:'2d10+4',dmgType:'E',pen:12,clip:3,reload:'Completa',special:'—',price:7500},
+  {g:'Fusión',name:'Rifle de fusión',cls:'Básica',range:'20m',rof:'T/-/-',dmg:'2d10+4',dmgType:'E',pen:12,clip:5,reload:'2 completos',special:'—',price:4000},
+  {g:'Plasma',name:'Pistola de plasma',cls:'Pistola',range:'30m',rof:'T/-/-',dmg:'1d10+6',dmgType:'E',pen:6,clip:10,reload:'4 completos',special:'Sobrecalentamiento',price:4000},
+  {g:'Plasma',name:'Rifle de plasma',cls:'Básica',range:'90m',rof:'T/2/-',dmg:'1d10+6',dmgType:'E',pen:6,clip:20,reload:'8 completos',special:'Sobrecalentamiento',price:3000},
+  {g:'Lanzallamas',name:'Pistola lanzallamas',cls:'Pistola',range:'10m',rof:'T/-/-',dmg:'1d10+4',dmgType:'E',pen:2,clip:3,reload:'2 completos',special:'Lanzallamas',price:200},
+  {g:'Lanzallamas',name:'Lanzallamas',cls:'Básica',range:'20m',rof:'T/-/-',dmg:'1d10+4',dmgType:'E',pen:3,clip:3,reload:'2 completos',special:'Lanzallamas',price:300},
+  {g:'Lanzadores',name:'Lanzagranadas',cls:'Básica',range:'60m',rof:'T/-/-',dmg:'*',dmgType:'X',pen:0,clip:6,reload:'Completa',special:'* según munición',price:500},
+  {g:'Lanzadores',name:'Lanzacohetes',cls:'Pesada',range:'120m',rof:'T/-/-',dmg:'*',dmgType:'X',pen:0,clip:1,reload:'Completa',special:'* según munición',price:1200},
+  {g:'Exóticas',name:'Pistola de agujas',cls:'Pistola',range:'30m',rof:'T/-/-',dmg:'1d10',dmgType:'A',pen:0,clip:6,reload:'Completa',special:'Precisa, Tóxica',price:1250},
+  {g:'Exóticas',name:'Pistola lanzarredes',cls:'Pistola',range:'30m',rof:'T/-/-',dmg:'—',dmgType:'I',pen:0,clip:1,reload:'Completa',special:'Apresadora',price:1200},
+  {g:'Exóticas',name:'Rifle de agujas',cls:'Básica',range:'180m',rof:'T/-/-',dmg:'1d10',dmgType:'A',pen:0,clip:6,reload:'2 completos',special:'Preciso, Tóxico',price:1000},
+  {g:'Primitivas',name:'Pistola de chispa',cls:'Pistola',range:'15m',rof:'T/-/-',dmg:'1d10+2',dmgType:'I',pen:0,clip:1,reload:'3 completos',special:'Poco fiable',price:10},
+  {g:'Primitivas',name:'Mosquete',cls:'Básica',range:'30m',rof:'T/-/-',dmg:'1d10+2',dmgType:'I',pen:0,clip:1,reload:'5 completos',special:'Poco fiable',price:30},
+  {g:'Primitivas',name:'Arco',cls:'Básica',range:'30m',rof:'T/-/-',dmg:'1d10',dmgType:'A',pen:0,clip:1,reload:'Media',special:'Fiable, Primitivo',price:10},
+  {g:'CaC Primitivas',name:'Cuchillo',cls:'CaC',range:'3m',rof:'—',dmg:'1d5',dmgType:'I',pen:0,clip:0,reload:'—',special:'Primitiva',price:5},
+  {g:'CaC Primitivas',name:'Espada',cls:'CaC',range:'—',rof:'—',dmg:'1d10',dmgType:'A',pen:0,clip:0,reload:'—',special:'Equilibrada, Primitiva',price:15},
+  {g:'CaC Primitivas',name:'Hacha',cls:'CaC',range:'—',rof:'—',dmg:'1d10+1',dmgType:'A',pen:0,clip:0,reload:'—',special:'Desequilibrada, Primitiva',price:20},
+  {g:'CaC Primitivas',name:'Garrote',cls:'CaC',range:'—',rof:'—',dmg:'1d10',dmgType:'I',pen:0,clip:0,reload:'—',special:'Primitiva',price:5},
+  {g:'CaC Primitivas',name:'Lanza',cls:'CaC',range:'10m',rof:'—',dmg:'1d10',dmgType:'A',pen:0,clip:0,reload:'—',special:'Primitiva',price:15},
+  {g:'Sierra',name:'Espada sierra',cls:'CaC',range:'—',rof:'—',dmg:'1d10+2',dmgType:'A',pen:2,clip:0,reload:'—',special:'Desgarradora, Equilibrada',price:275},
+  {g:'Sierra',name:'Hacha sierra',cls:'CaC',range:'—',rof:'—',dmg:'1d10+4',dmgType:'A',pen:2,clip:0,reload:'—',special:'Desgarradora',price:450},
+  {g:'Energía',name:'Cuchillo de energía',cls:'CaC',range:'—',rof:'—',dmg:'1d10+3',dmgType:'E',pen:6,clip:0,reload:'—',special:'Campo de energía',price:1750},
+  {g:'Energía',name:'Espada de energía',cls:'CaC',range:'—',rof:'—',dmg:'1d10+5',dmgType:'E',pen:6,clip:0,reload:'—',special:'Campo de energía, Equilibrada',price:2500},
+  {g:'Conmoción',name:'Maza eléctrica',cls:'CaC',range:'—',rof:'—',dmg:'1d10',dmgType:'I',pen:0,clip:0,reload:'—',special:'Conmocionadora',price:150},
+];
+
+const BOOK_WEAPON_GROUPS=[...new Set(BOOK_WEAPONS.map(w=>w.g))];
+
+// ================================================================
+// STATE
+// ================================================================
+let state = {
+  layers: [],
+  sequito: {},
+  armory: [],       // weapons
+  implants: [],
+  mechadendrites: [],
+  equipment: [],
+  armor: [],
+};
+
+let dragType = null; // 'layer' | 'seq'
+let dragId = null;
+let dragSourceLayerId = null;
+let searchQuery = '';
+
+// ================================================================
+// PERSISTENCE
+// ================================================================
+function save(){ localStorage.setItem('dh_sequito_v1', JSON.stringify(state)); }
+function load(){
+  try {
+    const raw = localStorage.getItem('dh_sequito_v1');
+    if(raw){
+      state = JSON.parse(raw);
+      // Ensure new arrays exist (backward compat with old saves)
+      if(!state.implants) state.implants=[];
+      if(!state.mechadendrites) state.mechadendrites=[];
+      if(!state.equipment) state.equipment=[];
+      if(!state.armor) state.armor=[];
+      if(!state.armory) state.armory=[];
+      if(!state.layers) state.layers=[];
+      if(!state.sequito) state.sequito={};
+    }
+  } catch(e){ console.warn('Load error:', e); }
+}
+
+function exportAll(){
+  const b = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement('a'); a.href=u; a.download='sequito.json'; a.click();
+  URL.revokeObjectURL(u); showToast('Exportado');
+}
+function importAll(e){
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if(d.layers && d.sequito){
+        state = d;
+        if(!state.implants) state.implants=[];
+        if(!state.mechadendrites) state.mechadendrites=[];
+        if(!state.equipment) state.equipment=[];
+        if(!state.armor) state.armor=[];
+        save(); renderAll(); showToast('Importado');
+      }
+    } catch(e){ showToast('Error: archivo inválido'); }
+  };
+  r.readAsText(f); e.target.value='';
+}
+
+// ================================================================
+// IDS
+// ================================================================
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ================================================================
+// COMPUTED
+// ================================================================
+function getEquippedCount(itemId){
+  let count = 0;
+  Object.values(state.sequito).forEach(s => {
+    (s.equipment||[]).forEach(e => { if(e.itemId===itemId) count+=e.qty; });
+  });
+  return count;
+}
+
+function getSeqEquipNames(seq){
+  return (seq.equipment||[]).map(e => {
+    const item = state.armory.find(i=>i.id===e.itemId);
+    return item ? `${item.name} ×${e.qty}` : null;
+  }).filter(Boolean);
+}
+
+// ================================================================
+// STATS
+// ================================================================
+function renderStats(){
+  const all = Object.values(state.sequito);
+  const alive = all.filter(s=>s.alive!==false).length;
+  const dead = all.filter(s=>s.alive===false).length;
+  const el = document.getElementById('statsBar');
+  el.innerHTML = `
+    <div class="stat-item">SÉQUITO TOTAL <span class="stat-val total">${all.length}</span></div>
+    <div class="stat-item">ACTIVOS <span class="stat-val alive">${alive}</span></div>
+    <div class="stat-item">CAÍDOS <span class="stat-val dead">${dead}</span></div>
+    <div class="stat-item">CAPAS <span class="stat-val" style="color:var(--gold)">${state.layers.length}</span></div>
+  `;
+}
+
+// ================================================================
+// SEARCH
+// ================================================================
+function applySearch(){
+  searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+  renderBoard();
+}
+
+// ================================================================
+// BOARD RENDER
+// ================================================================
+function renderBoard(){
+  const board = document.getElementById('board');
+  // Remove existing layers but keep add button
+  board.querySelectorAll('.layer').forEach(el => el.remove());
+  const addBtn = board.querySelector('.add-layer-btn');
+
+  state.layers.forEach(layer => {
+    const el = buildLayerEl(layer);
+    board.insertBefore(el, addBtn);
+  });
+  renderStats();
+}
+
+function buildLayerEl(layer){
+  const div = document.createElement('div');
+  div.className = 'layer';
+  div.dataset.layerId = layer.id;
+
+  // Filter seqs
+  const seqIds = layer.seqIds || [];
+  const seqs = seqIds.map(id => state.sequito[id]).filter(Boolean);
+  const visible = searchQuery
+    ? seqs.filter(s => s.name.toLowerCase().includes(searchQuery) || (s.role||'').toLowerCase().includes(searchQuery))
+    : seqs;
+
+  div.innerHTML = `
+    <div class="layer-head" draggable="true">
+      <span class="layer-drag-handle">⠿</span>
+      <input class="layer-name-input" value="${esc(layer.name)}" placeholder="Nombre del grupo..." onclick="event.stopPropagation()" onchange="renameLayer('${layer.id}', this.value)">
+      <span class="layer-count">${seqs.length}</span>
+      <button class="layer-del btn-icon" onclick="deleteLayer('${layer.id}')" title="Eliminar capa">✕</button>
+    </div>
+    <div class="layer-body" data-layer-id="${layer.id}">
+      ${visible.length === 0 ? `<div class="empty-layer">${searchQuery ? 'SIN RESULTADOS' : 'SIN MIEMBROS'}</div>` :
+        visible.map(s => buildSeqCardHTML(s)).join('')}
+    </div>
+    <div class="layer-footer">
+      <button class="btn btn-red btn-sm" style="width:100%" onclick="openAddSeq('${layer.id}')">+ AÑADIR SÉQUITO</button>
+    </div>
+  `;
+
+  // Layer drag events
+  const head = div.querySelector('.layer-head');
+  head.addEventListener('dragstart', e => { dragType='layer'; dragId=layer.id; div.classList.add('dragging-layer'); e.dataTransfer.effectAllowed='move'; });
+  head.addEventListener('dragend', () => { div.classList.remove('dragging-layer'); cleanDragClasses(); });
+
+  div.addEventListener('dragover', e => { if(dragType==='layer'&&dragId!==layer.id){ e.preventDefault(); div.classList.add('drag-over'); } });
+  div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+  div.addEventListener('drop', e => {
+    e.preventDefault(); div.classList.remove('drag-over');
+    if(dragType==='layer' && dragId !== layer.id){ reorderLayer(dragId, layer.id); }
+  });
+
+  // Seq drag events on body
+  const body = div.querySelector('.layer-body');
+  body.addEventListener('dragover', e => { if(dragType==='seq'){ e.preventDefault(); } });
+  body.addEventListener('drop', e => {
+    e.preventDefault();
+    if(dragType==='seq'){ moveSeqToLayer(dragId, layer.id); }
+  });
+
+  // Seq card events
+  div.querySelectorAll('.seq-card').forEach(card => {
+    const seqId = card.dataset.seqId;
+    card.addEventListener('click', () => openSeqModal(seqId));
+    const handle = card.querySelector('.seq-drag-handle');
+    handle.addEventListener('mousedown', () => { card.setAttribute('draggable','true'); });
+    card.addEventListener('dragstart', e => {
+      dragType='seq'; dragId=seqId; dragSourceLayerId=layer.id;
+      card.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend', () => { card.classList.remove('dragging'); card.setAttribute('draggable','false'); cleanDragClasses(); });
+  });
+
+  return div;
+}
+
+function buildSeqCardHTML(s){
+  const equipNames = getSeqEquipNames(s);
+  const equipCount = (s.equipment||[]).reduce((a,e)=>a+e.qty,0);
+  return `<div class="seq-card ${s.alive===false?'dead':''}" data-seq-id="${s.id}">
+    <span class="seq-drag-handle" onclick="event.stopPropagation()">⠿</span>
+    <span class="seq-status ${s.alive===false?'dead':'alive'}"></span>
+    <div class="seq-info">
+      <div class="seq-name">${esc(s.name||'Sin nombre')}</div>
+      ${s.role?`<div class="seq-role">${esc(s.role)}</div>`:''}
+    </div>
+    ${equipCount>0?`<span class="seq-equip-count">⚔${equipCount}</span>`:''}
+  </div>`;
+}
+
+function cleanDragClasses(){
+  document.querySelectorAll('.drag-over,.drag-target').forEach(el => { el.classList.remove('drag-over','drag-target'); });
+}
+
+// ================================================================
+// LAYER ACTIONS
+// ================================================================
+function addLayer(){
+  const layer = { id: uid(), name: `Grupo ${state.layers.length+1}`, seqIds: [] };
+  state.layers.push(layer);
+  save(); renderBoard();
+}
+
+function deleteLayer(id){
+  const layer = state.layers.find(l=>l.id===id);
+  if(!layer) return;
+  if(layer.seqIds.length > 0){
+    showConfirmModal(`¿Eliminar el grupo "${layer.name}" y sus ${layer.seqIds.length} miembros?`, ()=>{
+      layer.seqIds.forEach(sid => delete state.sequito[sid]);
+      state.layers = state.layers.filter(l=>l.id!==id);
+      save(); renderBoard();
+    });
+  } else {
+    state.layers = state.layers.filter(l=>l.id!==id);
+    save(); renderBoard();
+  }
+}
+
+function renameLayer(id, name){
+  const layer = state.layers.find(l=>l.id===id);
+  if(layer){ layer.name=name; save(); renderStats(); }
+}
+
+function reorderLayer(fromId, toId){
+  const fromIdx = state.layers.findIndex(l=>l.id===fromId);
+  const toIdx = state.layers.findIndex(l=>l.id===toId);
+  if(fromIdx<0||toIdx<0) return;
+  const [moved] = state.layers.splice(fromIdx, 1);
+  state.layers.splice(toIdx, 0, moved);
+  save(); renderBoard();
+}
+
+// ================================================================
+// SEQ ACTIONS
+// ================================================================
+function moveSeqToLayer(seqId, targetLayerId){
+  if(dragSourceLayerId === targetLayerId) return;
+  // Remove from source
+  const src = state.layers.find(l=>l.id===dragSourceLayerId);
+  if(src) src.seqIds = src.seqIds.filter(id=>id!==seqId);
+  // Add to target
+  const tgt = state.layers.find(l=>l.id===targetLayerId);
+  if(tgt && !tgt.seqIds.includes(seqId)) tgt.seqIds.push(seqId);
+  if(state.sequito[seqId]) state.sequito[seqId].layerId = targetLayerId;
+  save(); renderBoard();
+}
+
+// ================================================================
+// ADD SEQ MODAL
+// ================================================================
+function openAddSeq(layerId){
+  showModal('// AÑADIR SÉQUITO', `
+    <div class="form-group"><label>Modo</label>
+      <select id="addMode" onchange="toggleAddMode()">
+        <option value="single">Individual</option>
+        <option value="bulk">En masa</option>
+      </select>
+    </div>
+    <div id="singleMode">
+      <div class="form-group"><label>Nombre</label><input type="text" id="seqName" placeholder="Nombre del séquito..."></div>
+      <div class="form-group"><label>Rol / Tipo</label><input type="text" id="seqRole" placeholder="Guardia, Espía, Técnico..."></div>
+    </div>
+    <div id="bulkMode" style="display:none">
+      <div class="form-group"><label>Nombre base</label><input type="text" id="bulkName" placeholder="Guardia"></div>
+      <div class="form-group"><label>Rol</label><input type="text" id="bulkRole" placeholder="Guardia personal"></div>
+      <div class="form-group"><label>Cantidad</label><input type="number" id="bulkQty" value="5" min="1" max="200"></div>
+      <div class="form-group"><label>Numeración desde</label><input type="number" id="bulkStart" value="1" min="1"></div>
+    </div>
+  `, () => {
+    const mode = document.getElementById('addMode').value;
+    const layer = state.layers.find(l=>l.id===layerId);
+    if(!layer) return;
+    if(mode==='single'){
+      const name = document.getElementById('seqName').value.trim() || 'Séquito';
+      const role = document.getElementById('seqRole').value.trim();
+      const s = { id:uid(), name, role, alive:true, layerId, equipment:[],
+        stats:{WS:15,BS:15,S:15,T:15,Ag:15,Int:15,Per:15,WP:15,Fel:15} };
+      state.sequito[s.id] = s;
+      layer.seqIds.push(s.id);
+    } else {
+      const base = document.getElementById('bulkName').value.trim() || 'Séquito';
+      const role = document.getElementById('bulkRole').value.trim();
+      const qty = Math.min(200, +document.getElementById('bulkQty').value||1);
+      const start = +document.getElementById('bulkStart').value||1;
+      for(let i=0;i<qty;i++){
+        const s = { id:uid(), name:`${base} ${start+i}`, role, alive:true, layerId, equipment:[],
+          stats:{WS:15,BS:15,S:15,T:15,Ag:15,Int:15,Per:15,WP:15,Fel:15} };
+        state.sequito[s.id] = s;
+        layer.seqIds.push(s.id);
+      }
+    }
+    save(); renderBoard(); closeModal();
+    showToast('Séquito añadido');
+  });
+  document.getElementById('seqName')?.focus();
+}
+
+function toggleAddMode(){
+  const mode = document.getElementById('addMode').value;
+  document.getElementById('singleMode').style.display = mode==='single'?'block':'none';
+  document.getElementById('bulkMode').style.display = mode==='bulk'?'block':'none';
+}
+
+// ================================================================
+// SEQ DETAIL MODAL
+// ================================================================
+function openSeqModal(seqId){
+  const s = state.sequito[seqId];
+  if(!s) return;
+
+  // ---- Build equipment sections for all categories ----
+  const INV_CATS = [
+    {key:'armory',   label:'ARMAS',         getCount: getEquippedCount,    getAvail:(id)=>{ const i=state.armory.find(x=>x.id===id); return i?i.stock-getEquippedCount(id):0; }, store: state.armory },
+    {key:'implants', label:'IMPLANTES',     getCount:(id)=>getEquippedCountCat(id,'implants'),   getAvail:(id)=>{ const i=(state.implants||[]).find(x=>x.id===id); return i?i.stock-getEquippedCountCat(id,'implants'):0; }, store: state.implants||[] },
+    {key:'mechadendrites',label:'MECADENDRITES',getCount:(id)=>getEquippedCountCat(id,'mechadendrites'),getAvail:(id)=>{ const i=(state.mechadendrites||[]).find(x=>x.id===id); return i?i.stock-getEquippedCountCat(id,'mechadendrites'):0; }, store: state.mechadendrites||[] },
+    {key:'equipment',label:'EQUIPO',        getCount:(id)=>getEquippedCountCat(id,'equipment'),  getAvail:(id)=>{ const i=(state.equipment||[]).find(x=>x.id===id); return i?i.stock-getEquippedCountCat(id,'equipment'):0; }, store: state.equipment||[] },
+    {key:'armor',    label:'ARMADURAS',     getCount:(id)=>getEquippedCountCat(id,'armor'),      getAvail:(id)=>{ const i=(state.armor||[]).find(x=>x.id===id); return i?i.stock-getEquippedCountCat(id,'armor'):0; }, store: state.armor||[] },
+  ];
+
+  function buildEquipSection(cat){
+    const def = INV_CATS.find(c=>c.key===cat);
+    if(!def || !def.store.length) return '';
+    // Items this seq has in this category
+    const eqKey = cat==='armory'?'equipment':`eq_${cat}`;
+    const assigned = s[eqKey]||[];
+    const assignedHtml = assigned.length===0
+      ? `<div style="font-size:10px;color:var(--border-bright);padding:4px 0">Sin asignar</div>`
+      : assigned.map(e=>{
+          const item=def.store.find(i=>i.id===e.itemId);
+          if(!item) return '';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:var(--bg);border:1px solid var(--border);margin-bottom:3px">
+            <span style="font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text-bright)">${esc(item.name)}</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold)">×${e.qty}</span>
+              <button class="btn-icon" onclick="${cat==='armory'?`unequipItem('${seqId}','${e.itemId}')`:`unequipInvItem('${cat}','${seqId}','${e.itemId}')`};openSeqModal('${seqId}')">✕</button>
+            </div>
+          </div>`;
+        }).join('');
+    // Available to assign
+    const availItems = def.store.filter(i=>def.getAvail(i.id)>0 || (assigned.some(e=>e.itemId===i.id)));
+    const opts = def.store.map(i=>{
+      const avail=def.getAvail(i.id);
+      return `<option value="${cat}::${i.id}" ${avail<=0?'disabled':''}>${esc(i.name)} (${avail})</option>`;
+    }).join('');
+    return `<div style="margin-bottom:14px">
+      <div style="font-size:8px;color:var(--text-dim);letter-spacing:2px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">${def.label}</div>
+      <div style="margin-bottom:6px">${assignedHtml}</div>
+      ${def.store.length?`<div style="display:flex;gap:6px;align-items:flex-end">
+        <select id="equip_sel_${cat}" style="flex:1;background:var(--bg);border:1px solid var(--border-bright);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:5px 8px;outline:none">
+          <option value="">— Añadir —</option>${opts}
+        </select>
+        <input type="number" id="equip_qty_${cat}" value="1" min="1" style="width:50px;background:var(--bg);border:1px solid var(--border-bright);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:5px;outline:none">
+        <button class="btn btn-gold btn-sm" onclick="assignEquipCat('${seqId}','${cat}')">DAR</button>
+      </div>`:''}
+    </div>`;
+  }
+
+  const allEquipSections = INV_CATS.map(c=>buildEquipSection(c.key)).filter(Boolean).join('') ||
+    '<div style="font-size:10px;color:var(--text-dim)">Añade objetos en las pestañas de inventario primero.</div>';
+
+  const equipHtml = ''; // replaced by allEquipSections below
+
+  const layer = state.layers.find(l=>l.seqIds.includes(seqId));
+  const layerOptions = state.layers.map(l => `<option value="${l.id}" ${l.id===layer?.id?'selected':''}>${esc(l.name)}</option>`).join('');
+
+  // Stats - default 15 if not set
+  const st = s.stats || {};
+  const STAT_DEFS = [
+    {key:'WS',es:'HA'},{key:'BS',es:'HP'},{key:'S',es:'F'},{key:'T',es:'R'},
+    {key:'Ag',es:'Ag'},{key:'Int',es:'Int'},{key:'Per',es:'Per'},{key:'WP',es:'Vol'},{key:'Fel',es:'Em'}
+  ];
+  const statsHtml = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+    ${STAT_DEFS.map(d=>`
+      <div style="background:var(--bg);border:1px solid var(--border);padding:6px 8px;text-align:center">
+        <div style="font-size:7px;color:var(--text-dim);letter-spacing:1px">${d.key}</div>
+        <div style="font-size:7px;color:var(--text-dim);margin-bottom:3px">${d.es}</div>
+        <input type="number" id="stat_${d.key}" value="${st[d.key]||15}" min="1" max="99"
+          style="background:none;border:none;border-bottom:1px solid var(--border-bright);color:var(--red-bright);font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;width:100%;text-align:center;outline:none;padding:0">
+      </div>`).join('')}
+  </div>`;
+
+  showModal(`// ${esc(s.name).toUpperCase()}`, `
+    <div class="form-row-2" style="margin-bottom:12px">
+      <div class="form-group"><label>Nombre</label><input type="text" id="editName" value="${esc(s.name)}"></div>
+      <div class="form-group"><label>Rol</label><input type="text" id="editRole" value="${esc(s.role||'')}"></div>
+    </div>
+    <div class="form-row-2" style="margin-bottom:16px">
+      <div class="form-group"><label>Estado</label>
+        <select id="editAlive">
+          <option value="true" ${s.alive!==false?'selected':''}>● Activo</option>
+          <option value="false" ${s.alive===false?'selected':''}>✕ Caído</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Grupo</label>
+        <select id="editLayer">${layerOptions}</select>
+      </div>
+    </div>
+    <div style="font-size:8px;color:var(--gold);letter-spacing:3px;margin-bottom:8px">// CARACTERÍSTICAS</div>
+    <div style="margin-bottom:16px">${statsHtml}</div>
+    <div style="font-size:8px;color:var(--gold);letter-spacing:3px;margin-bottom:10px">// EQUIPO</div>
+    ${allEquipSections}
+  `, () => {
+    s.name = document.getElementById('editName').value.trim() || s.name;
+    s.role = document.getElementById('editRole').value.trim();
+    s.alive = document.getElementById('editAlive').value === 'true';
+    // Save stats
+    const STAT_KEYS=['WS','BS','S','T','Ag','Int','Per','WP','Fel'];
+    s.stats = s.stats||{};
+    STAT_KEYS.forEach(k=>{ s.stats[k]=+document.getElementById('stat_'+k).value||15; });
+    // Group change
+    const newLayerId = document.getElementById('editLayer').value;
+    if(newLayerId !== layer?.id){
+      if(layer) layer.seqIds = layer.seqIds.filter(id=>id!==seqId);
+      const newLayer = state.layers.find(l=>l.id===newLayerId);
+      if(newLayer && !newLayer.seqIds.includes(seqId)) newLayer.seqIds.push(seqId);
+      s.layerId = newLayerId;
+    }
+    save(); renderBoard(); renderArmory();
+  }, true);
+}
+
+function assignEquipCat(seqId, cat){
+  const s = state.sequito[seqId];
+  const sel = document.getElementById(`equip_sel_${cat}`);
+  const qtyEl = document.getElementById(`equip_qty_${cat}`);
+  if(!sel||!s) return;
+  const val = sel.value; // "cat::itemId"
+  if(!val) return;
+  const itemId = val.split('::')[1];
+  const qty = +qtyEl?.value || 1;
+  const store = cat==='armory' ? state.armory : (state[cat]||[]);
+  const item = store.find(i=>i.id===itemId);
+  if(!item) return;
+  const getAvail = cat==='armory'
+    ? ()=>item.stock-getEquippedCount(itemId)
+    : ()=>item.stock-getEquippedCountCat(itemId,cat);
+  if(qty > getAvail()){ showToast(`Solo ${getAvail()} disponibles`); return; }
+  const eqKey = cat==='armory' ? 'equipment' : `eq_${cat}`;
+  s[eqKey] = s[eqKey]||[];
+  const existing = s[eqKey].find(e=>e.itemId===itemId);
+  if(existing){ existing.qty += qty; } else { s[eqKey].push({itemId, qty}); }
+  save();
+  openSeqModal(seqId);
+}
+
+function assignEquip(seqId){ assignEquipCat(seqId,'armory'); }
+
+function unequipItem(seqId, itemId){
+  const s = state.sequito[seqId];
+  if(!s) return;
+  s.equipment = (s.equipment||[]).filter(e=>e.itemId!==itemId);
+  save();
+  openSeqModal(seqId);
+  renderArmory();
+}
+
+// ================================================================
+// ARMORY
+// ================================================================
+function renderArmory(){
+  const tbody = document.getElementById('armoryBody');
+  if(!tbody) return;
+  if(!state.armory.length){
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-dim);font-size:10px;letter-spacing:1px">SIN OBJETOS — AÑADE EL PRIMERO</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = state.armory.map(item => {
+    const equipped = getEquippedCount(item.id);
+    const avail = item.stock - equipped;
+    const availClass = avail<=0?'avail-zero':avail<=2?'avail-low':'avail-ok';
+    return `<tr>
+      <td>
+        <div class="item-name" onclick="showItemDetail('${item.id}')">${esc(item.name)}</div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="stock-cell">${item.stock}</span>
+          <div style="display:flex;gap:2px">
+            <button class="btn-icon" onclick="changeStock('${item.id}',-1)" title="−1">−</button>
+            <button class="btn-icon" onclick="changeStock('${item.id}',1)" title="+1" style="color:var(--green)">+</button>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="equipped-cell">${equipped}</span>
+          ${equipped>0?`<button class="btn btn-dark btn-sm" onclick="unequipAll('${item.id}')">RETIRAR TODO</button>`:''}
+        </div>
+      </td>
+      <td><span class="avail-cell ${availClass}">${avail}</span></td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn-icon" onclick="editItem('${item.id}')" title="Editar">✎</button>
+          <button class="btn-icon" onclick="deleteItem('${item.id}')" title="Eliminar">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function showItemDetail(itemId){
+  const item = state.armory.find(i=>i.id===itemId);
+  if(!item) return;
+  const equipped = getEquippedCount(itemId);
+  const avail = item.stock - equipped;
+  // Find who has it equipped
+  const carriers = Object.values(state.sequito)
+    .filter(s=>(s.equipment||[]).some(e=>e.itemId===itemId))
+    .map(s=>{
+      const e = s.equipment.find(e=>e.itemId===itemId);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-bottom:1px solid var(--border)">
+        <span style="font-family:'Rajdhani',sans-serif;font-size:13px">${esc(s.name)}</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold)">×${e.qty}</span>
+          <button class="btn-icon" onclick="unequipItem('${s.id}','${itemId}');showItemDetail('${itemId}')" title="Retirar">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+
+  showModal(`// ${esc(item.name).toUpperCase()}`, `
+    ${item.notes?`<div style="background:var(--bg);border:1px solid var(--border);padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--text);line-height:1.8">${esc(item.notes)}</div>`:''}
+    <div style="display:flex;gap:20px;margin-bottom:14px">
+      <div style="text-align:center"><div style="font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px">STOCK</div><div style="font-family:'Orbitron',sans-serif;font-size:20px;color:var(--gold-bright)">${item.stock}</div></div>
+      <div style="text-align:center"><div style="font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px">EQUIPADOS</div><div style="font-family:'Orbitron',sans-serif;font-size:20px;color:var(--blue)">${equipped}</div></div>
+      <div style="text-align:center"><div style="font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px">DISPONIBLES</div><div style="font-family:'Orbitron',sans-serif;font-size:20px;color:${avail<=0?'var(--red-bright)':avail<=2?'var(--gold)':'var(--green)'}">${avail}</div></div>
+    </div>
+    ${carriers?`<div style="font-size:8px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px">PORTADORES</div><div style="background:var(--bg);border:1px solid var(--border)">${carriers}</div>`:'<div style="font-size:10px;color:var(--text-dim)">Ningún séquito lleva este objeto.</div>'}
+  `, ()=>{ editItem(itemId); }, false, true);
+}
+
+function changeStock(itemId, delta){
+  const item = state.armory.find(i=>i.id===itemId);
+  if(!item) return;
+  item.stock = Math.max(getEquippedCount(itemId), item.stock + delta);
+  save(); renderArmory();
+}
+
+function unequipAll(itemId){
+  Object.values(state.sequito).forEach(s => {
+    s.equipment = (s.equipment||[]).filter(e=>e.itemId!==itemId);
+  });
+  save(); renderArmory(); renderBoard();
+  showToast('Objeto retirado a todos');
+}
+
+function deleteItem(itemId){
+  // Unequip first
+  Object.values(state.sequito).forEach(s => {
+    s.equipment = (s.equipment||[]).filter(e=>e.itemId!==itemId);
+  });
+  state.armory = state.armory.filter(i=>i.id!==itemId);
+  save(); renderArmory(); renderBoard();
+  showToast('Objeto eliminado');
+}
+
+function openAddFromBook(){
+  const groupOpts = BOOK_WEAPON_GROUPS.map(g=>`<option value="${g}">${g}</option>`).join('');
+  showModal('// AÑADIR DEL LIBRO', `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:0 0 130px">
+        <label style="font-size:8px;color:var(--text-dim);letter-spacing:1px">GRUPO</label>
+        <select id="bookGroup" onchange="filterBookWeapons()" style="background:var(--bg2);border:1px solid var(--border-bright);color:var(--text);font-family:Share Tech Mono,monospace;font-size:11px;padding:5px 7px;outline:none">
+          <option value="">Todos</option>${groupOpts}
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px">
+        <label style="font-size:8px;color:var(--text-dim);letter-spacing:1px">ARMA / OBJETO</label>
+        <select id="bookWeaponSel" onchange="previewBookWeapon()" style="background:var(--bg2);border:1px solid var(--border-bright);color:var(--text);font-family:Share Tech Mono,monospace;font-size:11px;padding:5px 7px;outline:none">
+          <option value="">— Selecciona —</option>
+        </select>
+      </div>
+    </div>
+    <div id="bookPreview" style="background:var(--bg);border:1px solid var(--border);padding:10px 12px;font-size:11px;color:var(--text-dim);min-height:40px;line-height:1.8;margin-bottom:12px">Selecciona un arma para ver sus stats.</div>
+    <div class="form-group"><label>Unidades en stock</label><input type="number" id="bookStock" value="1" min="1"></div>
+  `, () => {
+    const name = document.getElementById('bookWeaponSel').value;
+    const w = BOOK_WEAPONS.find(x=>x.name===name);
+    if(!w){ showToast('Selecciona un arma'); return false; }
+    const stock = +document.getElementById('bookStock').value || 1;
+    // Check if already exists
+    const existing = state.armory.find(i=>i.name===w.name);
+    if(existing){ existing.stock += stock; save(); renderArmory(); closeModal(); showToast(`+${stock} a ${w.name}`); return; }
+    state.armory.push({ id:uid(), name:w.name, type:`${w.g} — ${w.cls}`, stock, notes:`Daño: ${w.dmg}${w.dmgType} | Alc: ${w.range} | CDD: ${w.rof} | Pen: ${w.pen} | Car: ${w.clip} | ${w.special}` });
+    save(); renderArmory(); closeModal(); showToast(`${w.name} añadido`);
+  });
+  filterBookWeapons();
+}
+
+function openAddItemManual(){
+  showModal('// AÑADIR OBJETO MANUAL', `
+    <div class="form-group"><label>Nombre</label><input type="text" id="itemName" placeholder="Nombre del objeto..."></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Tipo / Categoría</label><input type="text" id="itemType" placeholder="Arma, Armadura, Equipo..."></div>
+      <div class="form-group"><label>Unidades</label><input type="number" id="itemStock" value="1" min="0"></div>
+    </div>
+    <div class="form-group"><label>Notas / Stats</label><input type="text" id="itemNotes" placeholder="Descripción, daño, efectos..."></div>
+  `, () => {
+    const name = document.getElementById('itemName').value.trim();
+    if(!name){ showToast('Introduce un nombre'); return false; }
+    state.armory.push({ id:uid(), name, type:document.getElementById('itemType').value.trim(), stock:+document.getElementById('itemStock').value||1, notes:document.getElementById('itemNotes').value.trim() });
+    save(); renderArmory(); closeModal();
+  });
+  setTimeout(()=>document.getElementById('itemName')?.focus(), 50);
+}
+
+function openAddItem(existingId){
+  // Edit existing item
+  const item = state.armory.find(i=>i.id===existingId);
+  if(!item) return;
+  showModal('// EDITAR OBJETO', `
+    <div class="form-group"><label>Nombre</label><input type="text" id="itemName" value="${esc(item.name)}"></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Tipo</label><input type="text" id="itemType" value="${esc(item.type||'')}"></div>
+      <div class="form-group"><label>Unidades</label><input type="number" id="itemStock" value="${item.stock}" min="0"></div>
+    </div>
+    <div class="form-group"><label>Notas / Stats</label><input type="text" id="itemNotes" value="${esc(item.notes||'')}"></div>
+  `, () => {
+    item.name = document.getElementById('itemName').value.trim() || item.name;
+    item.type = document.getElementById('itemType').value.trim();
+    item.stock = Math.max(getEquippedCount(item.id), +document.getElementById('itemStock').value||0);
+    item.notes = document.getElementById('itemNotes').value.trim();
+    save(); renderArmory(); closeModal();
+  });
+  setTimeout(()=>document.getElementById('itemName')?.focus(), 50);
+}
+
+function editItem(id){ openAddItem(id); }
+
+function filterBookWeapons(){
+  const group = document.getElementById('bookGroup')?.value;
+  const sel = document.getElementById('bookWeaponSel');
+  if(!sel) return;
+  const list = group ? BOOK_WEAPONS.filter(w=>w.g===group) : BOOK_WEAPONS;
+  sel.innerHTML = '<option value="">— Selecciona —</option>' +
+    list.map(w=>`<option value="${esc(w.name)}">${esc(w.name)} (${w.cls})</option>`).join('');
+  document.getElementById('bookPreview').textContent='Selecciona un arma para ver sus stats.';
+}
+
+function previewBookWeapon(){
+  const name = document.getElementById('bookWeaponSel')?.value;
+  const w = BOOK_WEAPONS.find(x=>x.name===name);
+  const el = document.getElementById('bookPreview');
+  if(!w||!el){if(el)el.textContent='Selecciona un arma para ver sus stats.';return;}
+  el.innerHTML = `
+    <div style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--text-bright);margin-bottom:6px">${esc(w.name)}</div>
+    <span style="color:var(--gold)">${w.g} — ${w.cls}</span><br>
+    Daño: <b style="color:var(--red-bright)">${w.dmg} ${w.dmgType}</b> &nbsp;·&nbsp; Alc: <b>${w.range}</b> &nbsp;·&nbsp; CDD: <b>${w.rof}</b> &nbsp;·&nbsp; Pen: <b>${w.pen}</b> &nbsp;·&nbsp; Car: <b>${w.clip}</b>
+    ${w.special&&w.special!=='—'?`<br><span style="color:var(--green)">⚡ ${esc(w.special)}</span>`:''}
+    <span style="color:var(--text-dim);font-size:10px"> &nbsp;·&nbsp; ${w.price} tronos</span>`;
+}
+
+// ================================================================
+// MODAL ENGINE
+// ================================================================
+let modalConfirmCb = null;
+
+function showModal(title, bodyHtml, onConfirm, noConfirmBtn, isDetail){
+  closeModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'modalOverlay';
+  const confirmLabel = isDetail ? 'EDITAR' : noConfirmBtn ? 'GUARDAR' : 'CONFIRMAR';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-head">
+        <h3>${title}</h3>
+        <button class="btn-icon" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+      <div class="modal-footer">
+        <button class="btn btn-dark btn-sm" onclick="closeModal()">CERRAR</button>
+        ${onConfirm?`<button class="btn btn-red btn-sm" onclick="modalConfirm()">${confirmLabel}</button>`:''}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) closeModal(); });
+  modalConfirmCb = onConfirm;
+}
+
+function modalConfirm(){ if(modalConfirmCb){ const r=modalConfirmCb(); if(r!==false) closeModal(); } }
+function closeModal(){ document.getElementById('modalOverlay')?.remove(); modalConfirmCb=null; }
+
+function showConfirmModal(msg, onConfirm){
+  showModal('// CONFIRMAR', `<div style="font-size:12px;line-height:1.8;color:var(--text)">${esc(msg)}</div>`, onConfirm);
+}
+
+// ================================================================
+// GENERIC INVENTORY (implants, mechadendrites, equipment, armor)
+// ================================================================
+function renderInventory(cat){
+  const tbody = document.getElementById(`${cat}-body`);
+  if(!tbody) return;
+  const items = state[cat]||[];
+  if(!items.length){
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-dim);font-size:10px;letter-spacing:1px">SIN OBJETOS — AÑADE EL PRIMERO</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items.map(item => {
+    const equipped = getEquippedCountCat(item.id, cat);
+    const avail = item.stock - equipped;
+    const availClass = avail<=0?'avail-zero':avail<=2?'avail-low':'avail-ok';
+    return `<tr>
+      <td>
+        <div class="item-name" onclick="showInventoryDetail('${cat}','${item.id}')">${esc(item.name)}</div>
+        ${item.cat?`<div style="font-size:9px;color:var(--text-dim)">${esc(item.cat)}</div>`:''}
+      </td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <span class="stock-cell">${item.stock}</span>
+        <button class="btn-icon" onclick="changeInvStock('${cat}','${item.id}',-1)">−</button>
+        <button class="btn-icon" onclick="changeInvStock('${cat}','${item.id}',1)" style="color:var(--green)">+</button>
+      </div></td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <span class="equipped-cell">${equipped}</span>
+        ${equipped>0?`<button class="btn btn-dark btn-sm" onclick="unequipAllCat('${cat}','${item.id}')">RETIRAR TODO</button>`:''}
+      </div></td>
+      <td><span class="avail-cell ${availClass}">${avail}</span></td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="editInventoryItem('${cat}','${item.id}')">✎</button>
+        <button class="btn-icon" onclick="deleteInventoryItem('${cat}','${item.id}')">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function getEquippedCountCat(itemId, cat){
+  let count=0;
+  Object.values(state.sequito).forEach(s=>{
+    ((s[`eq_${cat}`]||[])).forEach(e=>{ if(e.itemId===itemId) count+=e.qty; });
+  });
+  return count;
+}
+
+function unequipAllCat(cat, itemId){
+  Object.values(state.sequito).forEach(s=>{ s[`eq_${cat}`]=(s[`eq_${cat}`]||[]).filter(e=>e.itemId!==itemId); });
+  save(); renderInventory(cat); showToast('Objeto retirado a todos');
+}
+
+function changeInvStock(cat, itemId, delta){
+  const item=(state[cat]||[]).find(i=>i.id===itemId);
+  if(!item) return;
+  item.stock=Math.max(getEquippedCountCat(itemId,cat), item.stock+delta);
+  save(); renderInventory(cat);
+}
+
+function deleteInventoryItem(cat, itemId){
+  Object.values(state.sequito).forEach(s=>{ s[`eq_${cat}`]=(s[`eq_${cat}`]||[]).filter(e=>e.itemId!==itemId); });
+  state[cat]=(state[cat]||[]).filter(i=>i.id!==itemId);
+  save(); renderInventory(cat); showToast('Eliminado');
+}
+
+function editInventoryItem(cat, itemId){
+  const item=(state[cat]||[]).find(i=>i.id===itemId);
+  if(!item) return;
+  showModal('// EDITAR',`
+    <div class="form-group"><label>Nombre</label><input type="text" id="invName" value="${esc(item.name)}"></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Categoría</label><input type="text" id="invCat" value="${esc(item.cat||'')}"></div>
+      <div class="form-group"><label>Unidades</label><input type="number" id="invStock" value="${item.stock}" min="0"></div>
+    </div>
+    <div class="form-group"><label>Notas / Stats</label><input type="text" id="invNotes" value="${esc(item.notes||'')}"></div>
+  `,()=>{
+    item.name=document.getElementById('invName').value.trim()||item.name;
+    item.cat=document.getElementById('invCat').value.trim();
+    item.stock=Math.max(getEquippedCountCat(item.id,cat),+document.getElementById('invStock').value||0);
+    item.notes=document.getElementById('invNotes').value.trim();
+    save(); renderInventory(cat); closeModal();
+  });
+}
+
+function showInventoryDetail(cat, itemId){
+  const item=(state[cat]||[]).find(i=>i.id===itemId);
+  if(!item) return;
+  const equipped=getEquippedCountCat(itemId,cat);
+  const avail=item.stock-equipped;
+  const carriers=Object.values(state.sequito).filter(s=>(s[`eq_${cat}`]||[]).some(e=>e.itemId===itemId))
+    .map(s=>{
+      const e=(s[`eq_${cat}`]||[]).find(e=>e.itemId===itemId);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-bottom:1px solid var(--border)">
+        <span style="font-family:'Rajdhani',sans-serif;font-size:13px">${esc(s.name)}</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold)">×${e.qty}</span>
+          <button class="btn-icon" onclick="unequipInvItem('${cat}','${s.id}','${itemId}');showInventoryDetail('${cat}','${itemId}')">✕</button>
+        </div></div>`;
+    }).join('');
+  showModal(`// ${esc(item.name).toUpperCase()}`,`
+    ${item.notes?`<div style="background:var(--bg);border:1px solid var(--border);padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--text);line-height:1.8">${esc(item.notes)}</div>`:''}
+    <div style="display:flex;gap:20px;margin-bottom:14px">
+      <div style="text-align:center"><div style="font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px">STOCK</div><div style="font-family:'Orbitron',sans-serif;font-size:20px;color:var(--gold-bright)">${item.stock}</div></div>
+      <div style="text-align:center"><div style="font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px">EQUIPADOS</div><div style="font-family:'Orbitron',sans-serif;font-size:20px;color:var(--blue)">${equipped}</div></div>
+      <div style="text-align:center"><div style="font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px">DISPONIBLES</div><div style="font-family:'Orbitron',sans-serif;font-size:20px;color:${avail<=0?'var(--red-bright)':avail<=2?'var(--gold)':'var(--green)'}">${avail}</div></div>
+    </div>
+    ${carriers?`<div style="font-size:8px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px">PORTADORES</div><div style="background:var(--bg);border:1px solid var(--border)">${carriers}</div>`:'<div style="font-size:10px;color:var(--text-dim)">Ningún séquito lleva este objeto.</div>'}
+  `,()=>editInventoryItem(cat,itemId),false,true);
+}
+
+function unequipInvItem(cat,seqId,itemId){
+  const s=state.sequito[seqId]; if(!s) return;
+  s[`eq_${cat}`]=(s[`eq_${cat}`]||[]).filter(e=>e.itemId!==itemId);
+  save(); renderInventory(cat);
+}
+
+function openCatalogModal(cat){
+  const catalog=BOOK_CATALOGS[cat]||[];
+  const cats=[...new Set(catalog.map(i=>i.cat))];
+  const catOpts=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  showModal(`// AÑADIR DEL LIBRO — ${CATALOG_LABELS[cat]||''}`,`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:0 0 140px">
+        <label style="font-size:8px;color:var(--text-dim);letter-spacing:1px">CATEGORÍA</label>
+        <select id="catFilter" onchange="filterCatalogItems('${cat}')" style="background:var(--bg2);border:1px solid var(--border-bright);color:var(--text);font-family:Share Tech Mono,monospace;font-size:11px;padding:5px 7px;outline:none">
+          <option value="">Todas</option>${catOpts}
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px">
+        <label style="font-size:8px;color:var(--text-dim);letter-spacing:1px">OBJETO</label>
+        <select id="catItemSel" onchange="previewCatalogItem('${cat}')" style="background:var(--bg2);border:1px solid var(--border-bright);color:var(--text);font-family:Share Tech Mono,monospace;font-size:11px;padding:5px 7px;outline:none">
+          <option value="">— Selecciona —</option>
+        </select>
+      </div>
+    </div>
+    <div id="catPreview" style="background:var(--bg);border:1px solid var(--border);padding:10px 12px;font-size:11px;color:var(--text-dim);min-height:40px;line-height:1.8;margin-bottom:12px">Selecciona un objeto para ver sus características.</div>
+    <div class="form-group"><label>Unidades en stock</label><input type="number" id="catStock" value="1" min="1"></div>
+  `,()=>{
+    const name=document.getElementById('catItemSel').value;
+    const entry=catalog.find(i=>i.name===name);
+    if(!entry){showToast('Selecciona un objeto');return false;}
+    const stock=+document.getElementById('catStock').value||1;
+    const existing=(state[cat]||[]).find(i=>i.name===entry.name);
+    if(existing){existing.stock+=stock;save();renderInventory(cat);closeModal();showToast(`+${stock} a ${entry.name}`);return;}
+    (state[cat]=state[cat]||[]).push({id:uid(),name:entry.name,cat:entry.cat,stock,notes:entry.notes});
+    save();renderInventory(cat);closeModal();showToast(`${entry.name} añadido`);
+  });
+  filterCatalogItems(cat);
+}
+
+function filterCatalogItems(cat){
+  const catalog=BOOK_CATALOGS[cat]||[];
+  const group=document.getElementById('catFilter')?.value;
+  const sel=document.getElementById('catItemSel');
+  if(!sel) return;
+  const list=group?catalog.filter(i=>i.cat===group):catalog;
+  sel.innerHTML='<option value="">— Selecciona —</option>'+list.map(i=>`<option value="${esc(i.name)}">${esc(i.name)}</option>`).join('');
+  const prev=document.getElementById('catPreview');
+  if(prev) prev.textContent='Selecciona un objeto para ver sus características.';
+}
+
+function previewCatalogItem(cat){
+  const catalog=BOOK_CATALOGS[cat]||[];
+  const name=document.getElementById('catItemSel')?.value;
+  const entry=catalog.find(i=>i.name===name);
+  const el=document.getElementById('catPreview');
+  if(!entry||!el){if(el)el.textContent='Selecciona un objeto para ver sus características.';return;}
+  el.innerHTML=`<div style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--text-bright);margin-bottom:4px">${esc(entry.name)}</div>
+    <span style="color:var(--gold);font-size:9px">${esc(entry.cat)}</span><br>
+    <span style="color:var(--text)">${esc(entry.notes)}</span>`;
+}
+
+function openManualModal(cat){
+  showModal(`// AÑADIR MANUAL — ${CATALOG_LABELS[cat]||''}`,`
+    <div class="form-group"><label>Nombre</label><input type="text" id="invName" placeholder="Nombre..."></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Categoría</label><input type="text" id="invCat" placeholder="Tipo/categoría..."></div>
+      <div class="form-group"><label>Unidades</label><input type="number" id="invStock" value="1" min="0"></div>
+    </div>
+    <div class="form-group"><label>Notas / Stats</label><input type="text" id="invNotes" placeholder="Efectos, stats..."></div>
+  `,()=>{
+    const name=document.getElementById('invName').value.trim();
+    if(!name){showToast('Introduce un nombre');return false;}
+    (state[cat]=state[cat]||[]).push({id:uid(),name,cat:document.getElementById('invCat').value.trim(),stock:+document.getElementById('invStock').value||1,notes:document.getElementById('invNotes').value.trim()});
+    save();renderInventory(cat);closeModal();
+  });
+  setTimeout(()=>document.getElementById('invName')?.focus(),50);
+}
+
+// ================================================================
+// VIEWS
+// ================================================================
+const ALL_VIEWS=['sequito','armory','implants','mechadendrites','equipment','armor'];
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const viewEl=document.getElementById('view-'+name);
+  if(viewEl) viewEl.classList.add('active');
+  const tabEl=document.querySelector(`.nav-tab[data-view="${name}"]`);
+  if(tabEl) tabEl.classList.add('active');
+  if(name==='armory') renderArmory();
+  else if(['implants','mechadendrites','equipment','armor'].includes(name)) renderInventory(name);
+}
+
+// ================================================================
+// UTILS
+// ================================================================
+function esc(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg, dur=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
+
+// ================================================================
+// RENDER ALL
+// ================================================================
+function renderAll(){
+  try{ renderBoard(); }catch(e){ console.warn('renderBoard error:',e); }
+  try{ renderArmory(); }catch(e){ console.warn('renderArmory error:',e); }
+  ['implants','mechadendrites','equipment','armor'].forEach(cat=>{
+    try{ renderInventory(cat); }catch(e){ console.warn('renderInventory error:',cat,e); }
+  });
+}
+
+// ================================================================
+// INIT
+// ================================================================
+load();
+renderAll();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("/sw.js");
+}
+</script>
+</body>
+</html>

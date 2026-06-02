@@ -227,5 +227,6 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
     quickNotes: asString(r['quickNotes']),
     influenceGeneral: asString(r['influenceGeneral']),
     influencePlanetary: asString(r['influencePlanetary']),
+    inqTalents: [],
   }
 }

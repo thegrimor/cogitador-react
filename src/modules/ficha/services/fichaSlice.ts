@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import type {
   FichaState, Character, FallenCharacter, AttributeValues, XpLogEntry,
   Skill, Talent, Weapon, Armor, GearItem,
-  Mechadendrite, Augmentation, PsychicPower, CustomCurrency,
+  Mechadendrite, Augmentation, PsychicPower, CustomCurrency, InquisidorTalent,
 } from '../types/fichaTypes'
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
 
@@ -45,6 +45,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
     quickNotes: '',
     influenceGeneral: '',
     influencePlanetary: '',
+    inqTalents: [],
   }
 }
 
@@ -251,6 +252,16 @@ export const fichaSlice = createSlice({
       if (char) char[action.payload.field] = action.payload.value
     },
 
+    // — Inquisidor —
+    addInqTalent(state, action: PayloadAction<{ charId: string; talent: Omit<InquisidorTalent, 'id'> }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (char) char.inqTalents.push({ id: uid(), ...action.payload.talent })
+    },
+    removeInqTalent(state, action: PayloadAction<{ charId: string; talentId: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (char) char.inqTalents = char.inqTalents.filter(t => t.id !== action.payload.talentId)
+    },
+
     deleteCharacter(state, action: PayloadAction<string>) {
       state.characters = state.characters.filter(c => c.id !== action.payload)
       if (state.activeCharacterId === action.payload) {
@@ -295,6 +306,7 @@ export const {
   addPower, removePower, updatePsychic,
   updateMoney, addCurrency, updateCurrency, removeCurrency,
   updateNotes,
+  addInqTalent, removeInqTalent,
   deleteCharacter, toggleFilterCareer, killCharacter,
 } = fichaSlice.actions
 
