@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppDispatch } from '@/core/store/hooks'
 import { addSequito, addSequitoBulk } from '../services/sequitoSlice'
 import { showToast } from '@/shared/components/Toast'
+import { Modal } from '@/shared/components/Modal'
 
 interface Props {
   layerId: string
@@ -39,6 +40,7 @@ export function AddSeqModal({ layerId, onClose }: Props) {
   }
 
   return (
+    <Modal>
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-4"
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
@@ -178,5 +180,6 @@ export function AddSeqModal({ layerId, onClose }: Props) {
         </div>
       </div>
     </div>
+    </Modal>
   )
 }

@@ -10,6 +10,7 @@ import {
 import { showToast } from '@/shared/components/Toast'
 import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { useConfirm } from '@/shared/hooks/useConfirm'
+import { Modal } from '@/shared/components/Modal'
 import type { InvCategory, InventoryItem, EquippedItem } from '../types/sequitoTypes'
 
 interface Props {
@@ -128,6 +129,7 @@ export function SeqEditModal({ seqId, onClose }: Props) {
 
   return (
     <>
+      <Modal>
       <div
         className="fixed inset-0 z-40 flex items-end sm:items-center justify-center px-0 sm:px-4"
         style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
@@ -343,6 +345,7 @@ export function SeqEditModal({ seqId, onClose }: Props) {
           </div>
         </div>
       </div>
+      </Modal>
 
       <ConfirmModal
         isOpen={confirm.isOpen}

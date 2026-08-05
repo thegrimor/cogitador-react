@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Modal } from '@/shared/components/Modal'
 
 export interface CatalogEntry {
   name: string
@@ -25,6 +26,7 @@ export function BookCatalogModal({ title, entries, onPick, onClose }: Props) {
     : entries
 
   return (
+    <Modal>
     <div className="fixed inset-0 z-50 flex items-end bg-black/85" onClick={onClose}>
       <div
         className="w-full max-h-[80vh] flex flex-col border-t-2 border-gold bg-surface-2"
@@ -77,5 +79,6 @@ export function BookCatalogModal({ title, entries, onPick, onClose }: Props) {
         </div>
       </div>
     </div>
+    </Modal>
   )
 }
