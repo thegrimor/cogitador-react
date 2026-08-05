@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 import {
   addInventoryItem,
+  updateInventoryItem,
   deleteInventoryItem,
   changeInventoryStock,
   unequipAll,
@@ -9,7 +10,15 @@ import {
 import { showToast } from '@/shared/components/Toast'
 import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { useConfirm } from '@/shared/hooks/useConfirm'
-import type { EquippedItem } from '../../types/sequitoTypes'
+import { getEquippedCount as getEquippedCountShared } from '../../services/equipped'
+import { BookCatalogModal, type CatalogEntry } from '../BookCatalogModal'
+import { WEAPONS } from '@/core/data/darkheresy'
+
+const WEAPON_ENTRIES: CatalogEntry[] = WEAPONS.map(w => ({
+  name: w.name,
+  type: w.group,
+  notes: `${w.cls} · ${w.dmg} ${w.dmgType} · Alcance ${w.range} · RoF ${w.rof} · Pen ${w.pen}${w.notes ? ' · ' + w.notes : ''}`,
+}))
 
 export function ArmoryTab() {
   const dispatch = useAppDispatch()
@@ -22,11 +31,19 @@ export function ArmoryTab() {
   const [formStock, setFormStock] = useState(1)
   const [formNotes, setFormNotes] = useState('')
   const [detailItemId, setDetailItemId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showBook, setShowBook] = useState(false)
 
   function getEquippedCount(itemId: string): number {
-    return Object.values(allSequito).reduce((sum, m) => {
-      return sum + (m.equipment as EquippedItem[]).filter(e => e.itemId === itemId).reduce((s, e) => s + e.qty, 0)
-    }, 0)
+    return getEquippedCountShared(allSequito, 'armory', itemId)
+  }
+
+  function resetForm() {
+    setFormName('')
+    setFormType('')
+    setFormStock(1)
+    setFormNotes('')
+    setEditingId(null)
   }
 
   function handleAdd() {
@@ -34,15 +51,36 @@ export function ArmoryTab() {
       showToast('Introduce un nombre')
       return
     }
-    dispatch(addInventoryItem({
-      cat: 'armory',
-      item: { name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
-    }))
-    setFormName('')
-    setFormType('')
-    setFormStock(1)
-    setFormNotes('')
-    showToast('Arma añadida')
+    if (editingId) {
+      dispatch(updateInventoryItem({
+        cat: 'armory',
+        item: { id: editingId, name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
+      }))
+      showToast('Arma actualizada')
+    } else {
+      dispatch(addInventoryItem({
+        cat: 'armory',
+        item: { name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
+      }))
+      showToast('Arma añadida')
+    }
+    resetForm()
+  }
+
+  function handleEdit(itemId: string) {
+    const item = armory.find(i => i.id === itemId)
+    if (!item) return
+    setEditingId(item.id)
+    setFormName(item.name)
+    setFormType(item.type)
+    setFormStock(item.stock)
+    setFormNotes(item.notes)
+  }
+
+  function handlePickFromBook(entry: CatalogEntry) {
+    dispatch(addInventoryItem({ cat: 'armory', item: { name: entry.name, type: entry.type, stock: 1, notes: entry.notes } }))
+    showToast(`"${entry.name}" añadida del libro`)
+    setShowBook(false)
   }
 
   function handleDelete(itemId: string) {
@@ -54,6 +92,7 @@ export function ArmoryTab() {
         dispatch(deleteInventoryItem({ cat: 'armory', itemId }))
         showToast('Arma eliminada')
         if (detailItemId === itemId) setDetailItemId(null)
+        if (editingId === itemId) resetForm()
       }
     )
   }
@@ -68,8 +107,18 @@ export function ArmoryTab() {
   return (
     <div className="p-4 space-y-4">
       <div className="bg-surface-2 border border-rim-bright p-3 space-y-2">
-        <div className="font-display text-[9px] uppercase tracking-[3px] text-gold mb-3">
-          // AÑADIR ARMA
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-display text-[9px] uppercase tracking-[3px] text-gold">
+            // {editingId ? 'EDITAR ARMA' : 'AÑADIR ARMA'}
+          </div>
+          {!editingId && (
+            <button
+              onClick={() => setShowBook(true)}
+              className="font-display text-[8px] uppercase tracking-[1px] border border-gold text-gold px-2 py-1 hover:bg-gold/10 transition-colors"
+            >
+              + Del libro
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="flex flex-col gap-1">
@@ -121,12 +170,22 @@ export function ArmoryTab() {
             />
           </div>
         </div>
-        <button
-          onClick={handleAdd}
-          className="mt-1 bg-crimson text-white font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:bg-crimson-bright transition-colors"
-        >
-          + AÑADIR ARMA
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAdd}
+            className="mt-1 bg-crimson text-white font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:bg-crimson-bright transition-colors"
+          >
+            {editingId ? '✓ GUARDAR CAMBIOS' : '+ AÑADIR ARMA'}
+          </button>
+          {editingId && (
+            <button
+              onClick={resetForm}
+              className="mt-1 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:text-parchment transition-colors"
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
       </div>
 
       {detailItem && (
@@ -264,9 +323,9 @@ export function ArmoryTab() {
                     <td className="px-3 py-2 border-b border-rim">
                       <div className="flex gap-1">
                         <button
-                          onClick={() => setDetailItemId(item.id === detailItemId ? null : item.id)}
+                          onClick={() => handleEdit(item.id)}
                           className="text-parchment-dim hover:text-gold transition-colors text-xs px-1"
-                          title="Detalles"
+                          title="Editar"
                         >
                           ✎
                         </button>
@@ -294,6 +353,15 @@ export function ArmoryTab() {
         onCancel={confirm.onCancel}
         confirmLabel="Eliminar"
       />
+
+      {showBook && (
+        <BookCatalogModal
+          title="ARMA"
+          entries={WEAPON_ENTRIES}
+          onPick={handlePickFromBook}
+          onClose={() => setShowBook(false)}
+        />
+      )}
     </div>
   )
 }

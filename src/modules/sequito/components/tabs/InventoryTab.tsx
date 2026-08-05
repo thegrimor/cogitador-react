@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 import {
   addInventoryItem,
+  updateInventoryItem,
   deleteInventoryItem,
   changeInventoryStock,
   unequipAll,
@@ -9,11 +10,25 @@ import {
 import { showToast } from '@/shared/components/Toast'
 import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { useConfirm } from '@/shared/hooks/useConfirm'
+import { getEquippedCount as getEquippedCountShared, equipKeyFor } from '../../services/equipped'
+import { BookCatalogModal, type CatalogEntry } from '../BookCatalogModal'
+import { AUGMENTATIONS, MECHADENDRITES, GEAR, ARMORS } from '@/core/data/darkheresy'
 import type { InvCategory, EquippedItem } from '../../types/sequitoTypes'
 
 interface Props {
   cat: Exclude<InvCategory, 'armory'>
   label: string
+}
+
+const CATALOG_BY_CAT: Record<Exclude<InvCategory, 'armory'>, CatalogEntry[]> = {
+  implants: AUGMENTATIONS.map(a => ({ name: a.name, type: a.loc, notes: `${a.desc} · ${a.bonus}` })),
+  mechadendrites: MECHADENDRITES.map(m => ({
+    name: m.name, type: m.type, notes: `${m.desc}${m.abilities ? ' · ' + m.abilities.replace(/\n/g, '; ') : ''}`,
+  })),
+  equipment: GEAR.map(g => ({ name: g.name, type: g.category, notes: g.notes })),
+  armor: ARMORS.map(a => ({
+    name: a.name, type: a.type, notes: `PA: C${a.head} T${a.body} B${a.arms} P${a.legs}${a.notes ? ' · ' + a.notes : ''}`,
+  })),
 }
 
 export function InventoryTab({ cat, label }: Props) {
@@ -27,13 +42,19 @@ export function InventoryTab({ cat, label }: Props) {
   const [formStock, setFormStock] = useState(1)
   const [formNotes, setFormNotes] = useState('')
   const [detailItemId, setDetailItemId] = useState<string | null>(null)
-
-  const eqKey = `eq_${cat}` as `eq_${typeof cat}`
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showBook, setShowBook] = useState(false)
 
   function getEquippedCount(itemId: string): number {
-    return Object.values(allSequito).reduce((sum, m) => {
-      return sum + (m[eqKey] as EquippedItem[]).filter(e => e.itemId === itemId).reduce((s, e) => s + e.qty, 0)
-    }, 0)
+    return getEquippedCountShared(allSequito, cat, itemId)
+  }
+
+  function resetForm() {
+    setFormName('')
+    setFormType('')
+    setFormStock(1)
+    setFormNotes('')
+    setEditingId(null)
   }
 
   function handleAdd() {
@@ -41,15 +62,36 @@ export function InventoryTab({ cat, label }: Props) {
       showToast('Introduce un nombre')
       return
     }
-    dispatch(addInventoryItem({
-      cat,
-      item: { name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
-    }))
-    setFormName('')
-    setFormType('')
-    setFormStock(1)
-    setFormNotes('')
-    showToast(`${label.charAt(0) + label.slice(1).toLowerCase()} añadido`)
+    if (editingId) {
+      dispatch(updateInventoryItem({
+        cat,
+        item: { id: editingId, name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
+      }))
+      showToast('Objeto actualizado')
+    } else {
+      dispatch(addInventoryItem({
+        cat,
+        item: { name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
+      }))
+      showToast(`${label.charAt(0) + label.slice(1).toLowerCase()} añadido`)
+    }
+    resetForm()
+  }
+
+  function handleEdit(itemId: string) {
+    const item = items.find(i => i.id === itemId)
+    if (!item) return
+    setEditingId(item.id)
+    setFormName(item.name)
+    setFormType(item.type)
+    setFormStock(item.stock)
+    setFormNotes(item.notes)
+  }
+
+  function handlePickFromBook(entry: CatalogEntry) {
+    dispatch(addInventoryItem({ cat, item: { name: entry.name, type: entry.type, stock: 1, notes: entry.notes } }))
+    showToast(`"${entry.name}" añadido del libro`)
+    setShowBook(false)
   }
 
   function handleDelete(itemId: string) {
@@ -61,6 +103,7 @@ export function InventoryTab({ cat, label }: Props) {
         dispatch(deleteInventoryItem({ cat, itemId }))
         showToast('Objeto eliminado')
         if (detailItemId === itemId) setDetailItemId(null)
+        if (editingId === itemId) resetForm()
       }
     )
   }
@@ -75,8 +118,18 @@ export function InventoryTab({ cat, label }: Props) {
   return (
     <div className="p-4 space-y-4">
       <div className="bg-surface-2 border border-rim-bright p-3 space-y-2">
-        <div className="font-display text-[9px] uppercase tracking-[3px] text-gold mb-3">
-          // AÑADIR {label}
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-display text-[9px] uppercase tracking-[3px] text-gold">
+            // {editingId ? `EDITAR ${label}` : `AÑADIR ${label}`}
+          </div>
+          {!editingId && (
+            <button
+              onClick={() => setShowBook(true)}
+              className="font-display text-[8px] uppercase tracking-[1px] border border-gold text-gold px-2 py-1 hover:bg-gold/10 transition-colors"
+            >
+              + Del libro
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="flex flex-col gap-1">
@@ -128,12 +181,22 @@ export function InventoryTab({ cat, label }: Props) {
             />
           </div>
         </div>
-        <button
-          onClick={handleAdd}
-          className="mt-1 bg-crimson text-white font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:bg-crimson-bright transition-colors"
-        >
-          + AÑADIR
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAdd}
+            className="mt-1 bg-crimson text-white font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:bg-crimson-bright transition-colors"
+          >
+            {editingId ? '✓ GUARDAR CAMBIOS' : '+ AÑADIR'}
+          </button>
+          {editingId && (
+            <button
+              onClick={resetForm}
+              className="mt-1 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:text-parchment transition-colors"
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
       </div>
 
       {detailItem && (
@@ -181,9 +244,9 @@ export function InventoryTab({ cat, label }: Props) {
             PORTADORES
           </div>
           {Object.values(allSequito)
-            .filter(m => (m[eqKey] as EquippedItem[]).some(e => e.itemId === detailItem.id))
+            .filter(m => (m[equipKeyFor(cat)] as EquippedItem[]).some(e => e.itemId === detailItem.id))
             .map(m => {
-              const e = (m[eqKey] as EquippedItem[]).find(e => e.itemId === detailItem.id)!
+              const e = (m[equipKeyFor(cat)] as EquippedItem[]).find(e => e.itemId === detailItem.id)!
               return (
                 <div key={m.id} className="flex items-center justify-between border-b border-rim px-2 py-1.5">
                   <span className="font-rajdhani font-semibold text-sm text-parchment">{m.name}</span>
@@ -192,7 +255,7 @@ export function InventoryTab({ cat, label }: Props) {
               )
             })}
           {!Object.values(allSequito).some(m =>
-            (m[eqKey] as EquippedItem[]).some(e => e.itemId === detailItem.id)
+            (m[equipKeyFor(cat)] as EquippedItem[]).some(e => e.itemId === detailItem.id)
           ) && (
             <div className="font-mono text-[10px] text-parchment-dim">Ningún séquito lleva este objeto.</div>
           )}
@@ -273,9 +336,9 @@ export function InventoryTab({ cat, label }: Props) {
                     <td className="px-3 py-2 border-b border-rim">
                       <div className="flex gap-1">
                         <button
-                          onClick={() => setDetailItemId(item.id === detailItemId ? null : item.id)}
+                          onClick={() => handleEdit(item.id)}
                           className="text-parchment-dim hover:text-gold transition-colors text-xs px-1"
-                          title="Detalles"
+                          title="Editar"
                         >
                           ✎
                         </button>
@@ -303,6 +366,15 @@ export function InventoryTab({ cat, label }: Props) {
         onCancel={confirm.onCancel}
         confirmLabel="Eliminar"
       />
+
+      {showBook && (
+        <BookCatalogModal
+          title={label}
+          entries={CATALOG_BY_CAT[cat]}
+          onPick={handlePickFromBook}
+          onClose={() => setShowBook(false)}
+        />
+      )}
     </div>
   )
 }
