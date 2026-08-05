@@ -6,58 +6,12 @@ export interface AugmentationDefinition {
 }
 
 export const AUGMENTATIONS: AugmentationDefinition[] = [
-  {
-    name: 'Ojo Biónico',
-    loc: 'Ojo/Visión',
-    desc: 'Ojo artificial con funciones mejoradas',
-    bonus: '+10 Per visual, visión nocturna',
-  },
-  {
-    name: 'Ojo Mecánico con Zoom',
-    loc: 'Ojo/Visión',
-    desc: 'Ojo telescópico',
-    bonus: '+10 BS a larga distancia',
-  },
-  {
-    name: 'Brazo Biónico',
-    loc: 'Brazo/Mano',
-    desc: 'Brazo artificial resistente',
-    bonus: '+10 S para pruebas de fuerza con ese brazo',
-  },
-  {
-    name: 'Mano de Combate',
-    loc: 'Brazo/Mano',
-    desc: 'Mano reforzada con cuchillas',
-    bonus: 'Daño CaC: 1d10+2R, no necesita arma',
-  },
-  {
-    name: 'Pierna Biónica',
-    loc: 'Pierna',
-    desc: 'Pierna artificial',
-    bonus: '+2 a velocidad de movimiento',
-  },
-  {
-    name: 'Pulmón de Filtro',
-    loc: 'Torso/Interno',
-    desc: 'Pulmón mejorado con filtros',
-    bonus: 'Inmune a gases, puede respirar en ambientes tóxicos',
-  },
-  {
-    name: 'Corazón Auxiliar',
-    loc: 'Torso/Interno',
-    desc: 'Segundo corazón mecánico',
-    bonus: '+2 Heridas, puede estabilizarse 1/sesión',
-  },
-  {
-    name: 'Procesador Neural',
-    loc: 'Cerebro/Neural',
-    desc: 'Implante de procesamiento',
-    bonus: '+5 Int, +10 a pruebas de conocimiento',
-  },
-  {
-    name: 'Piel Subdermal',
-    loc: 'Piel/Externo',
-    desc: 'Placas bajo la piel',
-    bonus: '+2 PA en todo el cuerpo',
-  },
+  { name: 'Brazo biónico', loc: 'Brazo / Mano', desc: 'Reemplaza un brazo y mano humanos, conservando fuerza, destreza y sentido del tacto.', bonus: '+10 Ag para manipulaciones delicadas; +10 F con este brazo (calidad normal)' },
+  { name: 'Sistema locomotor biónico', loc: 'Pierna', desc: 'Reemplaza piernas y cadera. Se integra en espina dorsal y sistema nervioso.', bonus: '+20 Ag para saltos; talento Veloz (buena calidad)' },
+  { name: 'Sistema respiratorio biónico', loc: 'Torso / Interno', desc: 'Pulmones biónicos con suministro constante de oxígeno.', bonus: '+20 R para resistir toxinas aéreas y gases (calidad normal)' },
+  { name: 'Cibersentidos', loc: 'Ojo / Visión', desc: 'Vista, oído, tacto, gusto y otros sentidos artificiales. Pueden incluir sensores especiales.', bonus: 'Talento Sentido desarrollado; +20 a tiradas de ese sentido (buena calidad)' },
+  { name: 'Implantes corticales', loc: 'Cerebro / Neural', desc: 'Reparación o mejora cerebral. Versión normal restaura funciones perdidas.', bonus: 'Inteligencia antinatural ×2; funciona como cogitador (buena calidad, muy rara)' },
+  { name: 'Módulo sensorial', loc: 'Piel / Externo', desc: 'Duplica efectos de sensores especiales. Funciona como áuspex estándar.', bonus: 'Funciona como áuspex estándar; repetir tirada fallida de Percepción (buena calidad)' },
+  { name: 'Unidad de impulsos mentales', loc: 'Cerebro / Neural', desc: 'Enlace sensorial para comunicarse directamente con máquinas y dispositivos tecnológicos.', bonus: '+10 Competencia tecnológica, Conducir, HP y Lógica al manipular dispositivos con soporte (buena calidad)' },
+  { name: 'Ojo biónico', loc: 'Ojo / Visión', desc: 'Ojo artificial con capacidades mejoradas. Puede incluir mira telescópica, fotovisor o microcomunicador.', bonus: 'Sin penalización por oscuridad; mira telescópica integrada; fotovisor completo (avanzado)' },
 ]
