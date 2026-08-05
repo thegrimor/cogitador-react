@@ -176,6 +176,15 @@ Decisiones ya tomadas con el usuario, pendientes de implementar:
 - **`sequito` — edición de item existente**: el reducer `updateInventoryItem` existe pero no está conectado a ningún formulario.
 - Pendientes menores: import sin confirmación en `proyectos`, contador de "activos" en header, UI heridas/destino como iconos clicables en vez de inputs, bug en `fichaImportMapper.ts` (`acolito` fallback nunca se dispara), abreviaturas de atributos en español.
 
+### Plan de implementación
+
+Orden de trabajo acordado para abordar los pendientes de migración:
+
+- **Fase 0 — Catálogos de datos compartidos**: reescribir `talents.ts` (155), `psychicPowers.ts` (82), `weapons.ts` (55 + campo grupo), `armor.ts` (15), `gear.ts` (29), `mechadendrites.ts`, `augmentations.ts` con contenido canónico del libro. Es la base que necesitan tanto `ficha` como `sequito`, va primero.
+- **Fase 1 — `ficha`: modelo de roles y mecánica**: volver a 2 slots fijos Inquisidor/Séquito (`fichaTypes.ts`/`fichaSlice.ts`), nuevo tab Inquisidor (rangos 9-16), restricción "solo el Séquito puede caer en combate" + auto-creación de reemplazo con herencia del 100% de PE (`killCharacter`), fix de `computeXpSpent`, filtro por grupo en Armería, selector de rama de carrera.
+- **Fase 2 — `sequito`: conectar catálogo**: modal "+ del libro" en `ArmoryTab`/`InventoryTab`, conectar el reducer `updateInventoryItem` (ya existe, sin usar) a un formulario de edición, extraer la lógica duplicada de "equipados" a un selector compartido.
+- **Fase 3 — pulido cross-módulo**: import con confirmación en `proyectos`, contador de "activos" en header, UI heridas/destino tipo barra clicable + botón "nueva sesión", fix del bug de import legado, abreviaturas de atributos en español, estado XP "warn" intermedio.
+
 ### Tests
 
 Los tests seguirán la misma estructura que el código (pendiente de configurar Jest/RTL):
