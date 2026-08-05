@@ -3,8 +3,6 @@ import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addWeapon, removeWeapon, addArmor, removeArmor, addGear, removeGear } from '../../services/fichaSlice'
 import { WEAPONS, ARMORS, GEAR } from '@/core/data/darkheresy'
 
-type SubTab = 'armas' | 'armaduras' | 'equipo'
-
 type WeaponForm = {
   name: string
   cls: string
@@ -55,7 +53,6 @@ export function ArmeriaTab() {
   const dispatch = useAppDispatch()
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const char = characters.find(c => c.id === activeCharacterId)
-  const [sub, setSub] = useState<SubTab>('armas')
 
   const [selWeapon, setSelWeapon] = useState('')
   const [weaponGroupFilter, setWeaponGroupFilter] = useState('')
@@ -131,24 +128,11 @@ export function ArmeriaTab() {
         <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Armería</h3>
       </div>
 
-      <div className="flex border-b border-rim bg-surface-2">
-        {(['armas', 'armaduras', 'equipo'] as SubTab[]).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setSub(tab)}
-            className={[
-              'flex-1 py-2 font-display text-[9px] uppercase tracking-[2px] transition-colors border-b-2',
-              sub === tab
-                ? 'text-crimson border-crimson'
-                : 'text-parchment-dim border-transparent hover:text-parchment',
-            ].join(' ')}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {sub === 'armas' && (
+      {/* Arsenal — apilado con Armadura y Equipo, igual que el HTML legacy (sin sub-tabs) */}
+      <div className="flex flex-col gap-0">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+          <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Arsenal</h4>
+        </div>
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
             <select
@@ -257,9 +241,13 @@ export function ArmeriaTab() {
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {sub === 'armaduras' && (
+      {/* Armadura */}
+      <div className="flex flex-col gap-0">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+          <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Armadura</h4>
+        </div>
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
             <select
@@ -331,9 +319,13 @@ export function ArmeriaTab() {
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {sub === 'equipo' && (
+      {/* Equipo & Pertrechos */}
+      <div className="flex flex-col gap-0">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+          <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Equipo & Pertrechos</h4>
+        </div>
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
             <select
@@ -388,7 +380,7 @@ export function ArmeriaTab() {
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

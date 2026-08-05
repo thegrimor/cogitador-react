@@ -3,8 +3,6 @@ import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addMechadendrite, removeMechadendrite, addAugmentation, removeAugmentation } from '../../services/fichaSlice'
 import { MECHADENDRITES, AUGMENTATIONS } from '@/core/data/darkheresy'
 
-type SubTab = 'mecadendrites' | 'augmentations'
-
 type MechForm = {
   name: string
   type: string
@@ -39,7 +37,6 @@ export function MejorasTab() {
   const dispatch = useAppDispatch()
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const char = characters.find(c => c.id === activeCharacterId)
-  const [sub, setSub] = useState<SubTab>('mecadendrites')
 
   const [selMech, setSelMech] = useState('')
   const [showMechForm, setShowMechForm] = useState(false)
@@ -86,22 +83,11 @@ export function MejorasTab() {
         <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Mejoras Biónicas</h3>
       </div>
 
-      <div className="flex border-b border-rim bg-surface-2">
-        <button
-          onClick={() => setSub('mecadendrites')}
-          className={['flex-1 py-2 font-display text-[9px] uppercase tracking-[2px] transition-colors border-b-2', sub === 'mecadendrites' ? 'text-crimson border-crimson' : 'text-parchment-dim border-transparent hover:text-parchment'].join(' ')}
-        >
-          Mecadendrites
-        </button>
-        <button
-          onClick={() => setSub('augmentations')}
-          className={['flex-1 py-2 font-display text-[9px] uppercase tracking-[2px] transition-colors border-b-2', sub === 'augmentations' ? 'text-crimson border-crimson' : 'text-parchment-dim border-transparent hover:text-parchment'].join(' ')}
-        >
-          Augmentaciones
-        </button>
-      </div>
-
-      {sub === 'mecadendrites' && (
+      {/* Mecadendrites — apilado con Aumentaciones, igual que el HTML legacy (sin sub-tabs) */}
+      <div className="flex flex-col gap-0">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+          <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Mechadendrites</h4>
+        </div>
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
             <div className="flex gap-2">
@@ -171,9 +157,13 @@ export function MejorasTab() {
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {sub === 'augmentations' && (
+      {/* Aumentaciones cibernéticas */}
+      <div className="flex flex-col gap-0">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+          <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Aumentaciones Cibernéticas</h4>
+        </div>
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
             <div className="flex gap-2">
@@ -233,7 +223,7 @@ export function MejorasTab() {
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
