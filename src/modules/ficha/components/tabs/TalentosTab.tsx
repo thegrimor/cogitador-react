@@ -41,6 +41,7 @@ export function TalentosTab() {
   const char = characters.find(c => c.id === activeCharacterId)
 
   const [selectedTalentName, setSelectedTalentName] = useState('')
+  const [quickXp, setQuickXp] = useState(100)
   const [showManual, setShowManual] = useState(false)
   const [manual, setManual] = useState<ManualForm>(EMPTY_MANUAL)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
@@ -58,6 +59,7 @@ export function TalentosTab() {
 
   function handleQuickAdd() {
     if (!selectedDef) return
+    if (char!.talents.some(t => t.name === selectedDef.name)) return
     dispatch(addTalent({
       charId: char!.id,
       talent: {
@@ -66,7 +68,7 @@ export function TalentosTab() {
         req: selectedDef.req,
         desc: selectedDef.desc,
         effect: selectedDef.effect,
-        xp: 0,
+        xp: quickXp,
       },
     }))
     setSelectedTalentName('')
@@ -95,7 +97,7 @@ export function TalentosTab() {
       </div>
 
       <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center justify-between">
           <button
             onClick={() => dispatch(toggleFilterCareer(char!.id))}
             className={[
@@ -108,6 +110,12 @@ export function TalentosTab() {
           >
             {char.filterCareer ? '🔒 Carrera' : '◻ Carrera'}
           </button>
+          <button
+            onClick={() => setShowManual(v => !v)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+          >
+            + Añadir Manual
+          </button>
         </div>
         <div className="flex gap-2">
           <select
@@ -117,13 +125,23 @@ export function TalentosTab() {
           >
             <option value="">— Seleccionar talento —</option>
             {filteredTalents.map(t => (
-              <option key={t.name} value={t.name}>{t.name} [{t.type}]</option>
+              <option key={t.name} value={t.name}>{t.name}</option>
             ))}
           </select>
+          <div className="flex flex-col gap-0.5 shrink-0">
+            <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">Coste PE</span>
+            <input
+              type="number"
+              value={quickXp}
+              min={0}
+              onChange={e => setQuickXp(Number(e.target.value) || 0)}
+              className="w-20 bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-2 py-1.5 outline-none focus:border-gold transition-colors"
+            />
+          </div>
           <button
             onClick={handleQuickAdd}
             disabled={!selectedDef}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0 self-end"
           >
             Añadir
           </button>
@@ -139,13 +157,6 @@ export function TalentosTab() {
             <p className="font-mono text-[11px] text-neon">{selectedDef.effect}</p>
           </div>
         )}
-
-        <button
-          onClick={() => setShowManual(v => !v)}
-          className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment border border-rim-bright px-3 py-1.5 transition-colors text-left"
-        >
-          {showManual ? '▲ Ocultar formulario manual' : '▼ Añadir manualmente'}
-        </button>
 
         {showManual && (
           <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">

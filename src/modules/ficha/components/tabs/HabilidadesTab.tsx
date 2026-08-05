@@ -58,6 +58,8 @@ export function HabilidadesTab() {
   const char = characters.find(c => c.id === activeCharacterId)
 
   const [selectedSkillName, setSelectedSkillName] = useState('')
+  const [quickLevel, setQuickLevel] = useState(0)
+  const [quickXp, setQuickXp] = useState(100)
   const [showManual, setShowManual] = useState(false)
   const [manual, setManual] = useState<ManualForm>(EMPTY_MANUAL)
 
@@ -80,15 +82,16 @@ export function HabilidadesTab() {
 
   function handleQuickAdd() {
     if (!selectedDef) return
+    if (char!.skills.some(s => s.name === selectedDef.name && s.level === quickLevel)) return
     dispatch(addSkill({
       charId: char!.id,
       skill: {
         name: selectedDef.name,
         attr: selectedDef.attr,
-        level: 0,
+        level: quickLevel,
         bonus: 0,
         notes: selectedDef.notes ?? '',
-        xp: 0,
+        xp: quickXp,
       },
     }))
     setSelectedSkillName('')
@@ -119,7 +122,7 @@ export function HabilidadesTab() {
       </div>
 
       <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center justify-between">
           <button
             onClick={() => dispatch(toggleFilterCareer(char!.id))}
             className={[
@@ -131,6 +134,12 @@ export function HabilidadesTab() {
             title={char.filterCareer ? 'Mostrar todas las habilidades' : 'Solo habilidades de carrera'}
           >
             {char.filterCareer ? '🔒 Carrera' : '◻ Carrera'}
+          </button>
+          <button
+            onClick={() => setShowManual(v => !v)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+          >
+            + Añadir Manual
           </button>
         </div>
         <div className="flex gap-2">
@@ -144,10 +153,31 @@ export function HabilidadesTab() {
               <option key={s.name} value={s.name}>{s.name} ({s.attr})</option>
             ))}
           </select>
+        </div>
+        <div className="flex gap-2">
+          <select
+            value={quickLevel}
+            onChange={e => setQuickLevel(Number(e.target.value))}
+            className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+          >
+            {LEVEL_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <div className="flex flex-col gap-0.5 shrink-0">
+            <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">Coste PE</span>
+            <input
+              type="number"
+              value={quickXp}
+              min={0}
+              onChange={e => setQuickXp(Number(e.target.value) || 0)}
+              className="w-20 bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-2 py-1.5 outline-none focus:border-gold transition-colors"
+            />
+          </div>
           <button
             onClick={handleQuickAdd}
             disabled={!selectedDef}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0 self-end"
           >
             Añadir
           </button>
@@ -159,13 +189,6 @@ export function HabilidadesTab() {
             <p className="font-mono text-[11px] text-parchment-dim">{selectedDef.notes ?? 'Habilidad estándar'}</p>
           </div>
         )}
-
-        <button
-          onClick={() => setShowManual(v => !v)}
-          className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment border border-rim-bright px-3 py-1.5 transition-colors text-left"
-        >
-          {showManual ? '▲ Ocultar formulario manual' : '▼ Añadir manualmente'}
-        </button>
 
         {showManual && (
           <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
