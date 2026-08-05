@@ -13,7 +13,7 @@ function uid() {
 
 function buildDefaultAttrs() {
   return Object.fromEntries(
-    ATTRIBUTES.map(a => [a.key, { base: 0, advances: 0, bonuses: 0, bonusNote: '' }])
+    ATTRIBUTES.map(a => [a.key, { base: 0, dots: 0, bonuses: 0, bonusNote: '' }])
   )
 }
 

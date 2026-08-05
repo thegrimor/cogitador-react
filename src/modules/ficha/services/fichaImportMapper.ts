@@ -39,7 +39,7 @@ function asArray<T>(v: unknown): T[] {
 
 function buildDefaultAttrs(): Record<string, AttributeValues> {
   return Object.fromEntries(
-    ATTRIBUTES.map(a => [a.key, { base: 0, advances: 0, bonuses: 0, bonusNote: '' }])
+    ATTRIBUTES.map(a => [a.key, { base: 0, dots: 0, bonuses: 0, bonusNote: '' }])
   )
 }
 
@@ -95,7 +95,9 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
       const attrRaw = raw as Record<string, unknown>
       attrs[key] = {
         base: asNumber(attrRaw['base']),
-        advances: asNumber(attrRaw['dots'] ?? attrRaw['advances']),
+        // El legacy guarda "dots" (0-6). Si el JSON es de una versión anterior con
+        // avances libres, se aproxima 5 puntos = 1 dot.
+        dots: attrRaw['dots'] != null ? asNumber(attrRaw['dots']) : Math.min(4, Math.round(asNumber(attrRaw['advances']) / 5)),
         bonuses: asNumber(attrRaw['bonuses']),
         bonusNote: asString(attrRaw['bonusNote']),
       }

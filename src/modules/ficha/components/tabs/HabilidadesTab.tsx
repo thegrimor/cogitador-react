@@ -4,7 +4,7 @@ import { addSkill, updateSkill, removeSkill, toggleFilterCareer } from '../../se
 import { SKILLS } from '@/core/data/darkheresy'
 import { ATTRIBUTES } from '@/core/data/darkheresy'
 import { getRankForXP, getAvailableItemsForRank, normalizeName } from '@/core/data/darkheresy/careers'
-import { computeXpSpent } from '../../services/fichaComputed'
+import { computeXpSpent, getAttrTotal } from '../../services/fichaComputed'
 import type { Skill } from '../../types/fichaTypes'
 
 const LEVEL_OPTIONS: { value: number; label: string }[] = [
@@ -73,15 +73,9 @@ export function HabilidadesTab() {
 
   const selectedDef = SKILLS.find(s => s.name === selectedSkillName)
 
-  function getAttrTotal(attrKey: string): number {
-    const v = char!.attrs[attrKey]
-    if (!v) return 0
-    return v.base + v.advances + v.bonuses
-  }
-
   function calcTotal(skill: Skill): number {
     const levelBonus = skill.level === -20 ? -20 : skill.level
-    return getAttrTotal(skill.attr) + levelBonus + skill.bonus
+    return getAttrTotal(char!.attrs[skill.attr]) + levelBonus + skill.bonus
   }
 
   function handleQuickAdd() {

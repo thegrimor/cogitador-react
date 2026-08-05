@@ -1,4 +1,5 @@
 import { useAppSelector } from '@/core/store/hooks'
+import { getAttrTotal } from '../../services/fichaComputed'
 
 export function CaidosTab() {
   const { fallen } = useAppSelector(s => s.ficha)
@@ -70,7 +71,7 @@ export function CaidosTab() {
               {/* Attribute summary */}
               <div className="mt-2 grid grid-cols-9 gap-px bg-rim p-px">
                 {Object.entries(char.attrs).map(([key, val]) => {
-                  const total = val.base + val.advances + val.bonuses
+                  const total = getAttrTotal(val)
                   return (
                     <div key={key} className="bg-surface flex flex-col items-center py-1.5 px-0.5">
                       <span className="font-display text-[7px] text-parchment-dim">{key}</span>

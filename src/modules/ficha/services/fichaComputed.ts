@@ -1,6 +1,23 @@
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
 import { ATTR_ADVANCE_COSTS } from '@/core/data/darkheresy/careers'
-import type { Character } from '../types/fichaTypes'
+import type { Character, AttributeValues } from '../types/fichaTypes'
+
+/**
+ * Dots comprados de una característica, con migración de personajes persistidos
+ * antes del sistema de dots (tenían un input libre de "avances"): 5 puntos de
+ * avance equivalían a 1 dot, igual que la propia migración del HTML legacy.
+ */
+export function getAttrDots(values: (Partial<AttributeValues> & { advances?: number }) | undefined): number {
+  if (!values) return 0
+  if (typeof values.dots === 'number') return values.dots
+  return Math.min(4, Math.round((values.advances || 0) / 5))
+}
+
+/** Total de una característica: BASE + dots×10 + BONUS EXT — fórmula de attrTotal() del HTML legacy. */
+export function getAttrTotal(values: (Partial<AttributeValues> & { advances?: number }) | undefined): number {
+  if (!values) return 0
+  return (values.base || 0) + getAttrDots(values) * 10 + (values.bonuses || 0)
+}
 
 export function computeXpSpent(char: Character): number {
   let total = 0
@@ -13,10 +30,7 @@ export function computeXpSpent(char: Character): number {
   const costs = ATTR_ADVANCE_COSTS[char.info.career]
   if (costs) {
     ATTRIBUTES.forEach(def => {
-      const advances = char.attrs[def.key]?.advances || 0
-      // El input es libre (no "dots" del HTML): cada 5 puntos de avance equivale a un dot
-      // comprado, igual que la migración del propio HTML legacy (Math.round(advances/5)).
-      const dots = Math.min(4, Math.round(advances / 5))
+      const dots = getAttrDots(char.attrs[def.key])
       const attrCosts = costs[def.key] ?? []
       for (let i = 0; i < dots; i++) {
         const c = attrCosts[i]
@@ -31,8 +45,7 @@ export function computeXpSpent(char: Character): number {
 export function computeMovement(char: Character): {
   br: number; step: number; move: number; full: number; charge: number
 } {
-  const ag = char.attrs['Ag']
-  const agTotal = ag ? ag.base + ag.advances + ag.bonuses : 0
+  const agTotal = getAttrTotal(char.attrs['Ag'])
   const br = Math.floor(agTotal / 10)
   return { br, step: br, move: br * 2, full: br * 3, charge: br * 4 }
 }

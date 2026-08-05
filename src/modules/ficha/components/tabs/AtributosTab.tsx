@@ -2,6 +2,7 @@ import { useAppSelector } from '@/core/store/hooks'
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
 import { CharInfoGrid } from './atributos/CharInfoGrid'
 import { AttributeCard } from './atributos/AttributeCard'
+import { AttrCostTable } from './atributos/AttrCostTable'
 import { WoundsPanel } from './atributos/WoundsPanel'
 
 export function AtributosTab() {
@@ -33,7 +34,7 @@ export function AtributosTab() {
             // Características
           </h3>
           <span className="font-mono text-[9px] text-parchment-dim">
-            BASE + AVANCES + BONUS = TOTAL
+            BASE + AVANCES = TOTAL
           </span>
         </div>
         <div className="grid grid-cols-1 gap-px bg-rim p-px sm:grid-cols-2">
@@ -41,12 +42,15 @@ export function AtributosTab() {
             <AttributeCard
               key={def.key}
               charId={char.id}
+              career={char.info.career}
               def={def}
-              values={char.attrs[def.key] ?? { base: 0, advances: 0, bonuses: 0, bonusNote: '' }}
+              values={char.attrs[def.key] ?? { base: 0, dots: 0, bonuses: 0, bonusNote: '' }}
             />
           ))}
         </div>
       </div>
+
+      <AttrCostTable char={char} />
 
       {/* Estado vital */}
       <WoundsPanel char={char} />

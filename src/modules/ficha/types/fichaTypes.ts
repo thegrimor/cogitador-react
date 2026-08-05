@@ -1,6 +1,7 @@
 export interface AttributeValues {
   base: number
-  advances: number
+  /** Puntos de mejora comprados (Simple/Intermedio/Cualificado/Experto/Heroico/Maestro), 0-6. Cada dot = +10. */
+  dots: number
   bonuses: number
   bonusNote: string
 }

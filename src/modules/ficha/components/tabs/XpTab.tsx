@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addXpEntry, removeXpEntry } from '../../services/fichaSlice'
-import { getRankForXP, getAttrCostsForCareer } from '@/core/data/darkheresy/careers'
-import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
+import { getRankForXP } from '@/core/data/darkheresy/careers'
 import { computeXpSpent } from '../../services/fichaComputed'
 
 export function XpTab() {
@@ -27,8 +26,6 @@ export function XpTab() {
   const spent     = computeXpSpent(char)
   const available = total - spent
   const rankInfo  = getRankForXP(char.info.career, spent, char.info.branch)
-  const attrCosts = getAttrCostsForCareer(char.info.career)
-  const attrKeys  = ATTRIBUTES.map(a => a.key)
 
   function handleAdd() {
     const n = parseInt(amount)
@@ -65,54 +62,6 @@ export function XpTab() {
             <span className="font-display text-[8px] uppercase tracking-[2px] text-parchment-dim mt-1">Carrera</span>
           </div>
         </div>
-      </div>
-
-      {/* Costes de avance de característica por carrera */}
-      <div className="bg-surface-2 border border-rim overflow-x-auto">
-        <div className="border-b border-rim bg-crimson/5 px-4 py-2">
-          <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">
-            // Coste de Avances — {char.info.career || 'Sin carrera'}
-          </h3>
-        </div>
-        {Object.keys(attrCosts).length === 0 ? (
-          <p className="px-4 py-4 font-mono text-xs text-parchment-dim">
-            Selecciona una carrera para ver los costes de avance.
-          </p>
-        ) : (
-          <table className="w-full text-[11px] font-mono">
-            <thead>
-              <tr className="border-b border-rim">
-                <th className="px-3 py-1.5 text-left font-display text-[8px] uppercase tracking-[1px] text-parchment-dim">Attr</th>
-                {[1,2,3,4,5,6].map(n => (
-                  <th key={n} className="px-2 py-1.5 text-center font-display text-[8px] uppercase tracking-[1px] text-parchment-dim">
-                    Niv.{n}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {attrKeys.map(key => {
-                const costs = attrCosts[key] ?? []
-                return (
-                  <tr key={key} className="border-b border-rim/50 hover:bg-surface-3 transition-colors">
-                    <td className="px-3 py-1.5 font-display text-[10px] text-gold">{key}</td>
-                    {[0,1,2,3,4,5].map(i => {
-                      const c = costs[i]
-                      return (
-                        <td key={i} className="px-2 py-1.5 text-center">
-                          {c == null
-                            ? <span className="text-parchment-dim/30">—</span>
-                            : <span className="text-parchment">{c}</span>
-                          }
-                        </td>
-                      )
-                    })}
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
       </div>
 
       {/* Añadir XP */}
