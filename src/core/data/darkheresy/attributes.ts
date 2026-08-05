@@ -7,13 +7,13 @@ export interface AttributeDefinition {
 }
 
 export const ATTRIBUTES: AttributeDefinition[] = [
-  { key: 'WS',  label: 'Weapon Skill',    abbr: 'WS'  },
-  { key: 'BS',  label: 'Ballistic Skill', abbr: 'BS'  },
-  { key: 'S',   label: 'Strength',        abbr: 'S'   },
-  { key: 'T',   label: 'Toughness',       abbr: 'T'   },
-  { key: 'Ag',  label: 'Agility',         abbr: 'Ag'  },
-  { key: 'Int', label: 'Intelligence',    abbr: 'Int' },
-  { key: 'Per', label: 'Perception',      abbr: 'Per' },
-  { key: 'WP',  label: 'Willpower',       abbr: 'WP'  },
-  { key: 'Fel', label: 'Fellowship',      abbr: 'Fel' },
+  { key: 'WS',  label: 'Habilidad de Armas',       abbr: 'HA'  },
+  { key: 'BS',  label: 'Habilidad de Proyectiles', abbr: 'HP'  },
+  { key: 'S',   label: 'Fuerza',                   abbr: 'F'   },
+  { key: 'T',   label: 'Resistencia',              abbr: 'R'   },
+  { key: 'Ag',  label: 'Agilidad',                 abbr: 'Ag'  },
+  { key: 'Int', label: 'Inteligencia',             abbr: 'Int' },
+  { key: 'Per', label: 'Percepción',               abbr: 'Per' },
+  { key: 'WP',  label: 'Voluntad',                 abbr: 'Vol' },
+  { key: 'Fel', label: 'Empatía',                  abbr: 'Em'  },
 ]

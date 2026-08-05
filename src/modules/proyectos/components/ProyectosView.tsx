@@ -6,7 +6,8 @@ import { AddProjectForm } from './AddProjectForm'
 import { ProjectsGrid } from './ProjectsGrid'
 
 export function ProyectosView() {
-  const globalDay = useAppSelector(s => s.proyectos.globalDay)
+  const { globalDay, projects } = useAppSelector(s => s.proyectos)
+  const active = projects.filter(p => p.status === 'active').length
 
   return (
     <div className="flex flex-col flex-1">
@@ -25,6 +26,9 @@ export function ProyectosView() {
           </span>
           <span className="block font-mono text-[9px] text-parchment-dim uppercase tracking-[1px] mt-0.5">
             Día de campaña actual
+          </span>
+          <span className="block font-mono text-[9px] text-parchment-dim uppercase tracking-[1px]">
+            {active} PROYECTO{active !== 1 ? 'S' : ''} ACTIVO{active !== 1 ? 'S' : ''}
           </span>
         </div>
       </div>

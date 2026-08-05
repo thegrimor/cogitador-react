@@ -153,7 +153,15 @@ export function XpTab() {
           <div className="flex flex-wrap gap-4 items-center font-mono text-xs text-parchment-dim border-t border-rim pt-2">
             <span>Total: <span className="text-gold-bright font-bold">{total}</span></span>
             <span>Gastado: <span className="text-parchment font-bold">{spent}</span></span>
-            <span>Disponible: <span className={available < 0 ? 'text-crimson-bright font-bold' : 'text-neon font-bold'}>{available}</span></span>
+            <span>
+              Disponible:{' '}
+              <span className={[
+                'font-bold',
+                available >= 0 ? 'text-neon' : available > -100 ? 'text-gold' : 'text-crimson-bright',
+              ].join(' ')}>
+                {available}
+              </span>
+            </span>
           </div>
         </div>
       </div>

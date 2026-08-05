@@ -7,32 +7,59 @@ interface Props {
   char: Character
 }
 
+interface PipRowProps {
+  label: string
+  icon: string
+  current: number
+  max: number
+  color: string
+  onChangeCurrent: (v: number) => void
+  onChangeMax: (v: number) => void
+}
+
+/** Icono clicable por punto (herida/destino): click marca hasta ese punto, click sobre el último lo retira. */
+function PipRow({ label, icon, current, max, color, onChangeCurrent, onChangeMax }: PipRowProps) {
+  return (
+    <div className="bg-surface flex flex-col gap-1.5 px-3 py-2.5">
+      <div className="flex items-center justify-between">
+        <label className="font-display text-[8px] uppercase tracking-[1px] text-parchment-dim">{label}</label>
+        <div className="flex items-center gap-1">
+          <span className={`font-display text-sm font-bold ${color}`}>{current}/{max}</span>
+          <input
+            type="number"
+            value={max}
+            min={0}
+            onChange={e => onChangeMax(parseInt(e.target.value) || 0)}
+            title={`${label} máximo`}
+            className="w-12 bg-surface-2 border border-rim-bright font-mono text-[10px] text-parchment text-center py-0.5 outline-none focus:border-gold transition-colors"
+          />
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {Array.from({ length: max }, (_, i) => i + 1).map(i => (
+          <button
+            key={i}
+            onClick={() => onChangeCurrent(i === current ? i - 1 : i)}
+            className={[
+              'w-6 h-6 flex items-center justify-center text-sm border transition-colors',
+              i <= current
+                ? `${color} border-current bg-current/10`
+                : 'text-parchment-dim/30 border-rim hover:border-rim-bright',
+            ].join(' ')}
+            title={`Marcar ${i}`}
+          >
+            {icon}
+          </button>
+        ))}
+        {max === 0 && <span className="font-mono text-[10px] text-parchment-dim/50">Sin máximo definido</span>}
+      </div>
+    </div>
+  )
+}
+
 export function WoundsPanel({ char }: Props) {
   const dispatch = useAppDispatch()
   const mov = computeMovement(char)
-
-  const vitals = [
-    {
-      label: 'Heridas Act.',
-      value: char.wounds.current,
-      onChange: (v: number) => dispatch(updateWounds({ id: char.id, field: 'current', value: v })),
-    },
-    {
-      label: 'Heridas Máx.',
-      value: char.wounds.max,
-      onChange: (v: number) => dispatch(updateWounds({ id: char.id, field: 'max', value: v })),
-    },
-    {
-      label: 'Destino Act.',
-      value: char.fate.current,
-      onChange: (v: number) => dispatch(updateFate({ id: char.id, field: 'current', value: v })),
-    },
-    {
-      label: 'Destino Máx.',
-      value: char.fate.max,
-      onChange: (v: number) => dispatch(updateFate({ id: char.id, field: 'max', value: v })),
-    },
-  ]
 
   return (
     <div className="flex flex-col gap-2">
@@ -43,21 +70,25 @@ export function WoundsPanel({ char }: Props) {
             // Estado Vital
           </h3>
         </div>
-        <div className="grid grid-cols-4 gap-px bg-rim p-px">
-          {vitals.map(v => (
-            <div key={v.label} className="bg-surface flex flex-col items-center gap-1 px-2 py-3">
-              <label className="font-display text-[7px] uppercase tracking-[1px] text-parchment-dim text-center leading-tight">
-                {v.label}
-              </label>
-              <input
-                type="number"
-                value={v.value}
-                min={0}
-                onChange={e => v.onChange(parseInt(e.target.value) || 0)}
-                className="w-full bg-surface-2 border border-rim-bright text-gold-bright font-display text-xl font-bold text-center py-1 outline-none focus:border-gold transition-colors"
-              />
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-rim p-px">
+          <PipRow
+            label="Heridas"
+            icon="♥"
+            current={char.wounds.current}
+            max={char.wounds.max}
+            color="text-crimson-bright"
+            onChangeCurrent={v => dispatch(updateWounds({ id: char.id, field: 'current', value: Math.max(0, v) }))}
+            onChangeMax={v => dispatch(updateWounds({ id: char.id, field: 'max', value: v }))}
+          />
+          <PipRow
+            label="Destino"
+            icon="✦"
+            current={char.fate.current}
+            max={char.fate.max}
+            color="text-gold-bright"
+            onChangeCurrent={v => dispatch(updateFate({ id: char.id, field: 'current', value: Math.max(0, v) }))}
+            onChangeMax={v => dispatch(updateFate({ id: char.id, field: 'max', value: v }))}
+          />
         </div>
       </div>
 
