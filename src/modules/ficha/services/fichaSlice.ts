@@ -76,6 +76,27 @@ export const fichaSlice = createSlice({
       state.activeCharacterId = newChar.id
     },
 
+    /**
+     * Modelo de 2 slots fijos (como el HTML legacy: PJ0=Inquisidor, PJ1=Séquito):
+     * no hay flujo de "crear personaje", los 2 slots existen siempre. Se invoca al
+     * montar la app para rellenar el/los que falten (instalación nueva o estado
+     * persistido antes de este modelo) con un personaje en blanco.
+     */
+    ensureBothSlots(state) {
+      const roles: Array<'inquisidor' | 'sequito'> = ['inquisidor', 'sequito']
+      for (const role of roles) {
+        if (state.characters.some(c => c.info.role === role)) continue
+        const blank = buildDefaultCharacter({
+          name: '', rank: '1', career: '', homeworld: '',
+          experience: '0', xpSpent: '0', role, ordo: '', counterpart: '', branch: '',
+        })
+        state.characters.push(blank)
+      }
+      if (!state.activeCharacterId) {
+        state.activeCharacterId = state.characters.find(c => c.info.role === 'inquisidor')?.id ?? null
+      }
+    },
+
     importCharacter(state, action: PayloadAction<Character>) {
       // Modelo de 2 slots fijos: un personaje importado reemplaza al que ocupe su mismo rol
       const role = action.payload.info.role
@@ -318,7 +339,7 @@ export const fichaSlice = createSlice({
 })
 
 export const {
-  addCharacter, importCharacter, selectCharacter, updateCharInfo,
+  addCharacter, ensureBothSlots, importCharacter, selectCharacter, updateCharInfo,
   updateAttribute, updateWounds, updateFate, updateVital,
   addXpEntry, removeXpEntry,
   addSkill, updateSkill, removeSkill,
