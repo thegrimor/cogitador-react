@@ -160,10 +160,10 @@ export function SequitoView() {
           </>
         )}
         {activeTab === 'armory' && <ArmoryTab />}
-        {activeTab === 'implants' && <InventoryTab cat="implants" label="IMPLANTE" />}
-        {activeTab === 'mechadendrites' && <InventoryTab cat="mechadendrites" label="MECADENDRITE" />}
-        {activeTab === 'equipment' && <InventoryTab cat="equipment" label="OBJETO" />}
-        {activeTab === 'armor' && <InventoryTab cat="armor" label="ARMADURA" />}
+        {activeTab === 'implants' && <InventoryTab cat="implants" label="IMPLANTE" title="Implantes Cibernéticos" />}
+        {activeTab === 'mechadendrites' && <InventoryTab cat="mechadendrites" label="MECADENDRITE" title="Mecadendrites" />}
+        {activeTab === 'equipment' && <InventoryTab cat="equipment" label="OBJETO" title="Equipo General" />}
+        {activeTab === 'armor' && <InventoryTab cat="armor" label="ARMADURA" title="Armaduras" />}
       </div>
 
       {addSeqLayerId && (

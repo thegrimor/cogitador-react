@@ -6,18 +6,22 @@ import {
   deleteInventoryItem,
   changeInventoryStock,
   unequipAll,
+  unequipItem,
 } from '../../services/sequitoSlice'
 import { showToast } from '@/shared/components/Toast'
 import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { useConfirm } from '@/shared/hooks/useConfirm'
 import { getEquippedCount as getEquippedCountShared, equipKeyFor } from '../../services/equipped'
 import { BookCatalogModal, type CatalogEntry } from '../BookCatalogModal'
+import { ItemFormModal, type ItemFormData } from '../ItemFormModal'
+import { ItemDetailModal } from '../ItemDetailModal'
 import { AUGMENTATIONS, MECHADENDRITES, GEAR, ARMORS } from '@/core/data/darkheresy'
 import type { InvCategory, EquippedItem } from '../../types/sequitoTypes'
 
 interface Props {
   cat: Exclude<InvCategory, 'armory'>
   label: string
+  title: string
 }
 
 const CATALOG_BY_CAT: Record<Exclude<InvCategory, 'armory'>, CatalogEntry[]> = {
@@ -31,61 +35,37 @@ const CATALOG_BY_CAT: Record<Exclude<InvCategory, 'armory'>, CatalogEntry[]> = {
   })),
 }
 
-export function InventoryTab({ cat, label }: Props) {
+export function InventoryTab({ cat, label, title }: Props) {
   const dispatch = useAppDispatch()
   const confirm = useConfirm()
   const items = useAppSelector(s => s.sequito[cat])
   const allSequito = useAppSelector(s => s.sequito.sequito)
 
-  const [formName, setFormName] = useState('')
-  const [formType, setFormType] = useState('')
-  const [formStock, setFormStock] = useState(1)
-  const [formNotes, setFormNotes] = useState('')
   const [detailItemId, setDetailItemId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showManual, setShowManual] = useState(false)
   const [showBook, setShowBook] = useState(false)
 
   function getEquippedCount(itemId: string): number {
     return getEquippedCountShared(allSequito, cat, itemId)
   }
 
-  function resetForm() {
-    setFormName('')
-    setFormType('')
-    setFormStock(1)
-    setFormNotes('')
-    setEditingId(null)
-  }
-
-  function handleAdd() {
-    if (!formName.trim()) {
-      showToast('Introduce un nombre')
-      return
-    }
+  function handleSave(data: ItemFormData) {
     if (editingId) {
-      dispatch(updateInventoryItem({
-        cat,
-        item: { id: editingId, name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
-      }))
+      dispatch(updateInventoryItem({ cat, item: { id: editingId, ...data } }))
       showToast('Objeto actualizado')
     } else {
-      dispatch(addInventoryItem({
-        cat,
-        item: { name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
-      }))
+      dispatch(addInventoryItem({ cat, item: data }))
       showToast(`${label.charAt(0) + label.slice(1).toLowerCase()} añadido`)
     }
-    resetForm()
+    setEditingId(null)
+    setShowManual(false)
   }
 
-  function handleEdit(itemId: string) {
-    const item = items.find(i => i.id === itemId)
-    if (!item) return
-    setEditingId(item.id)
-    setFormName(item.name)
-    setFormType(item.type)
-    setFormStock(item.stock)
-    setFormNotes(item.notes)
+  function openEdit(itemId: string) {
+    setDetailItemId(null)
+    setEditingId(itemId)
+    setShowManual(true)
   }
 
   function handlePickFromBook(entry: CatalogEntry) {
@@ -103,7 +83,6 @@ export function InventoryTab({ cat, label }: Props) {
         dispatch(deleteInventoryItem({ cat, itemId }))
         showToast('Objeto eliminado')
         if (detailItemId === itemId) setDetailItemId(null)
-        if (editingId === itemId) resetForm()
       }
     )
   }
@@ -114,153 +93,27 @@ export function InventoryTab({ cat, label }: Props) {
   }
 
   const detailItem = detailItemId ? items.find(i => i.id === detailItemId) : null
+  const editingItem = editingId ? items.find(i => i.id === editingId) : null
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="bg-surface-2 border border-rim-bright p-3 space-y-2">
-        <div className="flex items-center justify-between mb-3">
-          <div className="font-display text-[9px] uppercase tracking-[3px] text-gold">
-            // {editingId ? `EDITAR ${label}` : `AÑADIR ${label}`}
-          </div>
-          {!editingId && (
-            <button
-              onClick={() => setShowBook(true)}
-              className="font-display text-[8px] uppercase tracking-[1px] border border-gold text-gold px-2 py-1 hover:bg-gold/10 transition-colors"
-            >
-              + Del libro
-            </button>
-          )}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Nombre
-            </label>
-            <input
-              type="text"
-              value={formName}
-              onChange={e => setFormName(e.target.value)}
-              placeholder={`Nombre del objeto...`}
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson placeholder:text-parchment-dim/40"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Tipo / Categoría
-            </label>
-            <input
-              type="text"
-              value={formType}
-              onChange={e => setFormType(e.target.value)}
-              placeholder="Tipo o categoría..."
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson placeholder:text-parchment-dim/40"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Stock
-            </label>
-            <input
-              type="number"
-              value={formStock}
-              min={1}
-              onChange={e => setFormStock(Number(e.target.value))}
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Notas
-            </label>
-            <input
-              type="text"
-              value={formNotes}
-              onChange={e => setFormNotes(e.target.value)}
-              placeholder="Descripción, efectos..."
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson placeholder:text-parchment-dim/40"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2">
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap bg-surface-2 border border-rim-bright px-3 py-2">
+        <span className="font-display text-[10px] uppercase tracking-[3px] text-gold">// {title}</span>
+        <div className="flex gap-1.5">
           <button
-            onClick={handleAdd}
-            className="mt-1 bg-crimson text-white font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:bg-crimson-bright transition-colors"
+            onClick={() => setShowBook(true)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors"
           >
-            {editingId ? '✓ GUARDAR CAMBIOS' : '+ AÑADIR'}
+            + Del Libro
           </button>
-          {editingId && (
-            <button
-              onClick={resetForm}
-              className="mt-1 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:text-parchment transition-colors"
-            >
-              Cancelar
-            </button>
-          )}
+          <button
+            onClick={() => { setEditingId(null); setShowManual(true) }}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 border border-rim-bright text-parchment-dim hover:text-parchment transition-colors"
+          >
+            + Manual
+          </button>
         </div>
       </div>
-
-      {detailItem && (
-        <div className="bg-surface-2 border border-rim-bright border-l-4 border-l-gold p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-display text-[9px] uppercase tracking-[3px] text-gold">
-              // {detailItem.name.toUpperCase()}
-            </span>
-            <button
-              onClick={() => setDetailItemId(null)}
-              className="text-parchment-dim hover:text-crimson-bright text-sm"
-            >
-              ✕
-            </button>
-          </div>
-          {detailItem.notes && (
-            <div className="bg-surface border border-rim px-3 py-2 font-mono text-[11px] text-parchment leading-relaxed mb-3">
-              {detailItem.notes}
-            </div>
-          )}
-          <div className="flex gap-5 mb-3">
-            {([
-              { label: 'STOCK', val: detailItem.stock, cls: 'text-gold' },
-              { label: 'EQUIPADOS', val: getEquippedCount(detailItem.id), cls: 'text-neon' },
-              {
-                label: 'DISPONIBLES',
-                val: detailItem.stock - getEquippedCount(detailItem.id),
-                cls:
-                  detailItem.stock - getEquippedCount(detailItem.id) <= 0
-                    ? 'text-crimson-bright'
-                    : detailItem.stock - getEquippedCount(detailItem.id) <= 2
-                    ? 'text-gold'
-                    : 'text-neon',
-              },
-            ] as Array<{ label: string; val: number; cls: string }>).map(({ label: lbl, val, cls }) => (
-              <div key={lbl} className="text-center">
-                <div className="font-mono text-[8px] tracking-[1px] text-parchment-dim mb-1">
-                  {lbl}
-                </div>
-                <div className={`font-display text-xl ${cls}`}>{val}</div>
-              </div>
-            ))}
-          </div>
-          <div className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim mb-1">
-            PORTADORES
-          </div>
-          {Object.values(allSequito)
-            .filter(m => (m[equipKeyFor(cat)] as EquippedItem[]).some(e => e.itemId === detailItem.id))
-            .map(m => {
-              const e = (m[equipKeyFor(cat)] as EquippedItem[]).find(e => e.itemId === detailItem.id)!
-              return (
-                <div key={m.id} className="flex items-center justify-between border-b border-rim px-2 py-1.5">
-                  <span className="font-rajdhani font-semibold text-sm text-parchment">{m.name}</span>
-                  <span className="font-display text-[11px] text-gold">×{e.qty}</span>
-                </div>
-              )
-            })}
-          {!Object.values(allSequito).some(m =>
-            (m[equipKeyFor(cat)] as EquippedItem[]).some(e => e.itemId === detailItem.id)
-          ) && (
-            <div className="font-mono text-[10px] text-parchment-dim">Ningún séquito lleva este objeto.</div>
-          )}
-        </div>
-      )}
 
       <div className="overflow-x-auto">
         {items.length === 0 ? (
@@ -291,7 +144,7 @@ export function InventoryTab({ cat, label }: Props) {
                   <tr key={item.id} className="hover:bg-surface-3 transition-colors">
                     <td className="px-3 py-2 border-b border-rim">
                       <button
-                        onClick={() => setDetailItemId(item.id === detailItemId ? null : item.id)}
+                        onClick={() => setDetailItemId(item.id)}
                         className="font-rajdhani font-semibold text-sm text-gold hover:text-gold-bright underline underline-offset-2 decoration-rim-bright text-left"
                       >
                         {item.name}
@@ -336,7 +189,7 @@ export function InventoryTab({ cat, label }: Props) {
                     <td className="px-3 py-2 border-b border-rim">
                       <div className="flex gap-1">
                         <button
-                          onClick={() => handleEdit(item.id)}
+                          onClick={() => openEdit(item.id)}
                           className="text-parchment-dim hover:text-gold transition-colors text-xs px-1"
                           title="Editar"
                         >
@@ -373,6 +226,42 @@ export function InventoryTab({ cat, label }: Props) {
           entries={CATALOG_BY_CAT[cat]}
           onPick={handlePickFromBook}
           onClose={() => setShowBook(false)}
+        />
+      )}
+
+      {showManual && (
+        <ItemFormModal
+          title={editingItem ? `Editar ${label}` : `Añadir ${label} Manual`}
+          initial={editingItem ? { name: editingItem.name, type: editingItem.type, stock: editingItem.stock, notes: editingItem.notes } : undefined}
+          namePlaceholder="Nombre del objeto..."
+          typePlaceholder="Tipo o categoría..."
+          notesPlaceholder="Descripción, efectos..."
+          onSave={handleSave}
+          onClose={() => { setShowManual(false); setEditingId(null) }}
+        />
+      )}
+
+      {detailItem && (
+        <ItemDetailModal
+          name={detailItem.name}
+          notes={detailItem.notes}
+          stock={detailItem.stock}
+          equipped={getEquippedCount(detailItem.id)}
+          carriers={Object.values(allSequito)
+            .filter(m => (m[equipKeyFor(cat)] as EquippedItem[]).some(e => e.itemId === detailItem.id))
+            .map(m => {
+              const e = (m[equipKeyFor(cat)] as EquippedItem[]).find(e => e.itemId === detailItem.id)!
+              return {
+                id: m.id,
+                name: m.name,
+                qty: e.qty,
+                onUnequip: () => {
+                  dispatch(unequipItem({ seqId: m.id, cat, itemId: detailItem.id }))
+                },
+              }
+            })}
+          onEdit={() => openEdit(detailItem.id)}
+          onClose={() => setDetailItemId(null)}
         />
       )}
     </div>

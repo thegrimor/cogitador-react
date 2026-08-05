@@ -6,12 +6,15 @@ import {
   deleteInventoryItem,
   changeInventoryStock,
   unequipAll,
+  unequipItem,
 } from '../../services/sequitoSlice'
 import { showToast } from '@/shared/components/Toast'
 import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { useConfirm } from '@/shared/hooks/useConfirm'
 import { getEquippedCount as getEquippedCountShared } from '../../services/equipped'
 import { BookCatalogModal, type CatalogEntry } from '../BookCatalogModal'
+import { ItemFormModal, type ItemFormData } from '../ItemFormModal'
+import { ItemDetailModal } from '../ItemDetailModal'
 import { WEAPONS } from '@/core/data/darkheresy'
 
 const WEAPON_ENTRIES: CatalogEntry[] = WEAPONS.map(w => ({
@@ -26,55 +29,31 @@ export function ArmoryTab() {
   const armory = useAppSelector(s => s.sequito.armory)
   const allSequito = useAppSelector(s => s.sequito.sequito)
 
-  const [formName, setFormName] = useState('')
-  const [formType, setFormType] = useState('')
-  const [formStock, setFormStock] = useState(1)
-  const [formNotes, setFormNotes] = useState('')
   const [detailItemId, setDetailItemId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showManual, setShowManual] = useState(false)
   const [showBook, setShowBook] = useState(false)
 
   function getEquippedCount(itemId: string): number {
     return getEquippedCountShared(allSequito, 'armory', itemId)
   }
 
-  function resetForm() {
-    setFormName('')
-    setFormType('')
-    setFormStock(1)
-    setFormNotes('')
-    setEditingId(null)
-  }
-
-  function handleAdd() {
-    if (!formName.trim()) {
-      showToast('Introduce un nombre')
-      return
-    }
+  function handleSave(data: ItemFormData) {
     if (editingId) {
-      dispatch(updateInventoryItem({
-        cat: 'armory',
-        item: { id: editingId, name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
-      }))
+      dispatch(updateInventoryItem({ cat: 'armory', item: { id: editingId, ...data } }))
       showToast('Arma actualizada')
     } else {
-      dispatch(addInventoryItem({
-        cat: 'armory',
-        item: { name: formName.trim(), type: formType.trim(), stock: Math.max(1, formStock), notes: formNotes.trim() },
-      }))
+      dispatch(addInventoryItem({ cat: 'armory', item: data }))
       showToast('Arma añadida')
     }
-    resetForm()
+    setEditingId(null)
+    setShowManual(false)
   }
 
-  function handleEdit(itemId: string) {
-    const item = armory.find(i => i.id === itemId)
-    if (!item) return
-    setEditingId(item.id)
-    setFormName(item.name)
-    setFormType(item.type)
-    setFormStock(item.stock)
-    setFormNotes(item.notes)
+  function openEdit(itemId: string) {
+    setDetailItemId(null)
+    setEditingId(itemId)
+    setShowManual(true)
   }
 
   function handlePickFromBook(entry: CatalogEntry) {
@@ -92,7 +71,6 @@ export function ArmoryTab() {
         dispatch(deleteInventoryItem({ cat: 'armory', itemId }))
         showToast('Arma eliminada')
         if (detailItemId === itemId) setDetailItemId(null)
-        if (editingId === itemId) resetForm()
       }
     )
   }
@@ -103,151 +81,27 @@ export function ArmoryTab() {
   }
 
   const detailItem = detailItemId ? armory.find(i => i.id === detailItemId) : null
+  const editingItem = editingId ? armory.find(i => i.id === editingId) : null
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="bg-surface-2 border border-rim-bright p-3 space-y-2">
-        <div className="flex items-center justify-between mb-3">
-          <div className="font-display text-[9px] uppercase tracking-[3px] text-gold">
-            // {editingId ? 'EDITAR ARMA' : 'AÑADIR ARMA'}
-          </div>
-          {!editingId && (
-            <button
-              onClick={() => setShowBook(true)}
-              className="font-display text-[8px] uppercase tracking-[1px] border border-gold text-gold px-2 py-1 hover:bg-gold/10 transition-colors"
-            >
-              + Del libro
-            </button>
-          )}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Nombre
-            </label>
-            <input
-              type="text"
-              value={formName}
-              onChange={e => setFormName(e.target.value)}
-              placeholder="Nombre del arma..."
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson placeholder:text-parchment-dim/40"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Tipo
-            </label>
-            <input
-              type="text"
-              value={formType}
-              onChange={e => setFormType(e.target.value)}
-              placeholder="Pistola, Básica, CaC..."
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson placeholder:text-parchment-dim/40"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Stock
-            </label>
-            <input
-              type="number"
-              value={formStock}
-              min={1}
-              onChange={e => setFormStock(Number(e.target.value))}
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
-              Notas / Stats
-            </label>
-            <input
-              type="text"
-              value={formNotes}
-              onChange={e => setFormNotes(e.target.value)}
-              placeholder="Daño, alcance, efectos..."
-              className="bg-surface border border-rim-bright text-parchment font-mono text-xs px-2.5 py-1.5 outline-none focus:border-crimson placeholder:text-parchment-dim/40"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2">
+    <div className="p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap bg-surface-2 border border-rim-bright px-3 py-2">
+        <span className="font-display text-[10px] uppercase tracking-[3px] text-gold">// Arsenal</span>
+        <div className="flex gap-1.5">
           <button
-            onClick={handleAdd}
-            className="mt-1 bg-crimson text-white font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:bg-crimson-bright transition-colors"
+            onClick={() => setShowBook(true)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors"
           >
-            {editingId ? '✓ GUARDAR CAMBIOS' : '+ AÑADIR ARMA'}
+            + Del Libro
           </button>
-          {editingId && (
-            <button
-              onClick={resetForm}
-              className="mt-1 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-4 py-2 hover:text-parchment transition-colors"
-            >
-              Cancelar
-            </button>
-          )}
+          <button
+            onClick={() => { setEditingId(null); setShowManual(true) }}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 border border-rim-bright text-parchment-dim hover:text-parchment transition-colors"
+          >
+            + Manual
+          </button>
         </div>
       </div>
-
-      {detailItem && (
-        <div className="bg-surface-2 border border-rim-bright border-l-4 border-l-gold p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-display text-[9px] uppercase tracking-[3px] text-gold">
-              // {detailItem.name.toUpperCase()}
-            </span>
-            <button
-              onClick={() => setDetailItemId(null)}
-              className="text-parchment-dim hover:text-crimson-bright text-sm"
-            >
-              ✕
-            </button>
-          </div>
-          {detailItem.notes && (
-            <div className="bg-surface border border-rim px-3 py-2 font-mono text-[11px] text-parchment leading-relaxed mb-3">
-              {detailItem.notes}
-            </div>
-          )}
-          <div className="flex gap-5 mb-3">
-            {([
-              { label: 'STOCK', val: detailItem.stock, cls: 'text-gold' },
-              { label: 'EQUIPADOS', val: getEquippedCount(detailItem.id), cls: 'text-neon' },
-              {
-                label: 'DISPONIBLES',
-                val: detailItem.stock - getEquippedCount(detailItem.id),
-                cls:
-                  detailItem.stock - getEquippedCount(detailItem.id) <= 0
-                    ? 'text-crimson-bright'
-                    : detailItem.stock - getEquippedCount(detailItem.id) <= 2
-                    ? 'text-gold'
-                    : 'text-neon',
-              },
-            ] as Array<{ label: string; val: number; cls: string }>).map(({ label, val, cls }) => (
-              <div key={label} className="text-center">
-                <div className="font-mono text-[8px] tracking-[1px] text-parchment-dim mb-1">
-                  {label}
-                </div>
-                <div className={`font-display text-xl ${cls}`}>{val}</div>
-              </div>
-            ))}
-          </div>
-          <div className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim mb-1">
-            PORTADORES
-          </div>
-          {Object.values(allSequito)
-            .filter(m => m.equipment.some(e => e.itemId === detailItem.id))
-            .map(m => {
-              const e = m.equipment.find(e => e.itemId === detailItem.id)!
-              return (
-                <div key={m.id} className="flex items-center justify-between border-b border-rim px-2 py-1.5">
-                  <span className="font-rajdhani font-semibold text-sm text-parchment">{m.name}</span>
-                  <span className="font-display text-[11px] text-gold">×{e.qty}</span>
-                </div>
-              )
-            })}
-          {!Object.values(allSequito).some(m => m.equipment.some(e => e.itemId === detailItem.id)) && (
-            <div className="font-mono text-[10px] text-parchment-dim">Ningún séquito lleva este objeto.</div>
-          )}
-        </div>
-      )}
 
       <div className="overflow-x-auto">
         {armory.length === 0 ? (
@@ -278,7 +132,7 @@ export function ArmoryTab() {
                   <tr key={item.id} className="hover:bg-surface-3 transition-colors">
                     <td className="px-3 py-2 border-b border-rim">
                       <button
-                        onClick={() => setDetailItemId(item.id === detailItemId ? null : item.id)}
+                        onClick={() => setDetailItemId(item.id)}
                         className="font-rajdhani font-semibold text-sm text-gold hover:text-gold-bright underline underline-offset-2 decoration-rim-bright text-left"
                       >
                         {item.name}
@@ -323,7 +177,7 @@ export function ArmoryTab() {
                     <td className="px-3 py-2 border-b border-rim">
                       <div className="flex gap-1">
                         <button
-                          onClick={() => handleEdit(item.id)}
+                          onClick={() => openEdit(item.id)}
                           className="text-parchment-dim hover:text-gold transition-colors text-xs px-1"
                           title="Editar"
                         >
@@ -360,6 +214,42 @@ export function ArmoryTab() {
           entries={WEAPON_ENTRIES}
           onPick={handlePickFromBook}
           onClose={() => setShowBook(false)}
+        />
+      )}
+
+      {showManual && (
+        <ItemFormModal
+          title={editingItem ? 'Editar Arma' : 'Añadir Arma Manual'}
+          initial={editingItem ? { name: editingItem.name, type: editingItem.type, stock: editingItem.stock, notes: editingItem.notes } : undefined}
+          namePlaceholder="Nombre del arma..."
+          typePlaceholder="Pistola, Básica, CaC..."
+          notesPlaceholder="Daño, alcance, efectos..."
+          onSave={handleSave}
+          onClose={() => { setShowManual(false); setEditingId(null) }}
+        />
+      )}
+
+      {detailItem && (
+        <ItemDetailModal
+          name={detailItem.name}
+          notes={detailItem.notes}
+          stock={detailItem.stock}
+          equipped={getEquippedCount(detailItem.id)}
+          carriers={Object.values(allSequito)
+            .filter(m => m.equipment.some(e => e.itemId === detailItem.id))
+            .map(m => {
+              const e = m.equipment.find(e => e.itemId === detailItem.id)!
+              return {
+                id: m.id,
+                name: m.name,
+                qty: e.qty,
+                onUnequip: () => {
+                  dispatch(unequipItem({ seqId: m.id, cat: 'armory', itemId: detailItem.id }))
+                },
+              }
+            })}
+          onEdit={() => openEdit(detailItem.id)}
+          onClose={() => setDetailItemId(null)}
         />
       )}
     </div>
