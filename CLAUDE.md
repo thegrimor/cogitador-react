@@ -14,11 +14,11 @@ El proyecto nació como 3 HTMLs standalone con estética Adeptus Mechanicus (gri
 
 | Módulo | Descripción | Estado |
 |---|---|---|
-| `ficha` | Ficha del agente/personaje | En progreso (estructura base + AtributosTab funcional) |
-| `proyectos` | Gestor de proyectos de campaña | Stub (placeholder) |
-| `sequito` | Gestión del séquito (acólitos y aliados) | Stub (placeholder) |
+| `ficha` | Ficha del agente/personaje | Funcional, 8 tabs + Caídos. Pendiente: tab Inquisidor, catálogos de reglas incompletos (ver "Pendientes de migración") |
+| `proyectos` | Gestor de proyectos de campaña | Funcional, casi 1:1 con el HTML de referencia |
+| `sequito` | Gestión del séquito (acólitos y aliados) | Funcional (capas, drag&drop, equipo). Pendiente: flujo "+ del libro" (ver "Pendientes de migración") |
 
-Cada módulo existe como HTML funcional previo que sirve de referencia para la migración.
+Cada módulo existe como HTML funcional previo (`gestionproyectos.html`, `gestionsequito.html`, `cogitadorpersonajes.html`) que sirve de referencia para la migración. Evaluación de fidelidad realizada el 2026-08-05.
 
 ### Diseño — Sistema visual
 
@@ -52,7 +52,8 @@ Estética Adeptus Mechanicus. El sistema de diseño está definido en `src/index
 
 - **React 19** + **Vite 8** + **TypeScript 6** (strict mode)
 - **Tailwind CSS v4** (config via `@theme` en `index.css`, plugin `@tailwindcss/vite`)
-- **Redux Toolkit 2** + `react-redux` (sin RTK Query aún)
+- **Redux Toolkit 2** + `react-redux` + **redux-persist** (persistencia en localStorage, key `cogitador-root`)
+- **@dnd-kit/core + @dnd-kit/sortable** — drag & drop (usado en `sequito`)
 - **Sin React Router** — navegación actual con tab state en `App.tsx`
 - **Sin Jest/RTL configurado** — pendiente de añadir
 - **ESLint v9** (flat config) con plugins: typescript-eslint, react-hooks, react-refresh
@@ -68,70 +69,112 @@ Arquitectura modular inspirada en DDD. Cada módulo representa un bounded contex
 src/
   core/
     data/
-      darkheresy/         # Datos del sistema de juego (atributos, skills, talentos, poderes)
+      darkheresy/         # Datos del sistema de juego — compartidos entre ficha y sequito
         attributes.ts     # 9 atributos base (WS, BS, S, T, Ag, Int, Per, WP, Fel)
-        skills.ts         # (vacío, pendiente)
-        talents.ts        # (vacío, pendiente)
-        psychicPowers.ts  # (vacío, pendiente)
+        skills.ts         # Habilidades del libro
+        talents.ts        # Talentos del libro (contenido incompleto, ver pendientes)
+        psychicPowers.ts  # Poderes psíquicos (contenido incompleto, ver pendientes)
+        careers.ts        # Carreras, rangos, coste de avance de atributos
+        weapons.ts        # Armas (contenido incompleto, ver pendientes)
+        armor.ts          # Armaduras (contenido incompleto, ver pendientes)
+        gear.ts           # Equipo general (contenido incompleto, ver pendientes)
+        augmentations.ts  # Implantes cibernéticos
+        mechadendrites.ts # Mecadendrites
         index.ts
     store/
-      store.ts            # Redux store (reducer: ficha)
+      store.ts            # Redux store persistido (redux-persist), reducers: ficha, proyectos, sequito
       hooks.ts            # useAppDispatch, useAppSelector (tipados)
   modules/
     ficha/
       components/
         FichaView.tsx           # Contenedor principal con tabs internos
-        CharacterHeader.tsx     # Selector de personaje + botón crear
+        CharacterHeader.tsx     # Selector de personaje + export/import + botón crear
         CharacterCreateModal.tsx# Formulario de creación de personaje
         ExperiencePanel.tsx     # Visualización y gestión de XP
         tabs/
-          AtributosTab.tsx      # Tab atributos (funcional)
-          HabilidadesTab.tsx    # (vacío)
-          TalentosTab.tsx       # (vacío)
-          ArmeriaTab.tsx        # (vacío)
-          EquipoTab.tsx         # (vacío)
-          MejorasTab.tsx        # (vacío)
-          PoderesPsiquicosTab.tsx # (vacío)
-          XpTab.tsx             # (vacío)
+          AtributosTab.tsx        # Atributos (funcional)
+          HabilidadesTab.tsx      # Habilidades (funcional)
+          TalentosTab.tsx         # Talentos (funcional, catálogo incompleto)
+          ArmeriaTab.tsx          # Armas/armaduras/gear (funcional, sin filtro por grupo)
+          EquipoTab.tsx           # Tesoro/notas/influencia (funcional)
+          MejorasTab.tsx          # Implantes/mecadendrites (funcional)
+          PoderesPsiquicosTab.tsx # Poderes psíquicos (funcional, catálogo incompleto)
+          XpTab.tsx               # Tabla de coste de atributos + log XP (funcional)
+          CaidosTab.tsx           # Personajes caídos en combate (funcional)
           atributos/
             AttributeCard.tsx   # Card de atributo individual
             CharInfoGrid.tsx    # Grid de info del personaje
-            WoundsPanel.tsx     # Panel de heridas/vida
+            WoundsPanel.tsx     # Panel de heridas/destino/vida
       services/
-        fichaSlice.ts     # Redux slice: addCharacter, selectCharacter,
-                          # updateCharInfo, updateAttribute, updateWounds,
-                          # updateFate, addXpEntry, removeXpEntry
+        fichaSlice.ts          # CRUD personajes, atributos, heridas, destino, XP, killCharacter
+        fichaComputed.ts       # Cálculos derivados (PE gastado, rango, movimiento)
+        fichaImportMapper.ts   # Import de fichas legacy (HTML) a formato React
       types/
-        fichaTypes.ts     # Character, CharacterInfo, AttributeValues,
-                          # VitalState, XpLogEntry
+        fichaTypes.ts     # Character, CharacterInfo, AttributeValues, VitalState, XpLogEntry
       index.ts            # Barrel export: FichaView
     proyectos/
       components/
-        ProyectosView.tsx # Placeholder "HOLA MUNDO — PROYECTOS"
-      index.ts
+        ProyectosView.tsx    # Vista contenedora
+        StatsBar.tsx         # Stats (total/activos/completados/en espera)
+        TimePanel.tsx        # Avanzar tiempo + export/import
+        AddProjectForm.tsx   # Alta de proyecto
+        ProjectsGrid.tsx     # Grid filtrable + empty state
+        ProjectCard.tsx      # Card de proyecto individual
+      services/
+        proyectosSlice.ts    # advanceTime, addProject, deleteProject, setProjectStatus, etc.
+      types/
+        proyectosTypes.ts    # Project, ProjectStatus, ProjectCategory
+      index.ts             # Barrel export: ProyectosView
     sequito/
       components/
-        SequitoView.tsx   # Placeholder "HOLA MUNDO — SÉQUITO"
-      index.ts
+        SequitoView.tsx      # Contenedor con tabs (séquito/armas/implantes/mecadendrites/equipo/armaduras)
+        LayerBoard.tsx        # Tablero de capas con dnd-kit
+        LayerRow.tsx           # Capa individual (renombrar, reordenar, eliminar)
+        SequitoCard.tsx         # Card de séquito individual
+        AddSeqModal.tsx        # Alta individual / en masa
+        SeqEditModal.tsx       # Edición de séquito: stats, equipo, vivo/muerto
+        tabs/
+          ArmoryTab.tsx        # Armas (stock/equipados/disponibles)
+          InventoryTab.tsx     # Implantes/mecadendrites/equipo/armaduras (mismo patrón)
+      services/
+        sequitoSlice.ts      # Capas, séquito, inventario, asignación de equipo
+      types/
+        sequitoTypes.ts      # Layer, Sequito, InventoryItem
+      index.ts              # Barrel export: SequitoView
   shared/
     components/
       TabBar/
         TabBar.tsx        # Barra de navegación inferior (ficha / proyectos / séquito)
         index.ts          # Barrel export: TabBar, TabId
+      ConfirmModal/       # Modal de confirmación genérico
+      Toast/              # Sistema de notificaciones toast
+    hooks/
+      useConfirm.ts       # Hook para ConfirmModal
+      useToast.ts         # Hook para Toast
   App.tsx                 # Tab state (useState), renderiza vista activa + TabBar
-  main.tsx                # Entry point: <Provider store><App /></Provider>
+  main.tsx                # Entry point: <Provider store><PersistGate><App /></PersistGate></Provider>
   index.css               # Tema Tailwind v4 + estilos base
 ```
 
 Los módulos son independientes entre sí. Solo se importa desde el `index.ts` de cada módulo, nunca directamente desde sus carpetas internas.
 
-### Estado actual del módulo `ficha`
+### Estado actual de los módulos
 
-- **Redux state funcional**: CRUD de personajes, gestión de atributos, heridas, puntos de destino, log de XP
-- **CharacterHeader**: selector con lista desplegable + modal de creación
-- **AtributosTab**: completamente funcional (CharInfoGrid + 9 AttributeCards + WoundsPanel)
-- **Todos los demás tabs**: vacíos (componentes scaffold sin contenido)
-- **Datos del sistema** (`skills.ts`, `talents.ts`, `psychicPowers.ts`): vacíos, pendientes de implementar
+Los 3 módulos están funcionales end-to-end (CRUD, persistencia, UI). Lo que queda pendiente es fidelidad de contenido/reglas frente a los HTML de referencia — ver siguiente sección.
+
+### Pendientes de migración (evaluación 2026-08-05 vs HTML de referencia)
+
+Decisiones ya tomadas con el usuario, pendientes de implementar:
+
+- **`ficha` — modelo de personajes**: recrear el modelo original de 2 slots fijos (Inquisidor / Séquito) con tab "Inquisidor" exclusivo (rangos 9-16), sustituyendo la lista abierta actual. Solo el Séquito puede "caer en combate".
+- **`ficha` — herencia de PE al morir**: al marcar caído en combate, heredar el 100% del PE al nuevo acólito y crearlo automáticamente (hoy hereda 50% y no crea reemplazo).
+- **`ficha` — compra de atributos**: mantener el input libre actual (no se implementan los "dots" del HTML), pero corregir `computeXpSpent` para que calcule el coste PE real a partir del valor introducido (hoy el cálculo asume el sistema de dots del HTML y queda desacoplado).
+- **Catálogos de datos incompletos** (`core/data/darkheresy/`), compartidos por `ficha` y `sequito`: `talents.ts` (25 de 155 canónicos, con nombres inventados que rompen el filtro "solo carrera"), `psychicPowers.ts` (25 de 82), `weapons.ts` (20 de 55, falta campo de grupo), `armor.ts` (8 de 15), `gear.ts` (19 de 29, notas vacías), `mechadendrites.ts`/`augmentations.ts` (nº correcto pero contenido reinventado).
+- **`ficha` — Armería**: falta filtro por grupo de armas/armaduras/gear (bloqueado por el campo "grupo" que falta en `weapons.ts`).
+- **`ficha` — selector de rama de carrera**: cuando dos rangos comparten tramo de PE, el HTML deja elegir rama; React se queda con el último de la lista.
+- **`sequito` — flujo "+ del libro"**: no existe modal de catálogo en `ArmoryTab`/`InventoryTab`; alta de items es solo manual. Bloqueado también por los catálogos incompletos de arriba.
+- **`sequito` — edición de item existente**: el reducer `updateInventoryItem` existe pero no está conectado a ningún formulario.
+- Pendientes menores: import sin confirmación en `proyectos`, contador de "activos" en header, UI heridas/destino como iconos clicables en vez de inputs, bug en `fichaImportMapper.ts` (`acolito` fallback nunca se dispara), abreviaturas de atributos en español.
 
 ### Tests
 
@@ -174,15 +217,17 @@ No hay React Router configurado. La navegación funciona así:
 
 ```typescript
 // src/core/store/store.ts
-configureStore({
-  reducer: {
-    ficha: fichaReducer   // único slice actual
-  }
+const rootReducer = combineReducers({
+  ficha: fichaReducer,
+  proyectos: proyectosReducer,
+  sequito: sequitoReducer,
 })
+// persistido con redux-persist (key: 'cogitador-root', storage: localStorage)
 ```
 
 - Usar siempre `useAppDispatch` y `useAppSelector` de `src/core/store/hooks.ts` (tipados)
 - Cuando se añadan nuevos módulos con estado, añadir su reducer aquí
+- El estado persiste automáticamente en localStorage vía redux-persist — no hace falta guardar manualmente
 
 ---
 
