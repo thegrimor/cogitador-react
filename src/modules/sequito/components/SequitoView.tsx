@@ -90,16 +90,6 @@ export function SequitoView() {
 
   return (
     <div className="flex flex-col h-full bg-surface overflow-hidden">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rim-bright bg-surface-2 px-3 py-1.5 flex-shrink-0 font-mono text-[11px] text-parchment-dim">
-        <span>SÉQUITO TOTAL <span className="text-gold font-bold">{totalCount}</span></span>
-        <span className="text-rim-bright">|</span>
-        <span>ACTIVOS <span className="text-neon font-bold">{aliveCount}</span></span>
-        <span className="text-rim-bright">|</span>
-        <span>CAÍDOS <span className="text-crimson-bright font-bold">{deadCount}</span></span>
-        <span className="text-rim-bright">|</span>
-        <span>CAPAS <span className="text-gold font-bold">{groupCount}</span></span>
-      </div>
-
       <div className="flex items-center gap-2 px-3 py-2 border-b border-rim-bright bg-surface-2 flex-shrink-0 flex-wrap">
         <input
           type="text"
@@ -150,13 +140,24 @@ export function SequitoView() {
 
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'sequito' && (
-          <div className="p-2">
-            <LayerBoard
-              searchQuery={searchQuery}
-              onAddSeq={layerId => setAddSeqLayerId(layerId)}
-              onEditSeq={seqId => setEditSeqId(seqId)}
-            />
-          </div>
+          <>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rim-bright bg-surface-2 px-3 py-1.5 font-mono text-[11px] text-parchment-dim">
+              <span>SÉQUITO TOTAL <span className="text-gold font-bold">{totalCount}</span></span>
+              <span className="text-rim-bright">|</span>
+              <span>ACTIVOS <span className="text-neon font-bold">{aliveCount}</span></span>
+              <span className="text-rim-bright">|</span>
+              <span>CAÍDOS <span className="text-crimson-bright font-bold">{deadCount}</span></span>
+              <span className="text-rim-bright">|</span>
+              <span>CAPAS <span className="text-gold font-bold">{groupCount}</span></span>
+            </div>
+            <div className="p-2">
+              <LayerBoard
+                searchQuery={searchQuery}
+                onAddSeq={layerId => setAddSeqLayerId(layerId)}
+                onEditSeq={seqId => setEditSeqId(seqId)}
+              />
+            </div>
+          </>
         )}
         {activeTab === 'armory' && <ArmoryTab />}
         {activeTab === 'implants' && <InventoryTab cat="implants" label="IMPLANTE" />}
