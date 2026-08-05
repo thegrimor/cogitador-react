@@ -30,12 +30,38 @@ export function InquisidorTab() {
   if (inqRank === null) {
     return (
       <div className="flex flex-col gap-0">
-        <div className="border-b border-rim bg-crimson/5 px-4 py-2">
-          <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Inquisidor</h3>
+        <div className="border-b border-rim bg-crimson/5 px-4 py-2 flex items-center justify-between">
+          <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Talentos de Inquisidor</h3>
+          <span className="font-display text-[12px] text-parchment-dim">Sin rango</span>
         </div>
-        <div className="px-4 py-10 text-center">
-          <p className="font-mono text-xs text-parchment-dim">
-            El rango de Inquisidor se desbloquea en el 6º rango de la carrera.
+
+        <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+          <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Selector Rápido</h4>
+          <div className="flex flex-wrap gap-2 items-end">
+            <select
+              disabled
+              className="max-w-[160px] shrink-0 bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-2 py-2 outline-none opacity-60"
+            >
+              <option>Todos los tipos</option>
+            </select>
+            <select
+              disabled
+              className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment-dim font-mono text-sm px-3 py-2 outline-none opacity-60"
+            >
+              <option>— Sin rango desbloqueado —</option>
+            </select>
+            <button
+              disabled
+              className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white opacity-40 cursor-not-allowed shrink-0"
+            >
+              Añadir
+            </button>
+          </div>
+        </div>
+
+        <div className="mx-4 mt-3 bg-surface border border-gold border-l-4 border-l-gold-bright px-3.5 py-3">
+          <p className="font-mono text-xs text-parchment leading-relaxed">
+            El rango de Inquisidor se desbloquea en el 6º rango de acólito.
           </p>
         </div>
       </div>
@@ -70,32 +96,32 @@ export function InquisidorTab() {
   return (
     <div className="flex flex-col gap-0">
       <div className="border-b border-rim bg-crimson/5 px-4 py-2 flex items-center justify-between">
-        <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Inquisidor</h3>
-        <span className="font-display text-[12px] text-gold">Rango {inqRank}</span>
+        <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Talentos de Inquisidor</h3>
+        <span className="font-display text-[12px] text-gold-bright">Rango {inqRank}</span>
       </div>
 
       {inqRank === 9 && rank9?.note && (
-        <div className="px-4 py-3 bg-surface border-b border-rim">
-          <p className="font-display text-[8px] uppercase tracking-[2px] text-gold mb-1">⚜ Rasgo especial del rango 9</p>
-          <p className="font-mono text-[11px] text-parchment-dim">{rank9.note}</p>
+        <div className="mx-4 mt-3 bg-surface border border-gold border-l-4 border-l-gold-bright px-3.5 py-3">
+          <p className="font-display text-[8px] uppercase tracking-[2px] text-gold mb-1.5">⚜ Rasgo especial del rango 9</p>
+          <p className="font-mono text-xs text-parchment leading-relaxed">{rank9.note}</p>
         </div>
       )}
 
-      <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-        <select
-          value={typeFilter}
-          onChange={e => { setTypeFilter(e.target.value); setSelName('') }}
-          className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-        >
-          <option value="">— Todos los tipos —</option>
-          {types.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
-
-        <div className="flex gap-2">
+      <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+        <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Selector Rápido</h4>
+        <div className="flex flex-wrap gap-2 items-end">
+          <select
+            value={typeFilter}
+            onChange={e => { setTypeFilter(e.target.value); setSelName('') }}
+            className="max-w-[160px] shrink-0 bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-2 py-2 outline-none focus:border-crimson transition-colors"
+          >
+            <option value="">Todos los tipos</option>
+            {types.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
           <select
             value={selName}
             onChange={e => setSelName(e.target.value)}
-            className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+            className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
           >
             <option value="">— Seleccionar mejora —</option>
             {available.map(m => (
@@ -105,7 +131,7 @@ export function InquisidorTab() {
           <button
             onClick={handleAdd}
             disabled={!selected}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
           >
             Añadir
           </button>

@@ -130,26 +130,33 @@ export function ArmeriaTab() {
 
       {/* Arsenal — apilado con Armadura y Equipo, igual que el HTML legacy (sin sub-tabs) */}
       <div className="flex flex-col gap-0">
-        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5 flex items-center justify-between gap-2">
           <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Arsenal</h4>
+          <button
+            onClick={() => setShowWeaponForm(v => !v)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+          >
+            + Manual
+          </button>
         </div>
         <div className="flex flex-col gap-0">
-          <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-            <select
-              value={weaponGroupFilter}
-              onChange={e => { setWeaponGroupFilter(e.target.value); setSelWeapon('') }}
-              className="bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-3 py-1.5 outline-none focus:border-crimson transition-colors"
-            >
-              <option value="">— Filtrar por grupo —</option>
-              {weaponGroups.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-            <div className="flex gap-2">
+          <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+            <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Armas del Libro</h4>
+            <div className="flex flex-wrap gap-2 items-end">
+              <select
+                value={weaponGroupFilter}
+                onChange={e => { setWeaponGroupFilter(e.target.value); setSelWeapon('') }}
+                className="max-w-[140px] shrink-0 bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-2 py-2 outline-none focus:border-crimson transition-colors"
+              >
+                <option value="">Todos los grupos</option>
+                {weaponGroups.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
               <select
                 value={selWeapon}
                 onChange={e => setSelWeapon(e.target.value)}
-                className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
-                <option value="">— Seleccionar arma —</option>
+                <option value="">— Selecciona arma —</option>
                 {filteredWeapons.map(w => (
                   <option key={w.name} value={w.name}>{w.name} [{w.cls}]</option>
                 ))}
@@ -157,7 +164,7 @@ export function ArmeriaTab() {
               <button
                 onClick={addQuickWeapon}
                 disabled={!selWeaponDef}
-                className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
               >
                 Añadir
               </button>
@@ -174,50 +181,44 @@ export function ArmeriaTab() {
                 {selWeaponDef.notes && <span className="col-span-2">Notas: <span className="text-parchment">{selWeaponDef.notes}</span></span>}
               </div>
             )}
-            <button
-              onClick={() => setShowWeaponForm(v => !v)}
-              className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment border border-rim-bright px-3 py-1.5 transition-colors text-left"
-            >
-              {showWeaponForm ? '▲ Ocultar formulario manual' : '▼ Añadir manualmente'}
-            </button>
-            {showWeaponForm && (
-              <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    placeholder="Nombre"
-                    value={weaponForm.name}
-                    onChange={e => setWeaponForm(f => ({ ...f, name: e.target.value }))}
-                    className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-                  />
-                  <select
-                    value={weaponForm.cls}
-                    onChange={e => setWeaponForm(f => ({ ...f, cls: e.target.value }))}
-                    className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-                  >
-                    {WEAPON_CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <select
-                    value={weaponForm.dmgType}
-                    onChange={e => setWeaponForm(f => ({ ...f, dmgType: e.target.value }))}
-                    className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-                  >
-                    {DMG_TYPES.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <input placeholder="Alcance" value={weaponForm.range} onChange={e => setWeaponForm(f => ({ ...f, range: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <input placeholder="RoF" value={weaponForm.rof} onChange={e => setWeaponForm(f => ({ ...f, rof: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <input placeholder="Daño" value={weaponForm.dmg} onChange={e => setWeaponForm(f => ({ ...f, dmg: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <input type="number" placeholder="Pen" value={weaponForm.pen} onChange={e => setWeaponForm(f => ({ ...f, pen: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <input placeholder="Cargador" value={weaponForm.clip} onChange={e => setWeaponForm(f => ({ ...f, clip: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <input placeholder="Notas" value={weaponForm.notes} onChange={e => setWeaponForm(f => ({ ...f, notes: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                </div>
-                <button onClick={addManualWeapon} disabled={!weaponForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
-              </div>
-            )}
           </div>
+          {showWeaponForm && (
+            <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  placeholder="Nombre"
+                  value={weaponForm.name}
+                  onChange={e => setWeaponForm(f => ({ ...f, name: e.target.value }))}
+                  className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                />
+                <select
+                  value={weaponForm.cls}
+                  onChange={e => setWeaponForm(f => ({ ...f, cls: e.target.value }))}
+                  className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                >
+                  {WEAPON_CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <select
+                  value={weaponForm.dmgType}
+                  onChange={e => setWeaponForm(f => ({ ...f, dmgType: e.target.value }))}
+                  className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                >
+                  {DMG_TYPES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <input placeholder="Alcance" value={weaponForm.range} onChange={e => setWeaponForm(f => ({ ...f, range: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <input placeholder="RoF" value={weaponForm.rof} onChange={e => setWeaponForm(f => ({ ...f, rof: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <input placeholder="Daño" value={weaponForm.dmg} onChange={e => setWeaponForm(f => ({ ...f, dmg: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <input type="number" placeholder="Pen" value={weaponForm.pen} onChange={e => setWeaponForm(f => ({ ...f, pen: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <input placeholder="Cargador" value={weaponForm.clip} onChange={e => setWeaponForm(f => ({ ...f, clip: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <input placeholder="Notas" value={weaponForm.notes} onChange={e => setWeaponForm(f => ({ ...f, notes: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+              </div>
+              <button onClick={addManualWeapon} disabled={!weaponForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
+            </div>
+          )}
           {char.weapons.length === 0 ? (
             <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin armas registradas</p></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim">
+            <div className="flex flex-col divide-y divide-rim mt-3">
               {char.weapons.map(w => (
                 <div key={w.id} className="flex items-start gap-2 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
                   <div className="flex-1 flex flex-col gap-1 min-w-0">
@@ -245,31 +246,38 @@ export function ArmeriaTab() {
 
       {/* Armadura */}
       <div className="flex flex-col gap-0">
-        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5 flex items-center justify-between gap-2">
           <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Armadura</h4>
+          <button
+            onClick={() => setShowArmorForm(v => !v)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+          >
+            + Manual
+          </button>
         </div>
         <div className="flex flex-col gap-0">
-          <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-            <select
-              value={armorGroupFilter}
-              onChange={e => { setArmorGroupFilter(e.target.value); setSelArmor('') }}
-              className="bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-3 py-1.5 outline-none focus:border-crimson transition-colors"
-            >
-              <option value="">— Filtrar por grupo —</option>
-              {armorGroups.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-            <div className="flex gap-2">
+          <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+            <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Armaduras del Libro</h4>
+            <div className="flex flex-wrap gap-2 items-end">
+              <select
+                value={armorGroupFilter}
+                onChange={e => { setArmorGroupFilter(e.target.value); setSelArmor('') }}
+                className="max-w-[140px] shrink-0 bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-2 py-2 outline-none focus:border-crimson transition-colors"
+              >
+                <option value="">Todos los grupos</option>
+                {armorGroups.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
               <select
                 value={selArmor}
                 onChange={e => setSelArmor(e.target.value)}
-                className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
                 <option value="">— Seleccionar armadura —</option>
                 {filteredArmors.map(a => (
                   <option key={a.name} value={a.name}>{a.name} [{a.type}]</option>
                 ))}
               </select>
-              <button onClick={addQuickArmor} disabled={!selArmorDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
+              <button onClick={addQuickArmor} disabled={!selArmorDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
             </div>
             {selArmorDef && (
               <div className="grid grid-cols-4 gap-1 bg-surface border border-rim px-3 py-2 font-mono text-[10px] text-parchment-dim">
@@ -280,27 +288,24 @@ export function ArmeriaTab() {
                 {selArmorDef.notes && <span className="col-span-4">Notas: <span className="text-parchment">{selArmorDef.notes}</span></span>}
               </div>
             )}
-            <button onClick={() => setShowArmorForm(v => !v)} className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment border border-rim-bright px-3 py-1.5 transition-colors text-left">
-              {showArmorForm ? '▲ Ocultar formulario manual' : '▼ Añadir manualmente'}
-            </button>
-            {showArmorForm && (
-              <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
-                <input placeholder="Nombre" value={armorForm.name} onChange={e => setArmorForm(f => ({ ...f, name: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                <div className="grid grid-cols-4 gap-2">
-                  <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Cab.</label><input type="number" value={armorForm.head} onChange={e => setArmorForm(f => ({ ...f, head: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
-                  <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Tors.</label><input type="number" value={armorForm.body} onChange={e => setArmorForm(f => ({ ...f, body: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
-                  <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Braz.</label><input type="number" value={armorForm.arms} onChange={e => setArmorForm(f => ({ ...f, arms: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
-                  <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Pier.</label><input type="number" value={armorForm.legs} onChange={e => setArmorForm(f => ({ ...f, legs: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
-                </div>
-                <input placeholder="Notas" value={armorForm.notes} onChange={e => setArmorForm(f => ({ ...f, notes: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                <button onClick={addManualArmor} disabled={!armorForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
-              </div>
-            )}
           </div>
+          {showArmorForm && (
+            <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
+              <input placeholder="Nombre" value={armorForm.name} onChange={e => setArmorForm(f => ({ ...f, name: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+              <div className="grid grid-cols-4 gap-2">
+                <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Cab.</label><input type="number" value={armorForm.head} onChange={e => setArmorForm(f => ({ ...f, head: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
+                <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Tors.</label><input type="number" value={armorForm.body} onChange={e => setArmorForm(f => ({ ...f, body: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
+                <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Braz.</label><input type="number" value={armorForm.arms} onChange={e => setArmorForm(f => ({ ...f, arms: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
+                <div className="flex flex-col gap-0.5"><label className="font-mono text-[10px] text-parchment-dim">Pier.</label><input type="number" value={armorForm.legs} onChange={e => setArmorForm(f => ({ ...f, legs: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-1.5 outline-none focus:border-crimson transition-colors text-center" /></div>
+              </div>
+              <input placeholder="Notas" value={armorForm.notes} onChange={e => setArmorForm(f => ({ ...f, notes: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+              <button onClick={addManualArmor} disabled={!armorForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
+            </div>
+          )}
           {char.armors.length === 0 ? (
             <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin armaduras registradas</p></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim">
+            <div className="flex flex-col divide-y divide-rim mt-3">
               {char.armors.map(armor => (
                 <div key={armor.id} className="flex items-start gap-2 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
                   <div className="flex-1 flex flex-col gap-1 min-w-0">
@@ -323,50 +328,54 @@ export function ArmeriaTab() {
 
       {/* Equipo & Pertrechos */}
       <div className="flex flex-col gap-0">
-        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5 flex items-center justify-between gap-2">
           <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Equipo & Pertrechos</h4>
+          <button
+            onClick={() => setShowGearForm(v => !v)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+          >
+            + Manual
+          </button>
         </div>
         <div className="flex flex-col gap-0">
-          <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-            <select
-              value={gearGroupFilter}
-              onChange={e => { setGearGroupFilter(e.target.value); setSelGear('') }}
-              className="bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-3 py-1.5 outline-none focus:border-crimson transition-colors"
-            >
-              <option value="">— Filtrar por grupo —</option>
-              {gearGroups.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-            <div className="flex gap-2">
+          <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+            <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Equipo del Libro</h4>
+            <div className="flex flex-wrap gap-2 items-end">
+              <select
+                value={gearGroupFilter}
+                onChange={e => { setGearGroupFilter(e.target.value); setSelGear('') }}
+                className="max-w-[140px] shrink-0 bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-2 py-2 outline-none focus:border-crimson transition-colors"
+              >
+                <option value="">Todos los grupos</option>
+                {gearGroups.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
               <select
                 value={selGear}
                 onChange={e => setSelGear(e.target.value)}
-                className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
                 <option value="">— Seleccionar objeto —</option>
                 {filteredGear.map(g => (
                   <option key={g.name} value={g.name}>{g.name} [{g.category}]</option>
                 ))}
               </select>
-              <button onClick={addQuickGear} disabled={!selGearDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
+              <button onClick={addQuickGear} disabled={!selGearDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
             </div>
-            <button onClick={() => setShowGearForm(v => !v)} className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment border border-rim-bright px-3 py-1.5 transition-colors text-left">
-              {showGearForm ? '▲ Ocultar formulario manual' : '▼ Añadir manualmente'}
-            </button>
-            {showGearForm && (
-              <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
-                <div className="grid grid-cols-3 gap-2">
-                  <input placeholder="Nombre" value={gearForm.name} onChange={e => setGearForm(f => ({ ...f, name: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <input type="number" placeholder="Qty" value={gearForm.qty} onChange={e => setGearForm(f => ({ ...f, qty: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors text-center" />
-                </div>
-                <input placeholder="Notas" value={gearForm.notes} onChange={e => setGearForm(f => ({ ...f, notes: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                <button onClick={addManualGear} disabled={!gearForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
-              </div>
-            )}
           </div>
+          {showGearForm && (
+            <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
+              <div className="grid grid-cols-3 gap-2">
+                <input placeholder="Nombre" value={gearForm.name} onChange={e => setGearForm(f => ({ ...f, name: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <input type="number" placeholder="Qty" value={gearForm.qty} onChange={e => setGearForm(f => ({ ...f, qty: Number(e.target.value) }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors text-center" />
+              </div>
+              <input placeholder="Notas" value={gearForm.notes} onChange={e => setGearForm(f => ({ ...f, notes: e.target.value }))} className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+              <button onClick={addManualGear} disabled={!gearForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
+            </div>
+          )}
           {char.gear.length === 0 ? (
             <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin objetos registrados</p></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim">
+            <div className="flex flex-col divide-y divide-rim mt-3">
               {char.gear.map(item => (
                 <div key={item.id} className="flex items-center gap-3 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
                   <span className="font-mono text-[11px] text-gold min-w-[2rem] text-center">x{item.qty}</span>

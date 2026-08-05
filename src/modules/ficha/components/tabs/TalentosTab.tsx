@@ -92,12 +92,9 @@ export function TalentosTab() {
 
   return (
     <div className="flex flex-col gap-0">
-      <div className="border-b border-rim bg-crimson/5 px-4 py-2">
-        <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Talentos</h3>
-      </div>
-
-      <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-        <div className="flex gap-2 items-center justify-between">
+      <div className="border-b border-rim bg-crimson/5 px-4 py-2 flex items-center justify-between gap-2 flex-wrap">
+        <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">// Registro de Talentos</h3>
+        <div className="flex gap-1.5">
           <button
             onClick={() => dispatch(toggleFilterCareer(char!.id))}
             className={[
@@ -108,7 +105,7 @@ export function TalentosTab() {
             ].join(' ')}
             title={char.filterCareer ? 'Mostrar todos los talentos' : 'Solo talentos de carrera'}
           >
-            {char.filterCareer ? '🔒 Carrera' : '◻ Carrera'}
+            {char.filterCareer ? '🔒 Solo carrera' : '◻ Solo carrera'}
           </button>
           <button
             onClick={() => setShowManual(v => !v)}
@@ -117,31 +114,35 @@ export function TalentosTab() {
             + Añadir Manual
           </button>
         </div>
-        <div className="flex gap-2">
+      </div>
+
+      <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+        <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Selector Rápido del Libro</h4>
+        <div className="flex flex-wrap gap-2 items-end">
           <select
             value={selectedTalentName}
             onChange={e => setSelectedTalentName(e.target.value)}
-            className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+            className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
           >
-            <option value="">— Seleccionar talento —</option>
+            <option value="">— Selecciona talento del libro —</option>
             {filteredTalents.map(t => (
               <option key={t.name} value={t.name}>{t.name}</option>
             ))}
           </select>
-          <div className="flex flex-col gap-0.5 shrink-0">
+          <div className="flex flex-col gap-0.5 w-20 shrink-0">
             <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">Coste PE</span>
             <input
               type="number"
               value={quickXp}
               min={0}
               onChange={e => setQuickXp(Number(e.target.value) || 0)}
-              className="w-20 bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-2 py-1.5 outline-none focus:border-gold transition-colors"
+              className="w-full bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-2 py-1.5 outline-none focus:border-gold transition-colors"
             />
           </div>
           <button
             onClick={handleQuickAdd}
             disabled={!selectedDef}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0 self-end"
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
           >
             Añadir
           </button>
@@ -157,62 +158,62 @@ export function TalentosTab() {
             <p className="font-mono text-[11px] text-neon">{selectedDef.effect}</p>
           </div>
         )}
-
-        {showManual && (
-          <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
-            <input
-              placeholder="Nombre"
-              value={manual.name}
-              onChange={e => setManual(m => ({ ...m, name: e.target.value }))}
-              className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <select
-                value={manual.type}
-                onChange={e => setManual(m => ({ ...m, type: e.target.value }))}
-                className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-              >
-                {TALENT_TYPES.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-              <input
-                placeholder="Requisitos"
-                value={manual.req}
-                onChange={e => setManual(m => ({ ...m, req: e.target.value }))}
-                className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-              />
-            </div>
-            <textarea
-              placeholder="Descripción"
-              value={manual.desc}
-              onChange={e => setManual(m => ({ ...m, desc: e.target.value }))}
-              rows={2}
-              className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors resize-y"
-            />
-            <input
-              placeholder="Efecto"
-              value={manual.effect}
-              onChange={e => setManual(m => ({ ...m, effect: e.target.value }))}
-              className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-            />
-            <input
-              type="number"
-              placeholder="XP"
-              value={manual.xp}
-              onChange={e => setManual(m => ({ ...m, xp: Number(e.target.value) }))}
-              className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-            />
-            <button
-              onClick={handleManualAdd}
-              disabled={!manual.name.trim()}
-              className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Añadir Manual
-            </button>
-          </div>
-        )}
       </div>
+
+      {showManual && (
+        <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
+          <input
+            placeholder="Nombre"
+            value={manual.name}
+            onChange={e => setManual(m => ({ ...m, name: e.target.value }))}
+            className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={manual.type}
+              onChange={e => setManual(m => ({ ...m, type: e.target.value }))}
+              className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+            >
+              {TALENT_TYPES.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+            <input
+              placeholder="Requisitos"
+              value={manual.req}
+              onChange={e => setManual(m => ({ ...m, req: e.target.value }))}
+              className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+            />
+          </div>
+          <textarea
+            placeholder="Descripción"
+            value={manual.desc}
+            onChange={e => setManual(m => ({ ...m, desc: e.target.value }))}
+            rows={2}
+            className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors resize-y"
+          />
+          <input
+            placeholder="Efecto"
+            value={manual.effect}
+            onChange={e => setManual(m => ({ ...m, effect: e.target.value }))}
+            className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+          />
+          <input
+            type="number"
+            placeholder="XP"
+            value={manual.xp}
+            onChange={e => setManual(m => ({ ...m, xp: Number(e.target.value) }))}
+            className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+          />
+          <button
+            onClick={handleManualAdd}
+            disabled={!manual.name.trim()}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Añadir Manual
+          </button>
+        </div>
+      )}
 
       {char.talents.length === 0 ? (
         <div className="px-4 py-10 text-center">
