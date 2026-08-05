@@ -3,10 +3,11 @@ import { useAppDispatch } from '@/core/store/hooks'
 import { addCharacter } from '../services/fichaSlice'
 
 interface Props {
+  role: 'inquisidor' | 'sequito'
   onClose: () => void
 }
 
-export function CharacterCreateModal({ onClose }: Props) {
+export function CharacterCreateModal({ role, onClose }: Props) {
   const dispatch = useAppDispatch()
   const [form, setForm] = useState({
     name: '',
@@ -15,11 +16,15 @@ export function CharacterCreateModal({ onClose }: Props) {
     homeworld: '',
     experience: '0',
     xpSpent: '0',
+    ordo: '',
+    counterpart: '',
   })
+
+  const counterpartLabel = role === 'inquisidor' ? 'Acólito' : 'Inquisidor'
 
   function handleCreate() {
     if (!form.name.trim()) return
-    dispatch(addCharacter({ info: { ...form, name: form.name.trim() } }))
+    dispatch(addCharacter({ info: { ...form, name: form.name.trim(), role, branch: '' } }))
     onClose()
   }
 
@@ -34,7 +39,7 @@ export function CharacterCreateModal({ onClose }: Props) {
       >
         <div className="border-b border-rim-bright px-4 py-3">
           <p className="font-display text-[10px] uppercase tracking-[3px] text-crimson">
-            // Registrar Nuevo Operativo
+            // Registrar {role === 'inquisidor' ? 'Inquisidor' : 'Séquito'}
           </p>
         </div>
 
@@ -96,6 +101,36 @@ export function CharacterCreateModal({ onClose }: Props) {
               placeholder="Ej: Scintilla"
               className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {/* Ordo */}
+            <div className="flex flex-col gap-1">
+              <label className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim">
+                Ordo
+              </label>
+              <input
+                type="text"
+                value={form.ordo}
+                onChange={e => setForm(f => ({ ...f, ordo: e.target.value }))}
+                placeholder="Ej: Xenos"
+                className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+              />
+            </div>
+
+            {/* Contraparte (Acólito / Inquisidor) */}
+            <div className="flex flex-col gap-1">
+              <label className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim">
+                {counterpartLabel}
+              </label>
+              <input
+                type="text"
+                value={form.counterpart}
+                onChange={e => setForm(f => ({ ...f, counterpart: e.target.value }))}
+                placeholder={counterpartLabel}
+                className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+              />
+            </div>
           </div>
         </div>
 

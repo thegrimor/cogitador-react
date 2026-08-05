@@ -26,7 +26,7 @@ export function XpTab() {
   const total     = parseInt(char.info.experience) || 0
   const spent     = computeXpSpent(char)
   const available = total - spent
-  const rankInfo  = getRankForXP(char.info.career, spent)
+  const rankInfo  = getRankForXP(char.info.career, spent, char.info.branch)
   const attrCosts = getAttrCostsForCareer(char.info.career)
   const attrKeys  = ATTRIBUTES.map(a => a.key)
 

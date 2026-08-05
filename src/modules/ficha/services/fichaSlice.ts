@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import type {
   FichaState, Character, FallenCharacter, AttributeValues, XpLogEntry,
   Skill, Talent, Weapon, Armor, GearItem,
-  Mechadendrite, Augmentation, PsychicPower, CustomCurrency,
+  Mechadendrite, Augmentation, PsychicPower, CustomCurrency, InqMejora,
 } from '../types/fichaTypes'
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
 
@@ -20,7 +20,15 @@ function buildDefaultAttrs() {
 function buildDefaultCharacter(info: Character['info']): Character {
   return {
     id: uid(),
-    info: { ...info, experience: info.experience || '0', xpSpent: info.xpSpent || '0' },
+    info: {
+      ...info,
+      experience: info.experience || '0',
+      xpSpent: info.xpSpent || '0',
+      role: info.role || 'sequito',
+      ordo: info.ordo || '',
+      counterpart: info.counterpart || '',
+      branch: info.branch || '',
+    },
     attrs: buildDefaultAttrs(),
     wounds: { current: 0, max: 0 },
     fate:   { current: 0, max: 0 },
@@ -45,6 +53,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
     quickNotes: '',
     influenceGeneral: '',
     influencePlanetary: '',
+    inqMejoras: [],
   }
 }
 
@@ -59,13 +68,20 @@ export const fichaSlice = createSlice({
   initialState,
   reducers: {
     addCharacter(state, action: PayloadAction<Pick<Character, 'info'>>) {
+      const role = action.payload.info.role
+      // Modelo de 2 slots fijos: un Inquisidor y un Séquito, nunca dos del mismo rol
+      if (role && state.characters.some(c => c.info.role === role)) return
       const newChar = buildDefaultCharacter(action.payload.info)
       state.characters.push(newChar)
-      if (!state.activeCharacterId) state.activeCharacterId = newChar.id
+      state.activeCharacterId = newChar.id
     },
 
     importCharacter(state, action: PayloadAction<Character>) {
-      state.characters.push(action.payload)
+      // Modelo de 2 slots fijos: un personaje importado reemplaza al que ocupe su mismo rol
+      const role = action.payload.info.role
+      const existingIdx = state.characters.findIndex(c => c.info.role === role)
+      if (existingIdx !== -1) state.characters.splice(existingIdx, 1, action.payload)
+      else state.characters.push(action.payload)
       state.activeCharacterId = action.payload.id
     },
 
@@ -267,16 +283,36 @@ export const fichaSlice = createSlice({
       const idx = state.characters.findIndex(c => c.id === action.payload)
       if (idx === -1) return
       const char = state.characters[idx]
+      // Solo el Séquito puede caer en combate — el Inquisidor no tiene reemplazo
+      if (char.info.role !== 'sequito') return
+      const xpInherited = parseInt(char.info.experience) || 0
       const fallen: FallenCharacter = {
         ...char,
         diedAt: new Date().toLocaleDateString('es-ES'),
-        xpInherited: Math.floor((parseInt(char.info.experience) || 0) * 0.5),
+        xpInherited,
       }
       state.fallen.push(fallen)
       state.characters.splice(idx, 1)
-      if (state.activeCharacterId === action.payload) {
-        state.activeCharacterId = state.characters[0]?.id ?? null
-      }
+      // Nuevo Séquito en blanco que hereda el 100% del PE del caído
+      const replacement = buildDefaultCharacter({
+        name: '', rank: '1', career: char.info.career, homeworld: '',
+        experience: String(xpInherited), xpSpent: '0',
+        role: 'sequito', ordo: char.info.ordo, counterpart: char.info.counterpart, branch: '',
+      })
+      state.characters.push(replacement)
+      state.activeCharacterId = replacement.id
+    },
+
+    addInqMejora(state, action: PayloadAction<{ charId: string; mejora: Omit<InqMejora, 'id'> }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (!char) return
+      if (!char.inqMejoras) char.inqMejoras = [] // personajes persistidos antes de esta migración
+      if (char.inqMejoras.some(m => m.name === action.payload.mejora.name)) return
+      char.inqMejoras.push({ id: uid(), ...action.payload.mejora })
+    },
+    removeInqMejora(state, action: PayloadAction<{ charId: string; mejoraId: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (char) char.inqMejoras = (char.inqMejoras ?? []).filter(m => m.id !== action.payload.mejoraId)
     },
   },
 })
@@ -296,6 +332,7 @@ export const {
   updateMoney, addCurrency, updateCurrency, removeCurrency,
   updateNotes,
   deleteCharacter, toggleFilterCareer, killCharacter,
+  addInqMejora, removeInqMejora,
 } = fichaSlice.actions
 
 export default fichaSlice.reducer

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAppSelector } from '@/core/store/hooks'
 import { CharacterHeader } from './CharacterHeader'
 import { ExperiencePanel } from './ExperiencePanel'
 import { AtributosTab } from './tabs/AtributosTab'
@@ -9,6 +10,7 @@ import { EquipoTab } from './tabs/EquipoTab'
 import { MejorasTab } from './tabs/MejorasTab'
 import { PoderesPsiquicosTab } from './tabs/PoderesPsiquicosTab'
 import { XpTab } from './tabs/XpTab'
+import { InquisidorTab } from './tabs/InquisidorTab'
 import { CaidosTab } from './tabs/CaidosTab'
 
 type FichaTabId =
@@ -20,6 +22,7 @@ type FichaTabId =
   | 'mejoras'
   | 'poderes'
   | 'xp'
+  | 'inquisidor'
   | 'caidos'
 
 interface FichaTab {
@@ -36,6 +39,7 @@ const TABS: FichaTab[] = [
   { id: 'mejoras',     label: 'Mejoras'  },
   { id: 'poderes',     label: 'Psíq.'    },
   { id: 'xp',          label: 'XP'       },
+  { id: 'inquisidor',  label: 'Inquis.'  },
   { id: 'caidos',      label: 'Caídos'   },
 ]
 
@@ -48,11 +52,21 @@ const TAB_CONTENT: Record<FichaTabId, React.ReactNode> = {
   mejoras:     <MejorasTab />,
   poderes:     <PoderesPsiquicosTab />,
   xp:          <XpTab />,
+  inquisidor:  <InquisidorTab />,
   caidos:      <CaidosTab />,
 }
 
 export function FichaView() {
   const [activeTab, setActiveTab] = useState<FichaTabId>('atributos')
+  const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
+  const activeChar = characters.find(c => c.id === activeCharacterId)
+
+  // El tab Inquisidor solo es visible para el slot con role='inquisidor'
+  const visibleTabs = TABS.filter(t => t.id !== 'inquisidor' || activeChar?.info.role === 'inquisidor')
+  // Si el personaje activo cambia y deja de ser Inquisidor, no nos quedamos en un tab oculto
+  const effectiveTab: FichaTabId = activeTab === 'inquisidor' && activeChar?.info.role !== 'inquisidor'
+    ? 'atributos'
+    : activeTab
 
   return (
     <div className="flex flex-col flex-1">
@@ -61,8 +75,8 @@ export function FichaView() {
 
       {/* Tab bar interno de ficha */}
       <div className="flex overflow-x-auto border-b border-rim-bright bg-surface-2 scrollbar-none">
-        {TABS.map((tab) => {
-          const isActive = tab.id === activeTab
+        {visibleTabs.map((tab) => {
+          const isActive = tab.id === effectiveTab
           return (
             <button
               key={tab.id}
@@ -82,7 +96,7 @@ export function FichaView() {
 
       {/* Contenido del tab activo */}
       <div className="flex flex-col flex-1">
-        {TAB_CONTENT[activeTab]}
+        {TAB_CONTENT[effectiveTab]}
       </div>
     </div>
   )

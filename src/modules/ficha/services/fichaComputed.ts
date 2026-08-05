@@ -7,13 +7,18 @@ export function computeXpSpent(char: Character): number {
 
   char.skills.forEach(s => { total += s.xp || 0 })
   char.talents.forEach(t => { total += t.xp || 0 })
+  // ?? [] — personajes persistidos antes de esta migración no tienen inqMejoras
+  ;(char.inqMejoras ?? []).forEach(m => { if (m.cost > 0) total += m.cost })
 
   const costs = ATTR_ADVANCE_COSTS[char.info.career]
   if (costs) {
     ATTRIBUTES.forEach(def => {
       const advances = char.attrs[def.key]?.advances || 0
+      // El input es libre (no "dots" del HTML): cada 5 puntos de avance equivale a un dot
+      // comprado, igual que la migración del propio HTML legacy (Math.round(advances/5)).
+      const dots = Math.min(4, Math.round(advances / 5))
       const attrCosts = costs[def.key] ?? []
-      for (let i = 0; i < advances; i++) {
+      for (let i = 0; i < dots; i++) {
         const c = attrCosts[i]
         if (c != null) total += c
       }

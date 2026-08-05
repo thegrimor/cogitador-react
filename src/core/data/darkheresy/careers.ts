@@ -246,7 +246,7 @@ export const CAREER_RANKS_DATA: Record<string, Record<string, string[]>> = {
   'Psíquico Imperial': {},
 }
 
-export function getRankForXP(profession: string, xpSpent: number): CareerRank | null {
+export function getRankForXP(profession: string, xpSpent: number, branch?: string | null): CareerRank | null {
   const ranks = CAREERS_DATA[profession]
   if (!ranks) return null
   let best = ranks[0]
@@ -255,7 +255,41 @@ export function getRankForXP(profession: string, xpSpent: number): CareerRank | 
     if (xpSpent >= peStart) best = r
     else break
   }
-  return best
+  // Sin rama elegida: se mantiene el comportamiento previo (última rama del tramo)
+  if (!branch) return best
+  const siblings = ranks.filter(r => r.pe === best.pe)
+  if (siblings.length <= 1) return best
+  return siblings.find(r => r.rank === branch) ?? best
+}
+
+// Ramas disponibles cuando dos o más rangos comparten tramo de PE (selector de rama)
+export function getRankSiblings(profession: string, xpSpent: number): CareerRank[] {
+  const ranks = CAREERS_DATA[profession]
+  if (!ranks || !ranks.length) return []
+  let best = ranks[0]
+  for (const r of ranks) {
+    const peStart = parseInt(r.pe.replace(/\./g, '').split('-')[0]) || 0
+    if (xpSpent >= peStart) best = r
+    else break
+  }
+  return ranks.filter(r => r.pe === best.pe)
+}
+
+// Rango de Inquisidor (9-16) derivado del índice de rango dentro de la carrera del personaje.
+// Se desbloquea en el 6º rango (índice 5); los 2 últimos rangos de cualquier carrera
+// equivalen siempre a Inquisidor Maestro (15) y Heroico (16).
+export function getInquisidorRank(profession: string, xpSpent: number, branch?: string | null): number | null {
+  const ranks = CAREERS_DATA[profession]
+  if (!ranks || !ranks.length) return null
+  const current = getRankForXP(profession, xpSpent, branch)
+  if (!current) return null
+  const rankIdx = ranks.findIndex(r => r.rank === current.rank)
+  if (rankIdx < 0) return null
+  const total = ranks.length
+  if (rankIdx === total - 1) return 16
+  if (rankIdx === total - 2) return 15
+  if (rankIdx < 5) return null
+  return Math.min(rankIdx + 4, 14)
 }
 
 export function getAttrCostsForCareer(profession: string): Record<string, Array<number | null>> {

@@ -58,14 +58,17 @@ export function ArmeriaTab() {
   const [sub, setSub] = useState<SubTab>('armas')
 
   const [selWeapon, setSelWeapon] = useState('')
+  const [weaponGroupFilter, setWeaponGroupFilter] = useState('')
   const [showWeaponForm, setShowWeaponForm] = useState(false)
   const [weaponForm, setWeaponForm] = useState<WeaponForm>(EMPTY_WEAPON)
 
   const [selArmor, setSelArmor] = useState('')
+  const [armorGroupFilter, setArmorGroupFilter] = useState('')
   const [showArmorForm, setShowArmorForm] = useState(false)
   const [armorForm, setArmorForm] = useState<ArmorForm>(EMPTY_ARMOR)
 
   const [selGear, setSelGear] = useState('')
+  const [gearGroupFilter, setGearGroupFilter] = useState('')
   const [showGearForm, setShowGearForm] = useState(false)
   const [gearForm, setGearForm] = useState<GearForm>(EMPTY_GEAR)
 
@@ -74,6 +77,14 @@ export function ArmeriaTab() {
   const selWeaponDef = WEAPONS.find(w => w.name === selWeapon)
   const selArmorDef = ARMORS.find(a => a.name === selArmor)
   const selGearDef = GEAR.find(g => g.name === selGear)
+
+  const weaponGroups = Array.from(new Set(WEAPONS.map(w => w.group))).sort()
+  const armorGroups = Array.from(new Set(ARMORS.map(a => a.type))).sort()
+  const gearGroups = Array.from(new Set(GEAR.map(g => g.category))).sort()
+
+  const filteredWeapons = weaponGroupFilter ? WEAPONS.filter(w => w.group === weaponGroupFilter) : WEAPONS
+  const filteredArmors = armorGroupFilter ? ARMORS.filter(a => a.type === armorGroupFilter) : ARMORS
+  const filteredGear = gearGroupFilter ? GEAR.filter(g => g.category === gearGroupFilter) : GEAR
 
   function addQuickWeapon() {
     if (!selWeaponDef) return
@@ -140,6 +151,14 @@ export function ArmeriaTab() {
       {sub === 'armas' && (
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
+            <select
+              value={weaponGroupFilter}
+              onChange={e => { setWeaponGroupFilter(e.target.value); setSelWeapon('') }}
+              className="bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-3 py-1.5 outline-none focus:border-crimson transition-colors"
+            >
+              <option value="">— Filtrar por grupo —</option>
+              {weaponGroups.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
             <div className="flex gap-2">
               <select
                 value={selWeapon}
@@ -147,7 +166,7 @@ export function ArmeriaTab() {
                 className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
                 <option value="">— Seleccionar arma —</option>
-                {WEAPONS.map(w => (
+                {filteredWeapons.map(w => (
                   <option key={w.name} value={w.name}>{w.name} [{w.cls}]</option>
                 ))}
               </select>
@@ -243,6 +262,14 @@ export function ArmeriaTab() {
       {sub === 'armaduras' && (
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
+            <select
+              value={armorGroupFilter}
+              onChange={e => { setArmorGroupFilter(e.target.value); setSelArmor('') }}
+              className="bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-3 py-1.5 outline-none focus:border-crimson transition-colors"
+            >
+              <option value="">— Filtrar por grupo —</option>
+              {armorGroups.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
             <div className="flex gap-2">
               <select
                 value={selArmor}
@@ -250,7 +277,7 @@ export function ArmeriaTab() {
                 className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
                 <option value="">— Seleccionar armadura —</option>
-                {ARMORS.map(a => (
+                {filteredArmors.map(a => (
                   <option key={a.name} value={a.name}>{a.name} [{a.type}]</option>
                 ))}
               </select>
@@ -309,6 +336,14 @@ export function ArmeriaTab() {
       {sub === 'equipo' && (
         <div className="flex flex-col gap-0">
           <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
+            <select
+              value={gearGroupFilter}
+              onChange={e => { setGearGroupFilter(e.target.value); setSelGear('') }}
+              className="bg-surface border border-rim-bright text-parchment-dim font-mono text-xs px-3 py-1.5 outline-none focus:border-crimson transition-colors"
+            >
+              <option value="">— Filtrar por grupo —</option>
+              {gearGroups.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
             <div className="flex gap-2">
               <select
                 value={selGear}
@@ -316,7 +351,7 @@ export function ArmeriaTab() {
                 className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
                 <option value="">— Seleccionar objeto —</option>
-                {GEAR.map(g => (
+                {filteredGear.map(g => (
                   <option key={g.name} value={g.name}>{g.name} [{g.category}]</option>
                 ))}
               </select>

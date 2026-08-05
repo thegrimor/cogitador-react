@@ -7,13 +7,29 @@ import { isLegacyExport, mapLegacyHtmlToCharacter } from '../services/fichaImpor
 import type { Character } from '../types/fichaTypes'
 
 type OverlayMode = 'selector' | 'create' | null
+type Role = 'inquisidor' | 'sequito'
+
+const ROLE_LABEL: Record<Role, string> = { inquisidor: '⚔ Inquisidor', sequito: '☠ Séquito' }
 
 export function CharacterHeader() {
   const dispatch = useAppDispatch()
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
   const [overlay, setOverlay] = useState<OverlayMode>(null)
+  const [createRole, setCreateRole] = useState<Role>('inquisidor')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const hasInquisidor = characters.some(c => c.info.role === 'inquisidor')
+  const hasSequito = characters.some(c => c.info.role === 'sequito')
+  const missingRoles: Role[] = [
+    ...(hasInquisidor ? [] : (['inquisidor'] as Role[])),
+    ...(hasSequito ? [] : (['sequito'] as Role[])),
+  ]
+
+  function openCreate(role: Role) {
+    setCreateRole(role)
+    setOverlay('create')
+  }
 
   function handleExport() {
     if (!activeChar) return
@@ -62,8 +78,13 @@ export function CharacterHeader() {
           onClick={() => setOverlay('selector')}
           className="flex flex-col gap-0.5 text-left min-w-0"
         >
-          <p className="font-rajdhani text-base font-semibold text-parchment leading-none truncate">
+          <p className="font-rajdhani text-base font-semibold text-parchment leading-none truncate flex items-center gap-2">
             {activeChar?.info.name ?? '— Sin Designación —'}
+            {activeChar && (
+              <span className="font-display text-[8px] uppercase tracking-[1px] text-gold shrink-0">
+                {ROLE_LABEL[activeChar.info.role === 'inquisidor' ? 'inquisidor' : 'sequito']}
+              </span>
+            )}
           </p>
           <p className="font-mono text-[10px] text-parchment-dim leading-none flex items-center gap-1">
             {activeChar
@@ -87,20 +108,21 @@ export function CharacterHeader() {
           >
             ↑ Imp
           </button>
-          <button
-            onClick={() => {
-              if (!activeChar) return
-              if (confirm(`¿Marcar a ${activeChar.info.name} como Caído?`)) {
-                dispatch(killCharacter(activeChar.id))
-                showToast(`${activeChar.info.name} ha caído en el olvido`)
-              }
-            }}
-            disabled={!activeChar}
-            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-crimson hover:text-crimson disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            title="Marcar como caído"
-          >
-            ⚰
-          </button>
+          {activeChar?.info.role === 'sequito' && (
+            <button
+              onClick={() => {
+                if (!activeChar) return
+                if (confirm(`¿Marcar a ${activeChar.info.name} como Caído en combate? Se creará un nuevo Séquito en blanco que hereda el 100% del PE.`)) {
+                  dispatch(killCharacter(activeChar.id))
+                  showToast(`${activeChar.info.name} ha caído en combate`)
+                }
+              }}
+              className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-crimson hover:text-crimson transition-colors"
+              title="Marcar como caído en combate"
+            >
+              ⚰
+            </button>
+          )}
           <button
             onClick={() => {
               if (!activeChar) return
@@ -140,12 +162,23 @@ export function CharacterHeader() {
               <p className="font-display text-[10px] uppercase tracking-[3px] text-crimson">
                 // Seleccionar Operativo
               </p>
-              <button
-                onClick={() => setOverlay('create')}
-                className="font-display text-[9px] uppercase tracking-[2px] bg-crimson text-white px-3 py-1 hover:bg-crimson-bright transition-colors"
-              >
-                + Nuevo
-              </button>
+              <div className="flex gap-1">
+                {missingRoles.length === 0 ? (
+                  <span className="font-display text-[8px] uppercase tracking-[1px] text-parchment-dim">
+                    Ambos slots ocupados
+                  </span>
+                ) : (
+                  missingRoles.map(role => (
+                    <button
+                      key={role}
+                      onClick={() => openCreate(role)}
+                      className="font-display text-[9px] uppercase tracking-[2px] bg-crimson text-white px-3 py-1 hover:bg-crimson-bright transition-colors"
+                    >
+                      + {role === 'inquisidor' ? 'Inquisidor' : 'Séquito'}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
 
             {characters.length === 0 ? (
@@ -172,10 +205,13 @@ export function CharacterHeader() {
                     >
                       <div className="flex flex-col gap-0.5">
                         <p className={[
-                          'font-rajdhani text-base font-semibold leading-none',
+                          'font-rajdhani text-base font-semibold leading-none flex items-center gap-2',
                           isActive ? 'text-crimson-bright' : 'text-parchment',
                         ].join(' ')}>
-                          {char.info.name}
+                          {char.info.name || '— Sin Designación —'}
+                          <span className="font-display text-[8px] uppercase tracking-[1px] text-gold">
+                            {ROLE_LABEL[char.info.role === 'inquisidor' ? 'inquisidor' : 'sequito']}
+                          </span>
                         </p>
                         <p className="font-mono text-[10px] text-parchment-dim">
                           Rango {char.info.rank} // {char.info.career} — {char.info.homeworld}
@@ -204,7 +240,7 @@ export function CharacterHeader() {
 
       {/* Modal creación */}
       {overlay === 'create' && (
-        <CharacterCreateModal onClose={() => setOverlay(null)} />
+        <CharacterCreateModal role={createRole} onClose={() => setOverlay(null)} />
       )}
     </>
   )

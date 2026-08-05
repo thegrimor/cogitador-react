@@ -48,7 +48,7 @@ export function TalentosTab() {
   if (!char) return <NoChar />
 
   const xpSpent      = computeXpSpent(char)
-  const rankInfo     = getRankForXP(char.info.career, xpSpent)
+  const rankInfo     = getRankForXP(char.info.career, xpSpent, char.info.branch)
   const available    = rankInfo ? getAvailableItemsForRank(char.info.career, rankInfo.rank) : null
   const filteredTalents = (char.filterCareer && available)
     ? TALENTS.filter(t => available.has(normalizeName(t.name)))
