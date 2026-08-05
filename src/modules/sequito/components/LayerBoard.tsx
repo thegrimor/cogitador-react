@@ -109,7 +109,7 @@ export function LayerBoard({ searchQuery, onAddSeq, onEditSeq }: Props) {
         onClick={() => dispatch(addLayer())}
         className="w-full h-11 border-t-2 border-dashed border-rim-bright bg-transparent text-parchment-dim font-display text-[9px] uppercase tracking-[2px] cursor-pointer hover:border-crimson-dim hover:text-crimson transition-all mt-1"
       >
-        + AÑADIR GRUPO
+        + NUEVO GRUPO
       </button>
 
       <DragOverlay>

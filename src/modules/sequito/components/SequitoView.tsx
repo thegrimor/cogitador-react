@@ -90,22 +90,14 @@ export function SequitoView() {
 
   return (
     <div className="flex flex-col h-full bg-surface overflow-hidden">
-      <div className="grid grid-cols-4 border-b border-rim-bright bg-surface-2 flex-shrink-0">
-        {(
-          [
-            { label: 'TOTAL', val: totalCount, cls: 'text-gold' },
-            { label: 'ACTIVOS', val: aliveCount, cls: 'text-neon' },
-            { label: 'CAÍDOS', val: deadCount, cls: 'text-crimson-bright' },
-            { label: 'GRUPOS', val: groupCount, cls: 'text-gold' },
-          ] as Array<{ label: string; val: number; cls: string }>
-        ).map(({ label, val, cls }) => (
-          <div key={label} className="flex flex-col items-center justify-center py-2 gap-0.5 border-r border-rim last:border-r-0">
-            <span className={`font-display text-[13px] ${cls}`}>{val}</span>
-            <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">
-              {label}
-            </span>
-          </div>
-        ))}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rim-bright bg-surface-2 px-3 py-1.5 flex-shrink-0 font-mono text-[11px] text-parchment-dim">
+        <span>SÉQUITO TOTAL <span className="text-gold font-bold">{totalCount}</span></span>
+        <span className="text-rim-bright">|</span>
+        <span>ACTIVOS <span className="text-neon font-bold">{aliveCount}</span></span>
+        <span className="text-rim-bright">|</span>
+        <span>CAÍDOS <span className="text-crimson-bright font-bold">{deadCount}</span></span>
+        <span className="text-rim-bright">|</span>
+        <span>CAPAS <span className="text-gold font-bold">{groupCount}</span></span>
       </div>
 
       <div className="flex items-center gap-2 px-3 py-2 border-b border-rim-bright bg-surface-2 flex-shrink-0 flex-wrap">
