@@ -8,50 +8,82 @@ interface Props {
 }
 
 interface PipRowProps {
-  label: string
+  title: string
+  maxLabel: string
   icon: string
   current: number
   max: number
-  color: string
+  emptyMessage: string
+  aliveTitle: string
+  deadTitle: string
+  filledClass: string
+  emptyClass: string
+  decLabel: string
+  incLabel: string
   onChangeCurrent: (v: number) => void
   onChangeMax: (v: number) => void
+  onDelta: (delta: number) => void
+  onInc: () => void
 }
 
-/** Icono clicable por punto (herida/destino): click marca hasta ese punto, click sobre el último lo retira. */
-function PipRow({ label, icon, current, max, color, onChangeCurrent, onChangeMax }: PipRowProps) {
+/**
+ * Fila de iconos clicables (heridas ♥ / destino ⚙), fiel al HTML legacy:
+ * click en un icono "vivo" hiere hasta ese punto, click en uno "vacío" sana hasta ese punto.
+ * Sin cajas ni bordes — solo el símbolo con glow, igual que `renderWounds`/`renderFate`.
+ */
+function PipRow({
+  title, maxLabel, icon, current, max, emptyMessage, aliveTitle, deadTitle,
+  filledClass, emptyClass, decLabel, incLabel, onChangeCurrent, onChangeMax, onDelta, onInc,
+}: PipRowProps) {
   return (
-    <div className="bg-surface flex flex-col gap-1.5 px-3 py-2.5">
-      <div className="flex items-center justify-between">
-        <label className="font-display text-[8px] uppercase tracking-[1px] text-parchment-dim">{label}</label>
-        <div className="flex items-center gap-1">
-          <span className={`font-display text-sm font-bold ${color}`}>{current}/{max}</span>
+    <div className="mb-4">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// {title}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[9px] text-parchment-dim">{maxLabel}</span>
           <input
             type="number"
-            value={max}
             min={0}
+            value={max}
             onChange={e => onChangeMax(parseInt(e.target.value) || 0)}
-            title={`${label} máximo`}
-            className="w-12 bg-surface-2 border border-rim-bright font-mono text-[10px] text-parchment text-center py-0.5 outline-none focus:border-gold transition-colors"
+            className="w-12 bg-surface border border-rim-bright text-gold-bright font-display text-[13px] text-center px-1.5 py-0.5 outline-none focus:border-gold transition-colors"
           />
+          <button
+            onClick={() => onDelta(-1)}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:text-parchment hover:border-parchment-dim transition-colors"
+          >
+            {decLabel}
+          </button>
+          <button
+            onClick={onInc}
+            className="font-display text-[8px] uppercase tracking-[1px] bg-gold text-black px-2 py-1 hover:bg-gold-bright transition-colors"
+          >
+            {incLabel}
+          </button>
         </div>
       </div>
-      <div className="flex flex-wrap gap-1">
-        {Array.from({ length: max }, (_, i) => i + 1).map(i => (
-          <button
-            key={i}
-            onClick={() => onChangeCurrent(i === current ? i - 1 : i)}
-            className={[
-              'w-6 h-6 flex items-center justify-center text-sm border transition-colors',
-              i <= current
-                ? `${color} border-current bg-current/10`
-                : 'text-parchment-dim/30 border-rim hover:border-rim-bright',
-            ].join(' ')}
-            title={`Marcar ${i}`}
-          >
-            {icon}
-          </button>
-        ))}
-        {max === 0 && <span className="font-mono text-[10px] text-parchment-dim/50">Sin máximo definido</span>}
+      <div className="flex flex-wrap gap-1 min-h-[26px]">
+        {max === 0 ? (
+          <span className="font-mono text-[10px] text-rim-bright">{emptyMessage}</span>
+        ) : (
+          Array.from({ length: max }, (_, i) => i).map(i => {
+            const alive = i < current
+            return (
+              <span
+                key={i}
+                onClick={() => onChangeCurrent(alive ? i : i + 1)}
+                title={alive ? aliveTitle : deadTitle}
+                className={[
+                  'cursor-pointer leading-none select-none transition-transform hover:scale-110',
+                  alive ? filledClass : emptyClass,
+                ].join(' ')}
+                style={{ fontSize: icon === '♥' ? 22 : 20 }}
+              >
+                {icon}
+              </span>
+            )
+          })
+        )}
       </div>
     </div>
   )
@@ -67,27 +99,54 @@ export function WoundsPanel({ char }: Props) {
       <div className="bg-surface-2 border border-rim">
         <div className="flex items-center border-b border-rim bg-crimson/5 px-4 py-2">
           <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">
-            // Estado Vital
+            // Estado
           </h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-rim p-px">
+        <div className="px-4 py-3">
           <PipRow
-            label="Heridas"
+            title="HERIDAS"
+            maxLabel="MÁX"
             icon="♥"
             current={char.wounds.current}
             max={char.wounds.max}
-            color="text-crimson-bright"
+            emptyMessage="Define las heridas máximas arriba"
+            aliveTitle="Sano (clic para herir)"
+            deadTitle="Herido (clic para sanar)"
+            filledClass="text-crimson [text-shadow:0_0_8px_rgba(196,30,30,0.6)]"
+            emptyClass="text-[#2a1a1a]"
+            decLabel="Herida −1"
+            incLabel="Recuperar +1"
             onChangeCurrent={v => dispatch(updateWounds({ id: char.id, field: 'current', value: Math.max(0, v) }))}
             onChangeMax={v => dispatch(updateWounds({ id: char.id, field: 'max', value: v }))}
+            onDelta={delta => dispatch(updateWounds({
+              id: char.id, field: 'current',
+              value: Math.max(0, Math.min(char.wounds.max, char.wounds.current + delta)),
+            }))}
+            onInc={() => dispatch(updateWounds({
+              id: char.id, field: 'current',
+              value: Math.max(0, Math.min(char.wounds.max, char.wounds.current + 1)),
+            }))}
           />
           <PipRow
-            label="Destino"
-            icon="✦"
+            title="DESTINO"
+            maxLabel="MÁXIMO (inicio sesión)"
+            icon="⚙"
             current={char.fate.current}
             max={char.fate.max}
-            color="text-gold-bright"
+            emptyMessage="Define el destino máximo arriba"
+            aliveTitle="Disponible"
+            deadTitle="Gastado"
+            filledClass="text-gold-bright [text-shadow:0_0_8px_rgba(200,150,42,0.6)]"
+            emptyClass="text-[#2a1a08] grayscale"
+            decLabel="Gastar"
+            incLabel="Nueva sesión"
             onChangeCurrent={v => dispatch(updateFate({ id: char.id, field: 'current', value: Math.max(0, v) }))}
             onChangeMax={v => dispatch(updateFate({ id: char.id, field: 'max', value: v }))}
+            onDelta={delta => dispatch(updateFate({
+              id: char.id, field: 'current',
+              value: Math.max(0, Math.min(char.fate.max, char.fate.current + delta)),
+            }))}
+            onInc={() => dispatch(updateFate({ id: char.id, field: 'current', value: char.fate.max }))}
           />
         </div>
       </div>
