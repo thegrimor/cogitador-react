@@ -22,12 +22,8 @@ export function SequitoCard({ seqId, onEdit }: Props) {
     transition,
   }
 
-  const equipCount =
-    member.equipment.reduce((a, e) => a + e.qty, 0) +
-    member.eq_implants.reduce((a, e) => a + e.qty, 0) +
-    member.eq_mechadendrites.reduce((a, e) => a + e.qty, 0) +
-    member.eq_equipment.reduce((a, e) => a + e.qty, 0) +
-    member.eq_armor.reduce((a, e) => a + e.qty, 0)
+  // El badge ⚔ del legacy solo cuenta armas equipadas (s.equipment), no el resto de categorías
+  const equipCount = member.equipment.reduce((a, e) => a + e.qty, 0)
 
   return (
     <div
