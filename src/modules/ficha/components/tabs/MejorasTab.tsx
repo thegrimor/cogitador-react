@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addMechadendrite, removeMechadendrite, addAugmentation, removeAugmentation } from '../../services/fichaSlice'
 import { MECHADENDRITES, AUGMENTATIONS } from '@/core/data/darkheresy'
+import { EmptyState } from '../EmptyState'
 
 type MechForm = {
   name: string
@@ -112,14 +113,8 @@ export function MejorasTab() {
               <button onClick={addQuickMech} disabled={!selMechDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
             </div>
             {selMechDef && (
-              <div className="bg-surface border border-rim px-3 py-2 flex flex-col gap-1">
-                <span className="font-mono text-[10px] bg-gold/20 text-gold px-2 py-0.5 w-fit">{selMechDef.type}</span>
-                <p className="font-mono text-[11px] text-parchment-dim">{selMechDef.desc}</p>
-                <div className="flex flex-col gap-0.5">
-                  {selMechDef.abilities.split('\n').map((line, i) => (
-                    <p key={i} className="font-mono text-[11px] text-neon">• {line}</p>
-                  ))}
-                </div>
+              <div className="bg-surface border border-rim px-3 py-2">
+                <span className="font-mono text-[11px] text-parchment-dim">{selMechDef.desc}</span>
               </div>
             )}
           </div>
@@ -137,26 +132,29 @@ export function MejorasTab() {
             </div>
           )}
           {char.mechadendrites.length === 0 ? (
-            <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin mecadendrites registrados</p></div>
+            <div className="p-4"><EmptyState icon="🔩" label="Sin mechadendrites" /></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim">
+            <div className="flex flex-col gap-2 p-2">
               {char.mechadendrites.map(mech => (
-                <div key={mech.id} className="flex items-start gap-2 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                  <div className="flex-1 flex flex-col gap-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-rajdhani font-bold text-parchment text-sm leading-none">{mech.name}</span>
-                      <span className="font-mono text-[10px] bg-gold/20 text-gold px-1.5 py-0.5 shrink-0">{mech.type}</span>
+                // Réplica de .mech-card: acento dorado, nombre 16px + tipo en
+                // línea propia (no badge), descripción siempre visible,
+                // capacidades con prefijo ► (el legacy usa ese carácter, no •).
+                <div key={mech.id} className="bg-surface border border-rim border-l-[3px] border-l-gold px-4 py-3.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-rajdhani font-bold text-base text-gold-bright">{mech.name}</div>
+                      <div className="font-mono text-[9px] tracking-[2px] text-parchment-dim mt-0.5">{mech.type}</div>
                     </div>
-                    {mech.desc && <p className="font-mono text-[11px] text-parchment-dim">{mech.desc}</p>}
-                    {mech.abilities && (
-                      <div className="flex flex-col gap-0.5">
-                        {mech.abilities.split('\n').filter(Boolean).map((line, i) => (
-                          <p key={i} className="font-mono text-[11px] text-neon">• {line}</p>
-                        ))}
-                      </div>
-                    )}
+                    <button onClick={() => dispatch(removeMechadendrite({ charId: char!.id, mechId: mech.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0" aria-label="Eliminar mecadendrite">✕</button>
                   </div>
-                  <button onClick={() => dispatch(removeMechadendrite({ charId: char!.id, mechId: mech.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0 mt-0.5" aria-label="Eliminar mecadendrite">✕</button>
+                  {mech.desc && <p className="font-rajdhani text-xs text-parchment leading-relaxed mt-2">{mech.desc}</p>}
+                  {mech.abilities && (
+                    <div className="flex flex-col gap-1 mt-2">
+                      {mech.abilities.split('\n').filter(Boolean).map((line, i) => (
+                        <p key={i} className="font-mono text-[11px] text-neon">► {line}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -192,10 +190,8 @@ export function MejorasTab() {
               <button onClick={addQuickAug} disabled={!selAugDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
             </div>
             {selAugDef && (
-              <div className="bg-surface border border-rim px-3 py-2 flex flex-col gap-1">
-                <span className="font-mono text-[10px] bg-gold/20 text-gold px-2 py-0.5 w-fit">{selAugDef.loc}</span>
-                <p className="font-mono text-[11px] text-parchment-dim">{selAugDef.desc}</p>
-                <p className="font-mono text-[11px] text-neon">{selAugDef.bonus}</p>
+              <div className="bg-surface border border-rim px-3 py-2">
+                <span className="font-mono text-[11px] text-neon">► {selAugDef.bonus}</span>
               </div>
             )}
           </div>
@@ -213,20 +209,23 @@ export function MejorasTab() {
             </div>
           )}
           {char.augmentations.length === 0 ? (
-            <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin augmentaciones registradas</p></div>
+            <div className="p-4"><EmptyState icon="🦾" label="Sin aumentaciones" /></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim">
+            <div className="flex flex-col gap-2 p-2">
               {char.augmentations.map(aug => (
-                <div key={aug.id} className="flex items-start gap-2 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                  <div className="flex-1 flex flex-col gap-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-rajdhani font-bold text-parchment text-sm leading-none">{aug.name}</span>
-                      <span className="font-mono text-[10px] bg-gold/20 text-gold px-1.5 py-0.5 shrink-0">{aug.loc}</span>
+                // Réplica de .augment-card: acento azul, nombre 15px + loc en
+                // línea propia (no badge), descripción en texto normal (no
+                // dim), bonus con prefijo ►.
+                <div key={aug.id} className="bg-surface border border-rim border-l-[3px] border-l-blue-400 px-3.5 py-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-rajdhani font-bold text-[15px] text-blue-400">{aug.name}</div>
+                      <div className="font-mono text-[9px] tracking-[2px] text-parchment-dim mt-0.5">{aug.loc}</div>
                     </div>
-                    {aug.desc && <p className="font-mono text-[11px] text-parchment-dim">{aug.desc}</p>}
-                    {aug.bonus && <p className="font-mono text-[11px] text-neon">{aug.bonus}</p>}
+                    <button onClick={() => dispatch(removeAugmentation({ charId: char!.id, augId: aug.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0" aria-label="Eliminar augmentación">✕</button>
                   </div>
-                  <button onClick={() => dispatch(removeAugmentation({ charId: char!.id, augId: aug.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0 mt-0.5" aria-label="Eliminar augmentación">✕</button>
+                  {aug.desc && <p className="font-rajdhani text-xs text-parchment leading-relaxed mt-2">{aug.desc}</p>}
+                  {aug.bonus && <p className="font-mono text-[11px] text-neon mt-1.5">► {aug.bonus}</p>}
                 </div>
               ))}
             </div>

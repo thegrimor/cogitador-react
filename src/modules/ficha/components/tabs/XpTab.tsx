@@ -72,7 +72,7 @@ export function XpTab() {
           </h3>
         </div>
         <div className="flex flex-col gap-3 px-4 py-3">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <input
               type="number"
               value={amount}
@@ -87,12 +87,12 @@ export function XpTab() {
               onChange={e => setReason(e.target.value)}
               placeholder="Motivo (sesión, logro...)"
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
-              className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-gold transition-colors"
+              className="flex-1 min-w-[100px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-gold transition-colors"
             />
             <button
               onClick={handleAdd}
               disabled={!amount || parseInt(amount) <= 0}
-              className="font-display text-[9px] uppercase tracking-[2px] bg-crimson text-white px-3 py-2 hover:bg-crimson-bright transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="font-display text-[9px] uppercase tracking-[2px] bg-crimson text-white px-3 py-2 hover:bg-crimson-bright transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
             >
               + Añadir
             </button>

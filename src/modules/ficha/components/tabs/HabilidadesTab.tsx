@@ -5,6 +5,7 @@ import { SKILLS } from '@/core/data/darkheresy'
 import { ATTRIBUTES } from '@/core/data/darkheresy'
 import { getRankForXP, getAvailableItemsForRank, normalizeName } from '@/core/data/darkheresy/careers'
 import { computeXpSpent, getAttrTotal } from '../../services/fichaComputed'
+import { EmptyState } from '../EmptyState'
 import type { Skill } from '../../types/fichaTypes'
 
 const LEVEL_OPTIONS: { value: number; label: string }[] = [
@@ -25,10 +26,15 @@ function levelLabel(level: number): string {
   return LEVEL_OPTIONS.find(o => o.value === level)?.label ?? 'Entrenado'
 }
 
-function nextLevel(current: number): number {
-  const values = [-20, 0, 10, 20]
-  const idx = values.indexOf(current)
-  return values[(idx + 1) % values.length]
+// Igual que cycleSkillLevel() del HTML legacy: 3 puntos (uno por Entrenado/
+// Avanzado/Maestro). "No entrenado" (-20) es el estado con los 3 vacíos, sin
+// punto propio. El legacy guarda un índice 0-3; aquí se guarda en puntos
+// (-20/0/10/20), así que se convierte antes y después de aplicar el ciclo.
+const LEVEL_INDEX = [-20, 0, 10, 20]
+function cycleSkillDot(currentLevelPoints: number, dotIndex: number): number {
+  const rawIndex = LEVEL_INDEX.indexOf(currentLevelPoints)
+  const newRawIndex = rawIndex === dotIndex + 1 ? dotIndex : dotIndex + 1
+  return LEVEL_INDEX[newRawIndex] ?? 0
 }
 
 type ManualForm = {
@@ -111,15 +117,11 @@ export function HabilidadesTab() {
     setShowManual(false)
   }
 
-  function handleLevelCycle(skill: Skill) {
+  function handleDotClick(skill: Skill, dotIndex: number) {
     dispatch(updateSkill({
       charId: char!.id,
-      skill: { ...skill, level: nextLevel(skill.level) },
+      skill: { ...skill, level: cycleSkillDot(skill.level, dotIndex) },
     }))
-  }
-
-  function handleBonusChange(skill: Skill, val: number) {
-    dispatch(updateSkill({ charId: char!.id, skill: { ...skill, bonus: val } }))
   }
 
   return (
@@ -265,49 +267,50 @@ export function HabilidadesTab() {
       </div>
 
       {char.skills.length === 0 ? (
-        <div className="px-4 py-10 text-center">
-          <p className="font-mono text-xs text-parchment-dim">Sin habilidades registradas</p>
+        <div className="p-4">
+          <EmptyState icon="📋" label="Sin habilidades" />
         </div>
       ) : (
         <div className="flex flex-col divide-y divide-rim">
           {char.skills.map(skill => {
             const total = calcTotal(skill)
+            const dotsFilled = LEVEL_INDEX.indexOf(skill.level)
             return (
-              <div key={skill.id} className="flex items-start gap-3 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                <div className="flex-1 flex flex-col gap-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-rajdhani font-semibold text-parchment text-sm leading-none">{skill.name}</span>
-                    <span className="font-mono text-[10px] bg-gold/20 text-gold px-1.5 py-0.5 shrink-0">{skill.attr}</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button
-                      onClick={() => handleLevelCycle(skill)}
-                      className="font-mono text-[10px] border border-rim-bright text-parchment-dim px-2 py-0.5 hover:border-crimson hover:text-crimson transition-colors shrink-0"
-                      title="Pulsa para cambiar nivel"
-                    >
-                      {levelLabel(skill.level)}
-                    </button>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-[10px] text-parchment-dim">+</span>
-                      <input
-                        type="number"
-                        value={skill.bonus}
-                        onChange={e => handleBonusChange(skill, Number(e.target.value))}
-                        className="w-14 bg-surface border border-rim-bright text-parchment font-mono text-[11px] px-2 py-0.5 outline-none focus:border-gold transition-colors text-center"
-                      />
-                    </div>
-                    <span className="font-mono text-[11px] text-neon font-bold">= {total}</span>
-                    {skill.xp > 0 && (
-                      <span className="font-mono text-[10px] text-parchment-dim">{skill.xp} XP</span>
-                    )}
-                  </div>
+              // Réplica de .skill-row: fila única con nombre+notas, atributo,
+              // 3 puntos de nivel clicables, bonus (solo lectura — el legacy
+              // no permite editarlo tras crear la habilidad), total en % y
+              // coste PE. flex-wrap añadido sobre el original (que no lo
+              // lleva) para no romper el layout en móvil con nombres largos.
+              <div key={skill.id} className="flex items-center flex-wrap gap-2.5 px-3 py-2 bg-surface-2 hover:bg-surface-3 transition-colors">
+                <div className="flex-1 min-w-[120px]">
+                  <div className="font-rajdhani font-semibold text-sm text-parchment leading-tight truncate">{skill.name}</div>
                   {skill.notes && (
-                    <p className="font-mono text-[10px] text-parchment-dim italic">{skill.notes}</p>
+                    <div className="font-mono text-[10px] text-parchment-dim truncate">{skill.notes}</div>
                   )}
                 </div>
+                <span className="font-mono text-[10px] text-parchment-dim w-[30px] text-center shrink-0">{skill.attr}</span>
+                <div className="flex gap-1 shrink-0" title={levelLabel(skill.level)}>
+                  {[0, 1, 2].map(i => (
+                    <button
+                      key={i}
+                      onClick={() => handleDotClick(skill, i)}
+                      className={[
+                        'w-[10px] h-[10px] border transition-colors',
+                        i < dotsFilled ? 'bg-crimson border-crimson' : 'border-rim-bright hover:border-crimson',
+                      ].join(' ')}
+                    />
+                  ))}
+                </div>
+                <span className="font-mono text-[10px] text-gold w-[30px] text-center shrink-0">
+                  {skill.bonus ? `+${skill.bonus}` : ''}
+                </span>
+                <span className="font-display text-[13px] font-bold text-gold-bright w-9 text-right shrink-0">{total}%</span>
+                {skill.xp > 0 && (
+                  <span className="font-mono text-[9px] text-parchment-dim w-10 text-center shrink-0">{skill.xp}PE</span>
+                )}
                 <button
                   onClick={() => dispatch(removeSkill({ charId: char!.id, skillId: skill.id }))}
-                  className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0 mt-0.5"
+                  className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0"
                   aria-label="Eliminar habilidad"
                 >
                   ✕
