@@ -31,13 +31,14 @@ type GearForm = {
 }
 
 const EMPTY_WEAPON: WeaponForm = {
-  name: '', cls: 'Pistola', dmgType: 'I', range: '', rof: '', dmg: '', pen: 0, clip: '', notes: '',
+  name: '', cls: 'Básica', dmgType: 'E (Energía)', range: '', rof: '', dmg: '', pen: 0, clip: '', notes: '',
 }
 const EMPTY_ARMOR: ArmorForm = { name: '', notes: '', head: 0, body: 0, arms: 0, legs: 0 }
 const EMPTY_GEAR: GearForm = { name: '', qty: 1, notes: '' }
 
-const WEAPON_CLASSES = ['Pistola', 'Básica', 'Pesada', 'CaC', 'Especial']
-const DMG_TYPES = ['E', 'I', 'X', 'R', 'A']
+// Mismos valores que #wpClass / #wpDmgType del HTML legacy
+const WEAPON_CLASSES = ['Básica', 'Pesada', 'Pistola', 'CaC', 'Lanzadora', 'Especial']
+const DMG_TYPES = ['E (Energía)', 'I (Impacto)', 'X (Explosivo)', 'R (Rending)', 'A (Acerado)']
 
 function NoChar() {
   return (
