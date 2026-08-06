@@ -41,7 +41,7 @@ function badgeLabel(status: ProjectStatus): string {
 
 function fillClass(status: ProjectStatus): string {
   switch (status) {
-    case 'active': return 'bg-gradient-to-r from-crimson-dim to-crimson animate-pulse-mech'
+    case 'active': return 'bg-gradient-to-r from-crimson-dim to-crimson animate-pulse-fill'
     case 'completed': return 'bg-neon'
     case 'paused': return 'bg-gold'
     default: return 'bg-parchment-dim'
@@ -52,7 +52,7 @@ function percentColor(status: ProjectStatus): string {
   switch (status) {
     case 'active': return 'text-crimson-bright'
     case 'completed': return 'text-neon'
-    default: return 'text-parchment'
+    default: return 'text-white'
   }
 }
 
@@ -65,9 +65,9 @@ function cardBorderClass(status: ProjectStatus): string {
 }
 
 const EDIT_INPUT_CLASS =
-  'w-[70px] bg-surface border border-rim-bright text-parchment font-mono text-xs text-center px-2 py-1 outline-none focus:border-gold transition-colors'
+  'w-[70px] bg-surface border border-rim-bright text-parchment font-mono text-xs text-center px-2 py-[5px] outline-none focus:border-gold transition-colors'
 
-const BTN_SM = 'font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 transition-colors'
+const BTN_SM = 'font-display text-[9px] uppercase tracking-[2px] px-3 py-[5px] transition-colors'
 
 export function ProjectCard({ project, onDeleteRequest }: Props) {
   const dispatch = useAppDispatch()
@@ -96,19 +96,19 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
     <div className={`bg-surface-2 border relative overflow-hidden transition-colors ${cardBorderClass(status)}`}>
       <div className={`absolute top-0 left-0 w-1 h-full ${accentClass(status)}`} />
 
-      <div className="pl-4 pr-4 pt-3 pb-2 flex justify-between items-start border-b border-rim gap-2">
+      <div className="pl-5 pr-4 pt-[14px] pb-[10px] flex justify-between items-start border-b border-rim">
         <div className="flex-1 min-w-0">
-          <p className="font-rajdhani font-semibold text-base text-white leading-tight truncate">{name}</p>
-          <p className="font-mono text-[9px] uppercase tracking-[2px] text-parchment-dim mt-0.5">
+          <p className="font-rajdhani font-semibold text-base text-white leading-tight">{name}</p>
+          <p className="font-mono text-[9px] tracking-[2px] text-parchment-dim mt-[3px]">
             {category} // DÍA {createdDay}
           </p>
         </div>
-        <span className={`font-display text-[8px] tracking-[1px] px-2 py-1 border whitespace-nowrap shrink-0 ${badgeClass(status)}`}>
+        <span className={`font-display text-[8px] tracking-[1px] px-2 py-[3px] border whitespace-nowrap shrink-0 ml-[10px] ${badgeClass(status)}`}>
           {badgeLabel(status)}
         </span>
       </div>
 
-      <div className="pl-4 pr-4 pt-3 pb-3">
+      <div className="pl-5 pr-4 pt-[14px] pb-[14px]">
         {desc && (
           <p className="font-rajdhani font-light text-[11px] text-parchment-dim leading-relaxed mb-3">
             {desc}
@@ -117,7 +117,7 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
 
         <div className="mb-3">
           <div className="flex justify-between items-center mb-1.5">
-            <span className="font-mono text-[10px] text-parchment-dim uppercase tracking-[1px]">Progreso</span>
+            <span className="font-mono text-[11px] text-parchment-dim">Progreso</span>
             <span className="font-display text-xs text-white">{daysElapsed} / {daysTotal} días</span>
           </div>
           <div className="h-1.5 bg-surface border border-rim relative overflow-hidden">
@@ -129,18 +129,21 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
             </div>
           </div>
           <div className="flex justify-between items-end mt-2">
-            <span className={`font-display text-xl font-bold ${percentColor(status)}`}>{pct}%</span>
-            {isComplete ? (
-              <span className="font-mono text-[10px] text-neon">✓ OPERATIVO</span>
-            ) : (
-              <span className="font-mono text-[10px] text-parchment-dim">{remaining} días restantes</span>
-            )}
+            <span
+              className={`font-display text-[22px] font-bold ${percentColor(status)}`}
+              style={isComplete ? { textShadow: '0 0 10px rgba(42,255,106,0.4)' } : undefined}
+            >
+              {pct}%
+            </span>
+            <span className="font-mono text-[10px] text-parchment-dim">
+              {isComplete ? '✓ OPERATIVO' : `${remaining} días restantes`}
+            </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 items-center pt-2 border-t border-rim">
+        <div className="flex flex-wrap gap-2 items-center mt-[10px] pt-[10px] border-t border-rim">
           <div className="flex flex-col gap-1">
-            <label className="font-mono text-[9px] text-parchment-dim uppercase tracking-[1px]">Días transcurridos</label>
+            <label className="font-mono text-[10px] text-parchment-dim">Días transcurridos:</label>
             <input
               type="number"
               min={0}
@@ -151,7 +154,7 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="font-mono text-[9px] text-parchment-dim uppercase tracking-[1px]">Días totales</label>
+            <label className="font-mono text-[10px] text-parchment-dim">Días totales:</label>
             <input
               type="number"
               min={1}
@@ -163,11 +166,11 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 items-center px-4 py-2.5 border-t border-rim bg-black/20">
+      <div className="flex flex-wrap gap-2 items-center pl-5 pr-4 pt-[10px] pb-3 border-t border-rim bg-black/20">
         {status === 'pending' && (
           <button
             onClick={() => changeStatus('active')}
-            className={`${BTN_SM} bg-crimson text-white hover:bg-crimson-bright`}
+            className={`${BTN_SM} bg-crimson text-white font-bold hover:bg-crimson-bright hover:shadow-[0_0_15px_rgba(255,34,34,0.4)]`}
           >
             ▶ Iniciar
           </button>
@@ -175,7 +178,7 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
         {status === 'active' && (
           <button
             onClick={() => changeStatus('paused')}
-            className={`${BTN_SM} bg-surface-4 border border-rim-bright text-parchment-dim hover:text-parchment`}
+            className={`${BTN_SM} bg-surface-4 border border-rim-bright text-parchment-dim hover:bg-surface-3 hover:text-parchment hover:border-parchment-dim`}
           >
             ⏸ Pausar
           </button>
@@ -183,7 +186,7 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
         {status === 'paused' && (
           <button
             onClick={() => changeStatus('active')}
-            className={`${BTN_SM} bg-gold text-black font-bold hover:bg-gold-bright`}
+            className={`${BTN_SM} bg-gold text-black font-bold hover:bg-gold-bright hover:shadow-[0_0_15px_rgba(240,184,64,0.4)]`}
           >
             ▶ Reanudar
           </button>
@@ -191,7 +194,7 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
         {status !== 'completed' && (
           <button
             onClick={() => changeStatus('completed')}
-            className={`${BTN_SM} bg-surface-4 border border-rim-bright text-parchment-dim hover:text-parchment`}
+            className={`${BTN_SM} bg-surface-4 border border-rim-bright text-parchment-dim hover:bg-surface-3 hover:text-parchment hover:border-parchment-dim`}
           >
             ✓ Completar
           </button>
@@ -199,14 +202,14 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
         {status === 'completed' && (
           <button
             onClick={() => changeStatus('active')}
-            className={`${BTN_SM} bg-surface-4 border border-rim-bright text-parchment-dim hover:text-parchment`}
+            className={`${BTN_SM} bg-surface-4 border border-rim-bright text-parchment-dim hover:bg-surface-3 hover:text-parchment hover:border-parchment-dim`}
           >
             ↺ Reabrir
           </button>
         )}
         <button
           onClick={() => onDeleteRequest(id, name)}
-          className={`${BTN_SM} ml-auto bg-surface-4 border border-rim-bright text-crimson-dim hover:text-crimson`}
+          className={`${BTN_SM} ml-auto bg-surface-4 border border-crimson-dim text-crimson-dim hover:bg-surface-3`}
         >
           ✕ Purgar
         </button>

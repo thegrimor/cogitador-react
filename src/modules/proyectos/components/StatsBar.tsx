@@ -9,7 +9,7 @@ export function StatsBar() {
   const pending = projects.filter(p => p.status === 'pending').length
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-[25px]">
       <div className="bg-surface-2 border border-rim px-4 py-3 text-center">
         <span className="block font-display text-2xl font-bold text-gold-bright">{total}</span>
         <span className="block font-mono text-[9px] uppercase tracking-[2px] text-parchment-dim mt-1">Total Proyectos</span>

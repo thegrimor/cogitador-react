@@ -15,10 +15,10 @@ const CATEGORIES: { value: ProjectCategory; label: string }[] = [
 ]
 
 const INPUT_CLASS =
-  'bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors w-full'
+  'bg-surface border border-rim-bright text-parchment font-mono text-[13px] px-3 py-[9px] outline-none focus:border-crimson focus:shadow-[0_0_8px_rgba(196,30,30,0.15)] transition-colors w-full'
 
 const SELECT_CLASS =
-  'bg-surface-2 border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors w-full'
+  'bg-surface border border-rim-bright text-parchment font-mono text-[13px] px-3 py-[9px] outline-none focus:border-crimson focus:shadow-[0_0_8px_rgba(196,30,30,0.15)] transition-colors w-full'
 
 export function AddProjectForm() {
   const dispatch = useAppDispatch()
@@ -47,7 +47,7 @@ export function AddProjectForm() {
   }
 
   return (
-    <div className="bg-surface-2 border border-rim-bright border-t-[3px] border-t-crimson px-5 py-5 mb-4">
+    <div className="bg-surface-2 border border-rim-bright border-t-[3px] border-t-crimson px-[25px] py-5 mb-[25px]">
       <h2 className="font-display text-[11px] uppercase tracking-[4px] text-crimson mb-4 pb-2 border-b border-rim">
         ⚙ Registrar Nuevo Proyecto
       </h2>
@@ -95,7 +95,7 @@ export function AddProjectForm() {
           </div>
           <button
             type="submit"
-            className="bg-crimson text-white font-display text-[10px] uppercase tracking-[2px] px-4 py-2 font-bold transition-colors hover:bg-crimson-bright whitespace-nowrap"
+            className="bg-crimson text-white font-display text-[11px] uppercase tracking-[2px] px-5 py-2.5 font-bold transition-colors hover:bg-crimson-bright hover:shadow-[0_0_15px_rgba(255,34,34,0.4)] whitespace-nowrap"
           >
             + Registrar
           </button>
