@@ -82,22 +82,28 @@ export function FichaView() {
       <ExperiencePanel />
 
       {/*
-        Tab bar interno de ficha — el legacy usa flex-wrap (varias filas de
-        ~33% de ancho cada tab en móvil), NO scroll horizontal. Ver .tabs/.tab
-        del HTML original.
+        Tab bar interno de ficha — réplica pixel a pixel de .tabs/.tab del
+        HTML legacy: flex-wrap (varias filas, no scroll lateral), cada tab
+        con su propio borde de 3 lados (sin el inferior), fondo bg2/bg3,
+        9px/letter-spacing 1px/padding 9px 10px por defecto y 8px/sin
+        tracking/padding 8px 6px en ≤600px (aquí: base = móvil, sm: = ancho,
+        ya que el proyecto es mobile-first). El tab activo cambia su borde a
+        rojo y su borde inferior a 2px del color de fondo (se funde con el
+        panel de abajo) — no es un subrayado de color.
       */}
-      <div className="flex flex-wrap border-b-2 border-crimson-dim bg-surface-2">
+      <div className="flex flex-wrap border-b-2 border-crimson-dim">
         {visibleTabs.map((tab) => {
           const isActive = tab.id === effectiveTab
+          const base = 'flex-[1_1_calc(33.333%-2px)] sm:flex-1 sm:min-w-[80px] px-1.5 py-2 sm:px-2.5 sm:py-2.5 font-display text-[8px] sm:text-[9px] tracking-normal sm:tracking-[1px] uppercase whitespace-nowrap text-center cursor-pointer transition-colors border-l border-r border-t'
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={[
-                'flex-[1_1_calc(33.333%-2px)] sm:flex-1 sm:min-w-[80px] px-2 py-2 font-display text-[9px] uppercase tracking-[1px] transition-colors border-b-2 whitespace-nowrap text-center',
+                base,
                 isActive
-                  ? 'text-crimson-bright border-crimson-bright bg-surface-3'
-                  : 'text-parchment-dim border-transparent hover:text-parchment',
+                  ? 'bg-surface-3 text-crimson-bright border-crimson-dim border-b-2 border-b-surface-3'
+                  : 'bg-surface-2 text-parchment-dim border-rim hover:text-parchment hover:bg-surface-3',
               ].join(' ')}
             >
               {tab.label}
