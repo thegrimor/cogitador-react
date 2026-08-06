@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { TabBar } from '@/shared/components/TabBar'
 import type { TabId } from '@/shared/components/TabBar'
 import { ThemePicker } from '@/shared/components/ThemePicker'
+import { Toast } from '@/shared/components/Toast'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { FichaView } from '@/modules/ficha'
 import { ProyectosView } from '@/modules/proyectos'
 import { SequitoView } from '@/modules/sequito'
-import { useAppSelector } from '@/core/store/hooks'
+import { AuthView, logout } from '@/modules/auth'
+import { CloudSync } from '@/core/sync/CloudSync'
+import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 
 const VIEWS: Record<TabId, React.ReactNode> = {
   ficha:     <FichaView />,
@@ -21,6 +24,7 @@ const TAB_SUBTITLES: Record<TabId, string> = {
 }
 
 function AppHeader({ activeTab }: { activeTab: TabId }) {
+  const dispatch = useAppDispatch()
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
   const [currentTheme, setTheme, themes] = useTheme()
@@ -48,8 +52,15 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
             {subtitle || '// Adeptus Mechanicus'}
           </p>
         </div>
-        <div className="ml-auto shrink-0">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <ThemePicker currentTheme={currentTheme} themes={themes} onSelect={setTheme} />
+          <button
+            onClick={() => dispatch(logout())}
+            title="Cerrar sesión"
+            className="font-display text-[8px] uppercase tracking-[2px] bg-surface-4 border border-rim-bright text-parchment-dim px-2 py-1.5 hover:text-crimson-bright hover:border-crimson transition-colors"
+          >
+            ⏻
+          </button>
         </div>
       </div>
     </header>
@@ -58,11 +69,23 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('ficha')
+  const token = useAppSelector(s => s.auth.token)
+
+  if (!token) {
+    return (
+      <div className="relative flex min-h-screen flex-col overflow-x-hidden font-mono text-parchment bg-surface">
+        <div className="scanline" />
+        <AuthView />
+        <Toast />
+      </div>
+    )
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden font-mono text-parchment bg-surface">
       <div className="scanline" />
 
+      <CloudSync />
       <AppHeader activeTab={activeTab} />
 
       <main className="relative z-10 flex flex-1 flex-col pb-16">
@@ -70,6 +93,7 @@ function App() {
       </main>
 
       <TabBar active={activeTab} onChange={setActiveTab} />
+      <Toast />
     </div>
   )
 }
