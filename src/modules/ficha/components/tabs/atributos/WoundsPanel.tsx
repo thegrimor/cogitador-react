@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import { useAppDispatch } from '@/core/store/hooks'
 import {
   updateWounds, updateFate, updateVital,
   updateMoney, addCurrency, updateCurrency, removeCurrency, updateNotes,
+  killCharacter,
 } from '../../../services/fichaSlice'
 import { computeMovement } from '../../../services/fichaComputed'
+import { showToast } from '@/shared/components/Toast'
+import { KillConfirmModal } from '../../KillConfirmModal'
 import type { Character } from '../../../types/fichaTypes'
 
 interface Props {
@@ -97,29 +101,56 @@ interface CounterRowProps {
   value: number
   max: number
   color: string
+  icon: string
+  iconClass: string
+  emptyMessage: string
   onChange: (v: number) => void
 }
 
-/** Fila "// LOCURA" / "// CORRUPCIÓN" del legacy: contador con botones −1/+1, sin slider. */
-function CounterRow({ title, value, max, color, onChange }: CounterRowProps) {
+/**
+ * Fila "// LOCURA" / "// CORRUPCIÓN" del legacy: botones −1/+1 más una fila de
+ * iconos clicables (uno por punto actual) — clic en el icono i reduce a i,
+ * igual que renderInsanity()/renderCorruption().
+ */
+function CounterRow({ title, value, max, color, icon, iconClass, emptyMessage, onChange }: CounterRowProps) {
   return (
-    <div className="flex items-center justify-between gap-2 py-2">
-      <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// {title}</span>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => onChange(Math.max(0, value - 1))}
-          className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:text-parchment hover:border-parchment-dim transition-colors"
-        >
-          − 1
-        </button>
-        <button
-          onClick={() => onChange(Math.min(max, value + 1))}
-          className={['font-display text-[8px] uppercase tracking-[1px] px-2 py-1 text-white transition-colors', color].join(' ')}
-        >
-          + 1
-        </button>
-        <span className="font-mono text-[10px] text-parchment-dim w-14 text-right">
-          Puntos: <span className="text-parchment">{value}</span>/{max}
+    <div className="py-2">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// {title}</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onChange(Math.max(0, value - 1))}
+            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:text-parchment hover:border-parchment-dim transition-colors"
+          >
+            − 1
+          </button>
+          <button
+            onClick={() => onChange(Math.min(max, value + 1))}
+            className={['font-display text-[8px] uppercase tracking-[1px] px-2 py-1 text-white transition-colors', color].join(' ')}
+          >
+            + 1
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1 min-h-[22px]">
+        {value === 0 ? (
+          <span className="font-mono text-[10px] text-rim-bright">{emptyMessage}</span>
+        ) : (
+          Array.from({ length: value }, (_, i) => (
+            <span
+              key={i}
+              onClick={() => onChange(i)}
+              title={`Clic para reducir a ${i}`}
+              className={['cursor-pointer leading-none select-none text-sm transition-transform hover:scale-110', iconClass].join(' ')}
+            >
+              {icon}
+            </span>
+          ))
+        )}
+      </div>
+      <div className="flex justify-between mt-1">
+        <span className="font-mono text-[9px] text-parchment-dim">
+          Puntos de {title.toLowerCase()}: <span className="text-parchment">{value}</span>/{max}
         </span>
       </div>
     </div>
@@ -129,14 +160,30 @@ function CounterRow({ title, value, max, color, onChange }: CounterRowProps) {
 export function WoundsPanel({ char }: Props) {
   const dispatch = useAppDispatch()
   const mov = computeMovement(char)
+  const [showKillModal, setShowKillModal] = useState(false)
+
+  function confirmKill() {
+    dispatch(killCharacter(char.id))
+    showToast(`⚰ ${char.info.name || 'El acólito'} ha caído. Nuevo acólito con ${char.info.experience || 0} PE heredados.`)
+    setShowKillModal(false)
+  }
 
   return (
     <div className="flex flex-col gap-2">
       <div className="bg-surface-2 border border-rim">
-        <div className="flex items-center border-b border-rim bg-crimson/5 px-4 py-2">
+        <div className="flex items-center justify-between border-b border-rim bg-crimson/5 px-4 py-2">
           <h3 className="font-display text-[10px] uppercase tracking-[3px] text-crimson">
             // Estado
           </h3>
+          {char.info.role === 'sequito' && (
+            <button
+              onClick={() => setShowKillModal(true)}
+              className="font-display text-[8px] uppercase tracking-[1px] px-2.5 py-1.5"
+              style={{ background: '#3a0a0a', color: '#c87070', border: '1px solid #7a1a1a' }}
+            >
+              ☠ Caído en Combate
+            </button>
+          )}
         </div>
         <div className="px-4 py-3 divide-y divide-rim">
           <PipRow
@@ -189,6 +236,9 @@ export function WoundsPanel({ char }: Props) {
             value={char.insanity}
             max={100}
             color="bg-purple-700 hover:bg-purple-600"
+            icon="🧠"
+            iconClass="text-purple-400 [text-shadow:0_0_6px_rgba(180,74,255,0.5)]"
+            emptyMessage="Sin puntos de locura"
             onChange={v => dispatch(updateVital({ id: char.id, field: 'insanity', value: v }))}
           />
           <CounterRow
@@ -196,6 +246,9 @@ export function WoundsPanel({ char }: Props) {
             value={char.corruption}
             max={100}
             color="bg-crimson hover:bg-crimson-bright"
+            icon="☠"
+            iconClass="text-crimson [text-shadow:0_0_6px_rgba(196,30,30,0.5)]"
+            emptyMessage="Sin puntos de corrupción"
             onChange={v => dispatch(updateVital({ id: char.id, field: 'corruption', value: v }))}
           />
         </div>
@@ -224,7 +277,15 @@ export function WoundsPanel({ char }: Props) {
 
         {/* Tesoro */}
         <div className="border-t border-rim px-4 py-3 flex flex-col gap-3">
-          <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// TESORO</span>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// TESORO</span>
+            <button
+              onClick={() => dispatch(addCurrency({ charId: char.id, currency: { name: 'NUEVA DIVISA', amount: 0 } }))}
+              className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2.5 py-1.5 hover:border-gold hover:text-gold transition-colors"
+            >
+              + Divisa
+            </button>
+          </div>
           <div className="flex items-center gap-3">
             <label className="font-mono text-[11px] text-parchment-dim uppercase tracking-[1px] shrink-0">Tronos ₮</label>
             <input
@@ -257,12 +318,6 @@ export function WoundsPanel({ char }: Props) {
               </button>
             </div>
           ))}
-          <button
-            onClick={() => dispatch(addCurrency({ charId: char.id, currency: { name: 'NUEVA DIVISA', amount: 0 } }))}
-            className="font-display text-[9px] uppercase tracking-[2px] border border-rim-bright text-parchment-dim px-3 py-1.5 hover:border-gold hover:text-gold transition-colors text-left"
-          >
-            + Añadir Divisa
-          </button>
         </div>
 
         {/* Notas rápidas */}
@@ -278,24 +333,40 @@ export function WoundsPanel({ char }: Props) {
 
         {/* Influencia */}
         <div className="border-t border-rim px-4 py-3 flex flex-col gap-2">
-          <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// INFLUENCIA — GENERAL</span>
-          <textarea
-            value={char.influenceGeneral}
-            onChange={e => dispatch(updateNotes({ charId: char.id, field: 'influenceGeneral', value: e.target.value }))}
-            placeholder="Contactos, favores, influencias generales..."
-            className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-gold transition-colors w-full min-h-[70px] resize-y"
-          />
-        </div>
-        <div className="border-t border-rim px-4 py-3 flex flex-col gap-2">
-          <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// INFLUENCIA — PLANETARIA</span>
-          <textarea
-            value={char.influencePlanetary}
-            onChange={e => dispatch(updateNotes({ charId: char.id, field: 'influencePlanetary', value: e.target.value }))}
-            placeholder="Influencias en el planeta actual..."
-            className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-gold transition-colors w-full min-h-[70px] resize-y"
-          />
+          <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// INFLUENCIA</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="font-mono text-[9px] uppercase tracking-[1px] text-parchment-dim">General</label>
+              <textarea
+                value={char.influenceGeneral}
+                onChange={e => dispatch(updateNotes({ charId: char.id, field: 'influenceGeneral', value: e.target.value }))}
+                placeholder="Contactos, favores, influencias generales..."
+                rows={3}
+                className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-gold transition-colors w-full resize-y"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="font-mono text-[9px] uppercase tracking-[1px] text-parchment-dim">Planetaria</label>
+              <textarea
+                value={char.influencePlanetary}
+                onChange={e => dispatch(updateNotes({ charId: char.id, field: 'influencePlanetary', value: e.target.value }))}
+                placeholder="Influencias en el planeta actual..."
+                rows={3}
+                className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-gold transition-colors w-full resize-y"
+              />
+            </div>
+          </div>
         </div>
       </div>
+
+      {showKillModal && (
+        <KillConfirmModal
+          name={char.info.name || 'Acólito sin nombre'}
+          xp={Number(char.info.experience) || 0}
+          onConfirm={confirmKill}
+          onCancel={() => setShowKillModal(false)}
+        />
+      )}
     </div>
   )
 }

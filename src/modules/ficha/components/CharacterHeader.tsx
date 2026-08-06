@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
-import { ensureBothSlots, selectCharacter, importCharacter, killCharacter } from '../services/fichaSlice'
+import { ensureBothSlots, selectCharacter, importCharacter } from '../services/fichaSlice'
 import { showToast } from '@/shared/components/Toast'
 import { isLegacyExport, mapLegacyHtmlToCharacter } from '../services/fichaImportMapper'
-import { KillConfirmModal } from './KillConfirmModal'
 import type { Character } from '../types/fichaTypes'
 
 type Role = 'inquisidor' | 'sequito'
@@ -17,7 +16,6 @@ export function CharacterHeader() {
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [showKillModal, setShowKillModal] = useState(false)
 
   // Modelo de 2 slots fijos: sin flujo de alta, se garantizan al montar.
   useEffect(() => {
@@ -67,18 +65,6 @@ export function CharacterHeader() {
     e.target.value = ''
   }
 
-  function handleKill() {
-    if (!activeChar || activeChar.info.role !== 'sequito') return
-    setShowKillModal(true)
-  }
-
-  function confirmKill() {
-    if (!activeChar) return
-    dispatch(killCharacter(activeChar.id))
-    showToast(`⚰ ${activeChar.info.name || 'El acólito'} ha caído. Nuevo acólito con ${activeChar.info.experience || 0} PE heredados.`)
-    setShowKillModal(false)
-  }
-
   return (
     <div className="flex flex-col gap-2 border-b border-rim-bright bg-surface-2 px-4 py-3">
       <div className="flex items-start justify-between gap-3">
@@ -113,15 +99,6 @@ export function CharacterHeader() {
           className="sr-only"
           aria-label="Importar personaje"
         />
-        {activeChar?.info.role === 'sequito' && (
-          <button
-            onClick={handleKill}
-            className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-crimson hover:text-crimson transition-colors"
-            title="Marcar como caído en combate"
-          >
-            ☠ Caído
-          </button>
-        )}
 
         {/* Selector de rol — los 2 slots existen siempre, igual que pjBtn0/pjBtn1 */}
         <div className="flex gap-1 ml-auto">
@@ -155,15 +132,6 @@ export function CharacterHeader() {
           )}
         </div>
       </div>
-
-      {showKillModal && activeChar && (
-        <KillConfirmModal
-          name={activeChar.info.name || 'Acólito sin nombre'}
-          xp={Number(activeChar.info.experience) || 0}
-          onConfirm={confirmKill}
-          onCancel={() => setShowKillModal(false)}
-        />
-      )}
     </div>
   )
 }
