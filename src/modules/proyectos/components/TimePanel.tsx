@@ -81,7 +81,7 @@ export function TimePanel() {
   }
 
   return (
-    <div className="bg-surface-2 border border-gold border-l-4 border-l-gold-bright px-4 py-4 mb-4 flex flex-wrap items-center gap-4">
+    <div className="bg-surface-2 border border-gold border-l-4 border-l-gold-bright px-5 py-4 mb-[25px] flex flex-wrap items-center gap-5">
       <label className="font-display text-[10px] uppercase tracking-[3px] text-gold whitespace-nowrap">
         ⚡ Avanzar Tiempo
       </label>
@@ -97,20 +97,20 @@ export function TimePanel() {
       </div>
       <button
         onClick={handleAdvance}
-        className="bg-gold text-black font-display text-[11px] uppercase tracking-[2px] px-5 py-2 font-bold transition-colors hover:bg-gold-bright"
+        className="bg-gold text-black font-display text-[11px] uppercase tracking-[2px] px-5 py-2.5 font-bold transition-colors hover:bg-gold-bright hover:shadow-[0_0_15px_rgba(240,184,64,0.4)]"
       >
         Avanzar
       </button>
       <div className="ml-auto flex gap-2">
         <button
           onClick={handleExport}
-          className="bg-surface-4 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 transition-colors hover:text-parchment hover:border-parchment-dim"
+          className="bg-surface-4 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-3 py-[5px] transition-colors hover:bg-surface-3 hover:text-parchment hover:border-parchment-dim"
         >
           ⬇ Exportar JSON
         </button>
         <button
           onClick={handleImportClick}
-          className="bg-surface-4 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 transition-colors hover:text-parchment hover:border-parchment-dim"
+          className="bg-surface-4 border border-rim-bright text-parchment-dim font-display text-[9px] uppercase tracking-[2px] px-3 py-[5px] transition-colors hover:bg-surface-3 hover:text-parchment hover:border-parchment-dim"
         >
           ⬆ Importar JSON
         </button>
@@ -128,7 +128,6 @@ export function TimePanel() {
         message={confirm.message}
         onConfirm={confirm.onConfirm}
         onCancel={confirm.onCancel}
-        confirmLabel="Importar"
       />
     </div>
   )

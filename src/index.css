@@ -33,6 +33,7 @@
   --animate-shimmer: shimmer 3s ease-in-out infinite;
   --animate-spin-slow: spin-slow 20s linear infinite;
   --animate-pulse-mech: pulse-mech 2s ease-in-out infinite;
+  --animate-pulse-fill: pulse-fill 2s ease-in-out infinite;
 }
 
 /* ============================================================
@@ -56,6 +57,11 @@
 @keyframes pulse-mech {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
+}
+
+@keyframes pulse-fill {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
 }
 
 /* ============================================================

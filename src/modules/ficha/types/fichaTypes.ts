@@ -125,6 +125,7 @@ export interface InqMejora {
   cost: number
   req: string
   desc: string
+  notes: string
 }
 
 export interface Character {

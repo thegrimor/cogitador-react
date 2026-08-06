@@ -4,6 +4,7 @@ import { addTalent, removeTalent, toggleFilterCareer } from '../../services/fich
 import { TALENTS } from '@/core/data/darkheresy'
 import { getRankForXP, getAvailableItemsForRank, normalizeName } from '@/core/data/darkheresy/careers'
 import { computeXpSpent } from '../../services/fichaComputed'
+import { EmptyState } from '../EmptyState'
 
 type ManualForm = {
   name: string
@@ -45,7 +46,6 @@ export function TalentosTab() {
   const [quickXp, setQuickXp] = useState(100)
   const [showManual, setShowManual] = useState(false)
   const [manual, setManual] = useState<ManualForm>(EMPTY_MANUAL)
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   if (!char) return <NoChar />
 
@@ -80,15 +80,6 @@ export function TalentosTab() {
     dispatch(addTalent({ charId: char!.id, talent: { ...manual } }))
     setManual(EMPTY_MANUAL)
     setShowManual(false)
-  }
-
-  function toggleExpand(id: string) {
-    setExpandedIds(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
   }
 
   return (
@@ -217,53 +208,47 @@ export function TalentosTab() {
       )}
 
       {char.talents.length === 0 ? (
-        <div className="px-4 py-10 text-center">
-          <p className="font-mono text-xs text-parchment-dim">Sin talentos registrados</p>
+        <div className="p-4">
+          <EmptyState icon="✦" label="Sin talentos" />
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-rim">
-          {char.talents.map(talent => {
-            const expanded = expandedIds.has(talent.id)
-            return (
-              <div key={talent.id} className="flex flex-col px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                <div className="flex items-start gap-2">
-                  <div className="flex-1 flex flex-col gap-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-rajdhani font-bold text-parchment text-sm leading-none">{talent.name}</span>
-                      <span className="font-mono text-[10px] bg-gold/20 text-gold px-1.5 py-0.5 shrink-0">{talent.type}</span>
-                      {talent.xp > 0 && (
-                        <span className="font-mono text-[10px] text-parchment-dim">{talent.xp} XP</span>
-                      )}
-                    </div>
-                    {talent.req && (
-                      <p className="font-mono text-[10px] text-parchment-dim">Req: {talent.req}</p>
-                    )}
-                    {talent.effect && (
-                      <p className="font-mono text-[11px] text-neon">{talent.effect}</p>
-                    )}
-                    {talent.desc && (
-                      <button
-                        onClick={() => toggleExpand(talent.id)}
-                        className="font-mono text-[10px] text-parchment-dim hover:text-parchment transition-colors text-left"
-                      >
-                        {expanded ? '▲ Ocultar descripción' : '▼ Ver descripción'}
-                      </button>
-                    )}
-                    {expanded && talent.desc && (
-                      <p className="font-mono text-[11px] text-parchment-dim border-l-2 border-rim pl-2 mt-1">{talent.desc}</p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => dispatch(removeTalent({ charId: char!.id, talentId: talent.id }))}
-                    className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0 mt-0.5"
-                    aria-label="Eliminar talento"
-                  >
-                    ✕
-                  </button>
-                </div>
+        <div className="flex flex-col gap-2 p-2">
+          {char.talents.map(talent => (
+            // Réplica de .talent-card: borde izquierdo de acento, nombre 15px,
+            // "REQUISITOS: X", efecto con prefijo ►, descripción siempre visible
+            // (el legacy no la oculta tras un toggle), columna derecha con
+            // coste PE (si tiene) y eliminar. Sin badge de tipo — el legacy
+            // no lo muestra en la tarjeta pese a tener esa clase en el CSS.
+            <div
+              key={talent.id}
+              className="bg-surface border border-rim border-l-[3px] border-l-crimson-dim hover:border-rim-bright hover:border-l-crimson px-3.5 py-3 flex gap-3 items-start transition-colors"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="font-rajdhani font-bold text-[15px] text-parchment-bright mb-1">{talent.name}</div>
+                {talent.req && (
+                  <div className="font-mono text-[9px] tracking-[1px] text-parchment-dim mb-1">REQUISITOS: {talent.req}</div>
+                )}
+                {talent.effect && (
+                  <div className="font-mono text-[11px] text-neon">► {talent.effect}</div>
+                )}
+                {talent.desc && (
+                  <div className="font-rajdhani text-[11px] text-parchment-dim mt-1">{talent.desc}</div>
+                )}
               </div>
-            )
-          })}
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                {talent.xp > 0 && (
+                  <span className="font-mono text-[10px] text-gold border border-gold px-1.5 py-0.5 whitespace-nowrap">{talent.xp} PE</span>
+                )}
+                <button
+                  onClick={() => dispatch(removeTalent({ charId: char!.id, talentId: talent.id }))}
+                  className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors"
+                  aria-label="Eliminar talento"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

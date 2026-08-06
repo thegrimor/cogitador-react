@@ -16,6 +16,9 @@ const DOT_LABELS = ['S', 'I', 'C', 'E', 'H', 'M']
 const DOT_TITLES = ['Simple', 'Intermedio', 'Cualificado', 'Experto', 'Heroico', 'Maestro']
 const FALLBACK_COSTS: Array<number | null> = [500, 750, 1000, 2500, null, null]
 
+// Réplica de .attr-row del HTML legacy: fila única (grid 44px|52px|1fr), sin
+// "bonus externo" ni "Tirada %" — ninguno de los dos existe en la UI real del
+// legacy (bonuses solo aparece como campo heredado del import, sin input).
 export function AttributeCard({ charId, career, def, values }: Props) {
   const dispatch = useAppDispatch()
   const dots = getAttrDots(values)
@@ -35,39 +38,39 @@ export function AttributeCard({ charId, career, def, values }: Props) {
   }
 
   return (
-    <div className="bg-surface border border-rim-bright hover:border-crimson-dim transition-colors">
-      <div className="flex items-start justify-between px-3 pt-2 pb-1 gap-2">
-        <div>
-          <p className="font-display text-[9px] uppercase tracking-[2px] text-gold">
-            {def.abbr} <span className="text-parchment-dim">({def.label})</span>
-          </p>
-          <p className="font-mono text-[9px] text-parchment-dim">BR {bonus}</p>
-        </div>
-        <p
-          className="font-display text-2xl font-black text-crimson-bright leading-none"
-          style={{ textShadow: '0 0 10px rgba(255,34,34,0.3)' }}
-        >
-          {total}
-        </p>
+    <div className="bg-surface border border-rim-bright hover:border-crimson-dim transition-colors grid grid-cols-[44px_52px_1fr] items-center gap-2 px-3 py-2">
+      {/* attr-short-block */}
+      <div className="flex flex-col gap-0.5">
+        <span className="font-display text-[11px] text-gold tracking-[1px]">{def.abbr}</span>
+        <span className="font-mono text-[7px] text-parchment-dim leading-tight break-words">{def.label}</span>
+        <span className="font-mono text-[9px] text-parchment-dim">BR {bonus}</span>
       </div>
 
-      {/* BASE + puntos de mejora (dots) */}
-      <div className="flex items-end gap-2 px-3 pb-2">
-        <div className="flex flex-col gap-1">
-          <span className="font-display text-[7px] tracking-[1px] text-parchment-dim">BASE</span>
+      {/* attr-total-block */}
+      <p
+        className="font-display text-[30px] font-black text-crimson-bright leading-none text-center"
+        style={{ textShadow: '0 0 8px rgba(255,34,34,0.3)' }}
+      >
+        {total}
+      </p>
+
+      {/* attr-inputs-row: BASE + AVA dots */}
+      <div className="flex items-end gap-1">
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="font-mono text-[7px] tracking-[1px] text-parchment-dim">BASE</span>
           <input
             type="number"
             value={values.base}
             min={0}
             max={99}
             onChange={e => update('base', parseInt(e.target.value) || 0)}
-            className="w-16 bg-surface-2 border border-rim-bright text-parchment-bright font-display text-base font-bold text-center py-1 outline-none focus:border-gold transition-colors"
+            className="w-[46px] bg-surface-2 border border-rim-bright text-parchment-bright font-display text-sm font-bold text-center py-1 outline-none focus:border-gold transition-colors"
           />
         </div>
-        <span className="font-display text-lg text-parchment-dim pb-1">+</span>
-        <div className="flex flex-col gap-1 flex-1">
-          <span className="font-display text-[7px] tracking-[1px] text-parchment-dim">AVA (+{dots * 10})</span>
-          <div className="flex gap-1">
+        <span className="font-display text-base text-parchment-dim pb-1.5">+</span>
+        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+          <span className="font-mono text-[7px] tracking-[1px] text-parchment-dim">AVA (+{dots * 10})</span>
+          <div className="flex gap-[3px]">
             {DOT_LABELS.map((label, i) => {
               const cost = costs[i]
               const bought = i < dots
@@ -79,7 +82,7 @@ export function AttributeCard({ charId, career, def, values }: Props) {
                   <div
                     key={label}
                     title="N/D"
-                    className="flex-1 h-7 border border-dashed border-rim opacity-30"
+                    className="w-[14px] h-[14px] border border-dashed border-rim opacity-30 shrink-0"
                   />
                 )
               }
@@ -89,9 +92,9 @@ export function AttributeCard({ charId, career, def, values }: Props) {
                   onClick={() => toggleDot(i)}
                   title={`${DOT_TITLES[i]}: ${cost} PE${bought ? ' (comprado)' : ''}`}
                   className={[
-                    'flex-1 h-7 font-display text-[10px] uppercase border transition-colors',
+                    'w-[14px] h-[14px] shrink-0 font-mono text-[7px] uppercase border flex items-center justify-center transition-colors',
                     bought
-                      ? 'border-crimson bg-crimson/20 text-crimson-bright'
+                      ? 'bg-crimson-dim border-crimson text-white'
                       : 'border-rim-bright text-parchment-dim hover:border-gold hover:text-gold',
                   ].join(' ')}
                 >
@@ -102,34 +105,6 @@ export function AttributeCard({ charId, career, def, values }: Props) {
           </div>
         </div>
       </div>
-
-      {/* Bonus externo */}
-      <div className="flex items-end gap-2 px-3 pb-2">
-        <div className="flex flex-col gap-1">
-          <span className="font-display text-[7px] tracking-[1px] text-parchment-dim">BONUS EXT</span>
-          <input
-            type="number"
-            value={values.bonuses}
-            min={-99}
-            max={99}
-            onChange={e => update('bonuses', parseInt(e.target.value) || 0)}
-            className="w-16 bg-surface-2 border border-rim-bright text-parchment-bright font-display text-base font-bold text-center py-1 outline-none focus:border-gold transition-colors"
-          />
-        </div>
-        {values.bonuses !== 0 && (
-          <input
-            type="text"
-            value={values.bonusNote}
-            placeholder="Origen del bonus..."
-            onChange={e => update('bonusNote', e.target.value)}
-            className="flex-1 bg-transparent border-b border-rim font-mono text-[10px] text-gold outline-none placeholder:text-parchment-dim/40 py-1.5"
-          />
-        )}
-      </div>
-
-      <p className="font-mono text-[9px] text-parchment-dim px-3 pb-2">
-        Tirada: {total}%
-      </p>
     </div>
   )
 }

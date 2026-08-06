@@ -69,11 +69,11 @@ export function CharacterHeader() {
     <div className="flex flex-col gap-2 border-b border-rim-bright bg-surface-2 px-4 py-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5 min-w-0">
-          <p className="font-rajdhani text-base font-semibold text-parchment leading-none truncate">
-            {activeChar?.info.name || 'Sin Designación'}
+          <p className="font-display text-sm text-white tracking-[2px] leading-none truncate">
+            {activeChar?.info.name || 'SIN DESIGNACIÓN'}
           </p>
-          <p className="font-mono text-[10px] text-parchment-dim leading-none">
-            Rango {activeChar?.info.rank || 1} // {activeChar?.info.career || '—'}
+          <p className="font-mono text-[11px] text-parchment-dim mt-1">
+            {activeChar?.info.career || '—'} // {activeChar?.info.rank || '—'}
           </p>
         </div>
       </div>
@@ -81,15 +81,15 @@ export function CharacterHeader() {
       <div className="flex flex-wrap items-center gap-1.5">
         <button
           onClick={handleExport}
-          className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-gold hover:text-gold transition-colors"
+          className="font-display text-[8px] uppercase tracking-[2px] bg-surface-4 border border-rim-bright text-parchment-dim px-2.5 py-1 hover:text-parchment hover:border-parchment-dim transition-colors"
         >
-          ↓ Exportar
+          ⬇ Exportar
         </button>
         <button
           onClick={handleImportClick}
-          className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:border-gold hover:text-gold transition-colors"
+          className="font-display text-[8px] uppercase tracking-[2px] bg-surface-4 border border-rim-bright text-parchment-dim px-2.5 py-1 hover:text-parchment hover:border-parchment-dim transition-colors"
         >
-          ↑ Importar
+          ⬆ Importar
         </button>
         <input
           ref={fileInputRef}
@@ -106,7 +106,7 @@ export function CharacterHeader() {
             <button
               onClick={() => dispatch(selectCharacter(inquisidor.id))}
               className={[
-                'font-display text-[8px] uppercase tracking-[1px] border px-2 py-1 transition-colors',
+                'font-display text-[8px] uppercase tracking-[2px] bg-surface-4 border px-2.5 py-1 transition-colors',
                 activeCharacterId === inquisidor.id
                   ? 'border-gold text-gold'
                   : 'border-rim-bright text-parchment-dim hover:text-parchment',
@@ -120,7 +120,7 @@ export function CharacterHeader() {
             <button
               onClick={() => dispatch(selectCharacter(sequito.id))}
               className={[
-                'font-display text-[8px] uppercase tracking-[1px] border px-2 py-1 transition-colors',
+                'font-display text-[8px] uppercase tracking-[2px] bg-surface-4 border px-2.5 py-1 transition-colors',
                 activeCharacterId === sequito.id
                   ? 'border-gold text-gold'
                   : 'border-rim-bright text-parchment-dim hover:text-parchment',

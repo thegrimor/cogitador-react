@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addWeapon, removeWeapon, addArmor, removeArmor, addGear, removeGear } from '../../services/fichaSlice'
 import { WEAPONS, ARMORS, GEAR } from '@/core/data/darkheresy'
+import { EmptyState } from '../EmptyState'
 
 type WeaponForm = {
   name: string
@@ -171,15 +172,9 @@ export function ArmeriaTab() {
               </button>
             </div>
             {selWeaponDef && (
-              <div className="grid grid-cols-4 gap-1 bg-surface border border-rim px-3 py-2 font-mono text-[10px] text-parchment-dim">
-                <span>Cls: <span className="text-parchment">{selWeaponDef.cls}</span></span>
-                <span>Tipo: <span className="text-parchment">{selWeaponDef.dmgType}</span></span>
-                <span>Rng: <span className="text-parchment">{selWeaponDef.range}</span></span>
-                <span>RoF: <span className="text-parchment">{selWeaponDef.rof}</span></span>
-                <span>Dmg: <span className="text-parchment">{selWeaponDef.dmg}</span></span>
-                <span>Pen: <span className="text-parchment">{selWeaponDef.pen}</span></span>
-                <span>Carg: <span className="text-parchment">{selWeaponDef.clip}</span></span>
-                {selWeaponDef.notes && <span className="col-span-2">Notas: <span className="text-parchment">{selWeaponDef.notes}</span></span>}
+              <div className="bg-surface border border-rim px-3 py-2 font-mono text-[11px] text-parchment-dim leading-relaxed">
+                <span className="text-gold">{selWeaponDef.cls}</span> &nbsp;|&nbsp; Alcance: <b className="text-parchment font-normal">{selWeaponDef.range}</b> &nbsp;|&nbsp; CDD: <b className="text-parchment font-normal">{selWeaponDef.rof}</b> &nbsp;|&nbsp; Daño: <span className="text-crimson-bright">{selWeaponDef.dmg} {selWeaponDef.dmgType.split(' ')[0]}</span> &nbsp;|&nbsp; Pen: <b className="text-parchment font-normal">{selWeaponDef.pen}</b> &nbsp;|&nbsp; Car: <b className="text-parchment font-normal">{selWeaponDef.clip}</b>
+                {selWeaponDef.notes && <> &nbsp;|&nbsp; <span className="text-neon">{selWeaponDef.notes}</span></>}
               </div>
             )}
           </div>
@@ -217,27 +212,53 @@ export function ArmeriaTab() {
             </div>
           )}
           {char.weapons.length === 0 ? (
-            <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin armas registradas</p></div>
+            <div className="p-4"><EmptyState icon="⚔" label="Sin armas" /></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim mt-3">
+            <div className="flex flex-col gap-2 p-2">
               {char.weapons.map(w => (
-                <div key={w.id} className="flex items-start gap-2 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                  <div className="flex-1 flex flex-col gap-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-rajdhani font-bold text-parchment text-sm leading-none">{w.name}</span>
-                      <span className="font-mono text-[10px] bg-crimson/20 text-crimson px-1.5 py-0.5">{w.cls}</span>
-                      <span className="font-mono text-[10px] bg-surface border border-rim text-parchment-dim px-1.5 py-0.5">{w.dmgType}</span>
+                // Réplica de .weapon-card: acento izquierdo, nombre 16px + tags
+                // de clase/daño, stats como bloques label+valor (PEN siempre
+                // visible, el resto solo si tienen dato), notas al final.
+                <div key={w.id} className="bg-surface border border-rim border-l-[3px] border-l-crimson-dim px-3.5 py-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="font-rajdhani font-bold text-base text-parchment-bright flex items-center gap-1.5 flex-wrap">
+                      {w.name}
+                      <span className="font-mono text-[8px] tracking-[1px] text-crimson border border-crimson px-1.5 py-0.5">{w.cls}</span>
+                      <span className="font-mono text-[8px] tracking-[1px] text-parchment-dim border border-rim-bright px-1.5 py-0.5">{w.dmgType}</span>
                     </div>
-                    <div className="grid grid-cols-4 gap-x-3 gap-y-0.5 font-mono text-[10px] text-parchment-dim">
-                      <span>Rng: <span className="text-parchment">{w.range}</span></span>
-                      <span>RoF: <span className="text-parchment">{w.rof}</span></span>
-                      <span>Dmg: <span className="text-parchment">{w.dmg}</span></span>
-                      <span>Pen: <span className="text-parchment">{w.pen}</span></span>
-                      <span>Carg: <span className="text-parchment">{w.clip}</span></span>
-                      {w.notes && <span className="col-span-3">Notas: <span className="text-parchment">{w.notes}</span></span>}
-                    </div>
+                    <button onClick={() => dispatch(removeWeapon({ charId: char!.id, weaponId: w.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0" aria-label="Eliminar arma">✕</button>
                   </div>
-                  <button onClick={() => dispatch(removeWeapon({ charId: char!.id, weaponId: w.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0 mt-0.5" aria-label="Eliminar arma">✕</button>
+                  <div className="flex flex-wrap gap-3 mt-2 mb-2">
+                    {w.range && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-mono text-[8px] tracking-[1px] text-parchment-dim">ALCANCE</span>
+                        <span className="font-display text-[13px] text-gold-bright">{w.range}</span>
+                      </div>
+                    )}
+                    {w.rof && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-mono text-[8px] tracking-[1px] text-parchment-dim">ROF</span>
+                        <span className="font-display text-[13px] text-gold-bright">{w.rof}</span>
+                      </div>
+                    )}
+                    {w.dmg && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-mono text-[8px] tracking-[1px] text-parchment-dim">DAÑO</span>
+                        <span className="font-display text-[13px] text-gold-bright">{w.dmg}</span>
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-mono text-[8px] tracking-[1px] text-parchment-dim">PEN</span>
+                      <span className="font-display text-[13px] text-gold-bright">{w.pen}</span>
+                    </div>
+                    {w.clip && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-mono text-[8px] tracking-[1px] text-parchment-dim">CARGADOR</span>
+                        <span className="font-display text-[13px] text-gold-bright">{w.clip}</span>
+                      </div>
+                    )}
+                  </div>
+                  {w.notes && <p className="font-rajdhani text-[11px] text-parchment-dim">{w.notes}</p>}
                 </div>
               ))}
             </div>
@@ -281,12 +302,9 @@ export function ArmeriaTab() {
               <button onClick={addQuickArmor} disabled={!selArmorDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
             </div>
             {selArmorDef && (
-              <div className="grid grid-cols-4 gap-1 bg-surface border border-rim px-3 py-2 font-mono text-[10px] text-parchment-dim">
-                <span>C: <span className="text-parchment">{selArmorDef.head}</span></span>
-                <span>T: <span className="text-parchment">{selArmorDef.body}</span></span>
-                <span>B: <span className="text-parchment">{selArmorDef.arms}</span></span>
-                <span>P: <span className="text-parchment">{selArmorDef.legs}</span></span>
-                {selArmorDef.notes && <span className="col-span-4">Notas: <span className="text-parchment">{selArmorDef.notes}</span></span>}
+              <div className="bg-surface border border-rim px-3 py-2 font-mono text-[11px] text-parchment-dim leading-relaxed">
+                PA: Cabeza <b className="text-parchment font-normal">{selArmorDef.head}</b> | Cuerpo <b className="text-parchment font-normal">{selArmorDef.body}</b> | Brazos <b className="text-parchment font-normal">{selArmorDef.arms}</b> | Piernas <b className="text-parchment font-normal">{selArmorDef.legs}</b>
+                {selArmorDef.notes && <> &nbsp;|&nbsp; <span className="text-parchment-dim">{selArmorDef.notes}</span></>}
               </div>
             )}
           </div>
@@ -304,22 +322,31 @@ export function ArmeriaTab() {
             </div>
           )}
           {char.armors.length === 0 ? (
-            <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin armaduras registradas</p></div>
+            <div className="p-4"><EmptyState icon="🛡" label="Sin armadura" /></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim mt-3">
+            <div className="flex flex-col gap-2 p-2">
               {char.armors.map(armor => (
-                <div key={armor.id} className="flex items-start gap-2 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                  <div className="flex-1 flex flex-col gap-1 min-w-0">
-                    <span className="font-rajdhani font-bold text-parchment text-sm leading-none">{armor.name}</span>
-                    <div className="flex gap-4 font-mono text-[10px]">
-                      <span className="text-parchment-dim">C: <span className="text-parchment font-bold">{armor.head}</span></span>
-                      <span className="text-parchment-dim">T: <span className="text-parchment font-bold">{armor.body}</span></span>
-                      <span className="text-parchment-dim">B: <span className="text-parchment font-bold">{armor.arms}</span></span>
-                      <span className="text-parchment-dim">P: <span className="text-parchment font-bold">{armor.legs}</span></span>
-                    </div>
-                    {armor.notes && <p className="font-mono text-[10px] text-parchment-dim italic">{armor.notes}</p>}
+                // Réplica de .armor-card: nombre 16px + notas, luego grid de
+                // 4 localizaciones con nombre completo (no abreviado).
+                <div key={armor.id} className="bg-surface border border-rim px-3.5 py-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-rajdhani font-bold text-base text-parchment-bright">{armor.name}</span>
+                    <button onClick={() => dispatch(removeArmor({ charId: char!.id, armorId: armor.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0" aria-label="Eliminar armadura">✕</button>
                   </div>
-                  <button onClick={() => dispatch(removeArmor({ charId: char!.id, armorId: armor.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0 mt-0.5" aria-label="Eliminar armadura">✕</button>
+                  {armor.notes && <p className="font-mono text-[11px] text-parchment-dim my-1">{armor.notes}</p>}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2.5">
+                    {[
+                      { label: 'CABEZA', value: armor.head },
+                      { label: 'CUERPO', value: armor.body },
+                      { label: 'BRAZOS', value: armor.arms },
+                      { label: 'PIERNAS', value: armor.legs },
+                    ].map(loc => (
+                      <div key={loc.label} className="bg-surface-2 border border-rim-bright px-2.5 py-1.5 text-center">
+                        <div className="font-mono text-[9px] tracking-[1px] text-parchment-dim">{loc.label}</div>
+                        <div className="font-display text-lg font-bold text-blue-400">{loc.value}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -374,17 +401,22 @@ export function ArmeriaTab() {
             </div>
           )}
           {char.gear.length === 0 ? (
-            <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin objetos registrados</p></div>
+            <div className="p-4"><EmptyState icon="🎒" label="Sin equipo" /></div>
           ) : (
-            <div className="flex flex-col divide-y divide-rim mt-3">
+            <div className="flex flex-col gap-1.5 p-2">
               {char.gear.map(item => (
-                <div key={item.id} className="flex items-center gap-3 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                  <span className="font-mono text-[11px] text-gold min-w-[2rem] text-center">x{item.qty}</span>
-                  <div className="flex-1 flex flex-col min-w-0">
-                    <span className="font-rajdhani font-semibold text-parchment text-sm leading-none">{item.name}</span>
+                // Réplica de .gear-item: nombre+notas a la izquierda, ×cantidad
+                // y eliminar a la derecha (el legacy no muestra la cantidad
+                // primero).
+                <div key={item.id} className="bg-surface border border-rim px-3 py-2 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="font-rajdhani font-semibold text-sm text-parchment">{item.name}</span>
                     {item.notes && <p className="font-mono text-[10px] text-parchment-dim">{item.notes}</p>}
                   </div>
-                  <button onClick={() => dispatch(removeGear({ charId: char!.id, itemId: item.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0" aria-label="Eliminar objeto">✕</button>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="font-display text-[11px] text-gold">×{item.qty}</span>
+                    <button onClick={() => dispatch(removeGear({ charId: char!.id, itemId: item.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors" aria-label="Eliminar objeto">✕</button>
+                  </div>
                 </div>
               ))}
             </div>

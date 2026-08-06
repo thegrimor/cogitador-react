@@ -335,6 +335,11 @@ export const fichaSlice = createSlice({
       const char = state.characters.find(c => c.id === action.payload.charId)
       if (char) char.inqMejoras = (char.inqMejoras ?? []).filter(m => m.id !== action.payload.mejoraId)
     },
+    updateInqMejoraNotes(state, action: PayloadAction<{ charId: string; mejoraId: string; notes: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      const mejora = char?.inqMejoras?.find(m => m.id === action.payload.mejoraId)
+      if (mejora) mejora.notes = action.payload.notes
+    },
   },
 })
 
@@ -353,7 +358,7 @@ export const {
   updateMoney, addCurrency, updateCurrency, removeCurrency,
   updateNotes,
   deleteCharacter, toggleFilterCareer, killCharacter,
-  addInqMejora, removeInqMejora,
+  addInqMejora, removeInqMejora, updateInqMejoraNotes,
 } = fichaSlice.actions
 
 export default fichaSlice.reducer

@@ -89,6 +89,7 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
     cost: asNumber(t['xp']),
     req: asString(t['req']),
     desc: asString(t['desc']),
+    notes: asString(t['notes']),
   }))
 
   const attrs: Record<string, AttributeValues> = buildDefaultAttrs()

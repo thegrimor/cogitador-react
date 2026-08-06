@@ -31,7 +31,7 @@ export function CaracteristicasTab() {
             BASE + AVANCES = TOTAL
           </span>
         </div>
-        <div className="grid grid-cols-1 gap-px bg-rim p-px sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5 p-4">
           {ATTRIBUTES.map(def => (
             <AttributeCard
               key={def.key}

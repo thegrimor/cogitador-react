@@ -34,7 +34,7 @@ export function SequitoCard({ seqId, onEdit }: Props) {
         'cursor-pointer transition-all duration-150 select-none',
         member.alive
           ? 'border-l-rim-bright hover:border-l-gold hover:bg-surface-4 hover:border-rim-bright'
-          : 'border-l-crimson-dim opacity-50',
+          : 'border-l-[#3a0a0a] opacity-50',
         isDragging ? 'opacity-30' : '',
       ].join(' ')}
       onClick={() => onEdit(seqId)}
@@ -42,7 +42,7 @@ export function SequitoCard({ seqId, onEdit }: Props) {
       <span
         {...attributes}
         {...listeners}
-        className="text-rim-bright text-xs cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
+        className="text-rim-bright text-[10px] px-0.5 cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
         onClick={e => e.stopPropagation()}
       >
         ⠿
@@ -53,7 +53,7 @@ export function SequitoCard({ seqId, onEdit }: Props) {
           'w-2 h-2 rounded-full flex-shrink-0',
           member.alive
             ? 'bg-neon'
-            : 'bg-transparent border border-crimson-dim',
+            : 'bg-[#3a1a1a] border border-[#7a1a1a]',
         ].join(' ')}
         style={member.alive ? { boxShadow: '0 0 6px rgba(42,255,106,0.4)' } : undefined}
       />
@@ -65,7 +65,7 @@ export function SequitoCard({ seqId, onEdit }: Props) {
             member.alive ? 'text-white' : 'line-through text-parchment-dim',
           ].join(' ')}
         >
-          {member.name}
+          {member.name || 'Sin nombre'}
         </div>
         {member.role && (
           <div className="font-mono text-[9px] tracking-[1px] text-parchment-dim truncate">

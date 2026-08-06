@@ -1,5 +1,7 @@
 import { useAppSelector } from '@/core/store/hooks'
 import { getAttrTotal } from '../../services/fichaComputed'
+import { ATTRIBUTES } from '@/core/data/darkheresy'
+import { EmptyState } from '../EmptyState'
 
 export function CaidosTab() {
   const { fallen } = useAppSelector(s => s.ficha)
@@ -13,73 +15,39 @@ export function CaidosTab() {
       </div>
 
       {fallen.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 gap-3 px-4 py-16">
-          <p className="font-display text-[9px] uppercase tracking-[3px] text-parchment-dim text-center">
-            Ningún caído
-          </p>
-          <p className="font-mono text-xs text-parchment-dim/50 text-center max-w-48">
-            Los agentes caídos quedan aquí como memoria del Omnissiah.
-          </p>
+        <div className="p-4">
+          <EmptyState icon="⚰" label="Ningún caído" />
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-rim">
-          {fallen.map(char => {
-            const xpTotal = parseInt(char.info.experience) || 0
-            return (
-              <div key={char.id} className="px-4 py-4 bg-surface-2 hover:bg-surface-3 transition-colors">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex flex-col gap-0.5">
-                    <p className="font-rajdhani text-base font-semibold text-parchment leading-none">
-                      {char.info.name || '— Sin nombre —'}
-                    </p>
-                    <p className="font-mono text-[10px] text-parchment-dim">
-                      {char.info.career} // {char.info.homeworld}
-                    </p>
-                    <p className="font-mono text-[10px] text-parchment-dim">
-                      {char.info.rank}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-0.5 shrink-0">
-                    <span className="font-display text-[8px] uppercase tracking-[1px] text-crimson border border-crimson px-2 py-0.5">
-                      Caído
-                    </span>
-                    <span className="font-mono text-[9px] text-parchment-dim">{char.diedAt}</span>
-                  </div>
+        <div className="flex flex-col gap-2 p-4">
+          {[...fallen].reverse().map(char => (
+            <div key={char.id} className="bg-surface border border-[#3a1a1a] border-l-[3px] border-l-[#7a1a1a] px-3.5 py-3 opacity-80">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="font-rajdhani text-base font-bold text-[#c87070] leading-tight">
+                    ⚰ {char.info.name || 'Desconocido'}
+                  </p>
+                  <p className="font-mono text-[9px] tracking-[1px] text-parchment-dim">
+                    {char.info.career || '—'} // {char.info.rank || '—'} — Caído: {char.diedAt || '?'}
+                  </p>
                 </div>
-
-                {/* XP summary */}
-                <div className="grid grid-cols-3 gap-px bg-rim p-px">
-                  <div className="bg-surface flex flex-col items-center py-2 px-2">
-                    <span className="font-display text-sm font-bold text-gold-bright">{xpTotal}</span>
-                    <span className="font-display text-[7px] uppercase tracking-[1px] text-parchment-dim mt-0.5">XP Total</span>
-                  </div>
-                  <div className="bg-surface flex flex-col items-center py-2 px-2">
-                    <span className="font-display text-sm font-bold text-parchment">{char.xpInherited}</span>
-                    <span className="font-display text-[7px] uppercase tracking-[1px] text-parchment-dim mt-0.5">Heredado</span>
-                  </div>
-                  <div className="bg-surface flex flex-col items-center py-2 px-2">
-                    <span className="font-display text-sm font-bold text-parchment-dim">
-                      {char.wounds.max}
-                    </span>
-                    <span className="font-display text-[7px] uppercase tracking-[1px] text-parchment-dim mt-0.5">Heridas</span>
-                  </div>
-                </div>
-
-                {/* Attribute summary */}
-                <div className="mt-2 grid grid-cols-9 gap-px bg-rim p-px">
-                  {Object.entries(char.attrs).map(([key, val]) => {
-                    const total = getAttrTotal(val)
-                    return (
-                      <div key={key} className="bg-surface flex flex-col items-center py-1.5 px-0.5">
-                        <span className="font-display text-[7px] text-parchment-dim">{key}</span>
-                        <span className="font-display text-xs font-bold text-parchment">{total}</span>
-                      </div>
-                    )
-                  })}
-                </div>
+                <span className="font-mono text-[10px] text-gold shrink-0">{char.xpInherited || 0} PE</span>
               </div>
-            )
-          })}
+              <div className="mt-2 flex gap-1.5 flex-wrap">
+                {Object.entries(char.attrs).map(([key, val]) => {
+                  const def = ATTRIBUTES.find(d => d.key === key)
+                  const total = getAttrTotal(val)
+                  return (
+                    <div key={key} className="text-center font-mono text-[9px] text-parchment-dim">
+                      {def?.abbr ?? key}
+                      <br />
+                      <span className="text-parchment text-xs">{total}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addPower, removePower, updatePsychic } from '../../services/fichaSlice'
 import { PSYCHIC_POWERS } from '@/core/data/darkheresy'
+import { EmptyState } from '../EmptyState'
 
 const DISCIPLINES = ['menor', 'adivinacion', 'biomancia', 'piromancia', 'telequinesia', 'telepatia']
 // Disciplina principal: no incluye "menor", igual que el HTML legacy (psychDiscipline)
@@ -17,22 +18,35 @@ const DISC_LABELS: Record<string, string> = {
   telepatia:    'Telepatía',
 }
 
+// Igual que .disc-* del legacy: menor=dim, resto con su propio color de acento
 const DISC_COLORS: Record<string, string> = {
-  menor:        'text-gold',
-  adivinacion:  'text-parchment',
-  biomancia:    'text-neon',
-  piromancia:   'text-crimson',
+  menor:        'text-parchment-dim',
+  adivinacion:  'text-amber-500',
+  biomancia:    'text-green-500',
+  piromancia:   'text-orange-500',
   telequinesia: 'text-blue-400',
   telepatia:    'text-purple-400',
 }
 
-const DISC_BG: Record<string, string> = {
-  menor:        'bg-gold/20 text-gold',
-  adivinacion:  'bg-parchment/10 text-parchment',
-  biomancia:    'bg-neon/10 text-neon',
-  piromancia:   'bg-crimson/20 text-crimson',
-  telequinesia: 'bg-blue-400/10 text-blue-400',
-  telepatia:    'bg-purple-400/10 text-purple-400',
+// Igual que DISC_LABEL del legacy (distinto de DISC_LABELS: en la tarjeta de
+// poder registrado "menor" se muestra como "MENOR", no "Poderes Menores")
+const DISC_BADGE_LABELS: Record<string, string> = {
+  menor:        'MENOR',
+  adivinacion:  'ADIVINACIÓN',
+  biomancia:    'BIOMANCIA',
+  piromancia:   'PIROMANCIA',
+  telequinesia: 'TELEQUINESIA',
+  telepatia:    'TELEPATÍA',
+}
+
+// Igual que .disc-* del legacy (color + border-color del mismo tono)
+const DISC_BORDER: Record<string, string> = {
+  menor:        'border-parchment-dim',
+  adivinacion:  'border-amber-500',
+  biomancia:    'border-green-500',
+  piromancia:   'border-orange-500',
+  telequinesia: 'border-blue-400',
+  telepatia:    'border-purple-400',
 }
 
 type ManualForm = {
@@ -77,9 +91,11 @@ export function PoderesPsiquicosTab() {
 
   if (!char) return <NoChar />
 
-  const availablePowers = discFilter === ALL_DISC_LABEL
+  const availablePowers = (discFilter === ALL_DISC_LABEL
     ? PSYCHIC_POWERS
-    : PSYCHIC_POWERS.filter(p => p.disc === discFilter)
+    : PSYCHIC_POWERS.filter(p => p.disc === discFilter))
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   const selPowerDef = PSYCHIC_POWERS.find(p => p.name === selPower)
 
@@ -95,13 +111,6 @@ export function PoderesPsiquicosTab() {
     setManual(EMPTY_MANUAL)
     setShowManual(false)
   }
-
-  const groupedPowers = char.powers.reduce<Record<string, typeof char.powers>>((acc, p) => {
-    const disc = p.disc || 'otro'
-    acc[disc] = acc[disc] ?? []
-    acc[disc].push(p)
-    return acc
-  }, {})
 
   return (
     <div className="flex flex-col gap-0">
@@ -186,23 +195,20 @@ export function PoderesPsiquicosTab() {
             >
               <option value="">— Selecciona poder —</option>
               {availablePowers.map(p => (
-                <option key={p.name} value={p.name}>{p.name} [{p.disc}] Umbral {p.umbral}</option>
+                <option key={p.name} value={p.name}>{p.name} (UP: {p.umbral}) — {DISC_BADGE_LABELS[p.disc] ?? p.disc.toUpperCase()}</option>
               ))}
             </select>
             <button onClick={handleQuickAdd} disabled={!selPowerDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
           </div>
 
           {selPowerDef && (
-            <div className="bg-surface border border-rim px-3 py-2 flex flex-col gap-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className={['font-mono text-[10px] px-2 py-0.5', DISC_BG[selPowerDef.disc] ?? 'bg-gold/20 text-gold'].join(' ')}>{selPowerDef.disc}</span>
-                <span className="font-mono text-[10px] text-parchment-dim">Umbral {selPowerDef.umbral}</span>
-                <span className="font-mono text-[10px] text-parchment-dim">Conc: {selPowerDef.conc}</span>
-                <span className="font-mono text-[10px] text-parchment-dim">Mant: {selPowerDef.mant}</span>
-                <span className="font-mono text-[10px] text-parchment-dim">Alc: {selPowerDef.alcance}</span>
-              </div>
-              <p className="font-mono text-[11px] text-parchment-dim">{selPowerDef.desc}</p>
-            </div>
+            <p className="font-mono text-xs leading-relaxed">
+              <span className="text-purple-400">UP:{selPowerDef.umbral}</span>
+              {'  |  '}
+              <span className="text-parchment-dim">{selPowerDef.conc} — {selPowerDef.mant === 'Sí' ? 'Mantenimiento' : 'Sin mantenimiento'} — {selPowerDef.alcance}</span>
+              <br />
+              <span className="text-parchment">{selPowerDef.desc}</span>
+            </p>
           )}
         </div>
 
@@ -228,40 +234,43 @@ export function PoderesPsiquicosTab() {
       </div>
 
       {char.powers.length === 0 ? (
-        <div className="px-4 py-10 text-center">
-          <p className="font-mono text-xs text-parchment-dim">Sin poderes psíquicos registrados</p>
+        <div className="p-4">
+          <EmptyState icon="✵" label="Sin poderes psíquicos" />
         </div>
       ) : (
-        <div className="flex flex-col gap-0">
-          {Object.entries(groupedPowers).map(([disc, powers]) => (
-            <div key={disc} className="flex flex-col gap-0">
-              <div className="border-b border-rim bg-surface-3 px-4 py-1.5">
-                <span className={['font-display text-[9px] uppercase tracking-[2px]', DISC_COLORS[disc] ?? 'text-gold'].join(' ')}>
-                  {disc.charAt(0).toUpperCase() + disc.slice(1)}
-                </span>
-              </div>
-              <div className="flex flex-col divide-y divide-rim">
-                {powers.map(power => (
-                  <div key={power.id} className="flex items-start gap-2 px-4 py-3 bg-surface-2 hover:bg-surface-3 transition-colors">
-                    <div className="flex-1 flex flex-col gap-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-rajdhani font-bold text-parchment text-sm leading-none">{power.name}</span>
-                        <span className={['font-mono text-[10px] px-1.5 py-0.5 shrink-0', DISC_BG[power.disc] ?? 'bg-gold/20 text-gold'].join(' ')}>{power.disc}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[10px] text-parchment-dim">
-                        <span>Umbral: <span className="text-parchment">{power.umbral}</span></span>
-                        <span>Conc: <span className="text-parchment">{power.conc}</span></span>
-                        <span>Mant: <span className="text-parchment">{power.mant}</span></span>
-                        <span>Alc: <span className="text-parchment">{power.alcance}</span></span>
-                      </div>
-                      {power.desc && <p className="font-mono text-[11px] text-parchment-dim">{power.desc}</p>}
-                    </div>
-                    <button onClick={() => dispatch(removePower({ charId: char!.id, powerId: power.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0 mt-0.5" aria-label="Eliminar poder">✕</button>
+        // Réplica de renderPowers(): lista plana ordenada por disciplina y
+        // luego nombre — el legacy NO agrupa en secciones con cabecera, la
+        // disciplina es solo una etiqueta dentro de cada tarjeta (.power-card).
+        <div className="flex flex-col gap-2 p-2">
+          {[...char.powers]
+            .sort((a, b) => (a.disc === b.disc ? a.name.localeCompare(b.name) : a.disc.localeCompare(b.disc)))
+            .map(power => (
+              <div key={power.id} className="bg-surface border border-purple-400 border-l-[3px] px-3 py-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className={['font-display text-[9px] tracking-[1px] px-2 py-0.5 border inline-block mb-1.5', DISC_COLORS[power.disc] ?? 'text-parchment-dim', DISC_BORDER[power.disc] ?? 'border-parchment-dim'].join(' ')}>
+                      {DISC_BADGE_LABELS[power.disc] ?? power.disc.toUpperCase()}
+                    </span>
+                    <div className="font-rajdhani font-bold text-sm text-purple-400">{power.name}</div>
                   </div>
-                ))}
+                  <button onClick={() => dispatch(removePower({ charId: char!.id, powerId: power.id }))} className="font-mono text-xs text-parchment-dim hover:text-crimson-bright transition-colors shrink-0" aria-label="Eliminar poder">✕</button>
+                </div>
+                <div className="flex flex-wrap gap-3 mb-1.5">
+                  {[
+                    { label: 'UMBRAL', value: power.umbral },
+                    { label: 'CONCENTRACIÓN', value: power.conc || '—' },
+                    { label: 'MANT.', value: power.mant || 'No' },
+                    { label: 'ALCANCE', value: power.alcance || '—' },
+                  ].map(s => (
+                    <div key={s.label} className="flex flex-col gap-0.5">
+                      <span className="font-mono text-[8px] tracking-[1px] text-parchment-dim">{s.label}</span>
+                      <span className="font-display text-xs text-parchment-bright">{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+                {power.desc && <p className="font-rajdhani text-[11px] text-parchment-dim leading-relaxed">{power.desc}</p>}
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
     </div>

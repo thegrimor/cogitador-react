@@ -37,14 +37,14 @@ export function ProjectsGrid() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-[15px]">
         <h2 className="font-display text-[11px] uppercase tracking-[4px] text-parchment-dim">
           // Registro de Proyectos Activos
         </h2>
         <select
           value={filter}
           onChange={e => setFilter(e.target.value as FilterValue)}
-          className="bg-surface-2 border border-rim-bright text-parchment font-mono text-[11px] px-3 py-1.5 outline-none focus:border-crimson transition-colors"
+          className="bg-surface-2 border border-rim-bright text-parchment font-mono text-[11px] px-[10px] py-1.5 outline-none focus:border-crimson transition-colors"
         >
           {FILTER_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value} className="bg-surface-2">
@@ -55,7 +55,7 @@ export function ProjectsGrid() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="border border-dashed border-rim px-5 py-16 text-center">
+        <div className="border border-dashed border-rim px-5 py-[60px] text-center">
           <p className="text-5xl mb-4 opacity-30">⚙</p>
           <h3 className="font-display text-xs uppercase tracking-[3px] text-parchment-dim mb-2">
             Sin Proyectos Registrados
@@ -65,7 +65,7 @@ export function ProjectsGrid() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4">
           {filtered.map(p => (
             <ProjectCard key={p.id} project={p} onDeleteRequest={handleDeleteRequest} />
           ))}
@@ -77,7 +77,6 @@ export function ProjectsGrid() {
         message={message}
         onConfirm={onConfirm}
         onCancel={onCancel}
-        confirmLabel="PURGAR"
       />
     </>
   )
