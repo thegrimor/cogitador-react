@@ -17,8 +17,15 @@ export function TimePanel() {
       showToast('ERROR: Introduce un número de días válido')
       return
     }
+    const completedNames = projects
+      .filter(p => p.status === 'active' && p.daysElapsed + days >= p.daysTotal)
+      .map(p => p.name)
     dispatch(advanceTime(days))
-    showToast(`Tiempo avanzado ${days} día${days !== 1 ? 's' : ''}`)
+    if (completedNames.length > 0) {
+      showToast(`✓ PROYECTOS COMPLETADOS: ${completedNames.join(', ')}`, 4000)
+    } else {
+      showToast(`+${days} días. Día actual: ${globalDay + days}`)
+    }
   }
 
   function handleExport() {
