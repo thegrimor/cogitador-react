@@ -177,6 +177,11 @@ export const sequitoSlice = createSlice({
     importState(_state, action: PayloadAction<SequitoState>) {
       return action.payload
     },
+
+    // Vacía el slice — usado en el borrado total al hacer logout (ver core/store).
+    resetSequito() {
+      return initialState
+    },
   },
 })
 
@@ -185,7 +190,7 @@ export const {
   addSequito, addSequitoBulk, editSequito, deleteSequito, moveSequitoToLayer,
   equipItem, unequipItem, unequipAll,
   addInventoryItem, updateInventoryItem, deleteInventoryItem, changeInventoryStock,
-  importState,
+  importState, resetSequito,
 } = sequitoSlice.actions
 
 export default sequitoSlice.reducer

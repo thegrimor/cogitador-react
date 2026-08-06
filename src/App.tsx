@@ -7,8 +7,9 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { FichaView } from '@/modules/ficha'
 import { ProyectosView } from '@/modules/proyectos'
 import { SequitoView } from '@/modules/sequito'
-import { AuthView, logout } from '@/modules/auth'
+import { AuthView } from '@/modules/auth'
 import { CloudSync } from '@/core/sync/CloudSync'
+import { logoutFully } from '@/core/store/logoutFully'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 
 const VIEWS: Record<TabId, React.ReactNode> = {
@@ -55,7 +56,7 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <ThemePicker currentTheme={currentTheme} themes={themes} onSelect={setTheme} />
           <button
-            onClick={() => dispatch(logout())}
+            onClick={() => logoutFully(dispatch)}
             title="Cerrar sesión"
             className="font-display text-[8px] uppercase tracking-[2px] bg-surface-4 border border-rim-bright text-parchment-dim px-2 py-1.5 hover:text-crimson-bright hover:border-crimson transition-colors"
           >
