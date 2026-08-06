@@ -103,15 +103,20 @@ export const sequitoSlice = createSlice({
     },
 
     // — Equipment —
+    // Nota: los séquito creados antes de añadir alguna de las categorías
+    // (eq_implants/eq_mechadendrites/eq_equipment/eq_armor) pueden no tener
+    // ese array en el estado persistido — todo acceso usa `?? []` para no
+    // reventar el render (pantalla en negro) con datos antiguos.
     equipItem(state, action: PayloadAction<{ seqId: string; cat: InvCategory; itemId: string; qty: number }>) {
       const { seqId, cat, itemId, qty } = action.payload
       const member = state.sequito[seqId]
       if (!member) return
       const key = cat === 'armory' ? 'equipment' : `eq_${cat}` as keyof SequitoMember
-      const arr = member[key] as Array<{ itemId: string; qty: number }>
+      const arr = (member[key] as Array<{ itemId: string; qty: number }> | undefined) ?? []
       const existing = arr.find(e => e.itemId === itemId)
       if (existing) existing.qty += qty
       else arr.push({ itemId, qty })
+      ;(member as unknown as Record<string, unknown>)[key] = arr
     },
 
     unequipItem(state, action: PayloadAction<{ seqId: string; cat: InvCategory; itemId: string }>) {
@@ -119,16 +124,16 @@ export const sequitoSlice = createSlice({
       const member = state.sequito[seqId]
       if (!member) return
       const key = cat === 'armory' ? 'equipment' : `eq_${cat}` as keyof SequitoMember
-      ;(member[key] as Array<{ itemId: string; qty: number }>) =
-        (member[key] as Array<{ itemId: string; qty: number }>).filter(e => e.itemId !== itemId)
+      const arr = (member[key] as Array<{ itemId: string; qty: number }> | undefined) ?? []
+      ;(member as unknown as Record<string, unknown>)[key] = arr.filter(e => e.itemId !== itemId)
     },
 
     unequipAll(state, action: PayloadAction<{ cat: InvCategory; itemId: string }>) {
       const { cat, itemId } = action.payload
       const key = cat === 'armory' ? 'equipment' : `eq_${cat}`
       Object.values(state.sequito).forEach(m => {
-        ;(m as Record<string, unknown>)[key] =
-          ((m as Record<string, unknown>)[key] as Array<{ itemId: string }>).filter(e => e.itemId !== itemId)
+        const arr = ((m as Record<string, unknown>)[key] as Array<{ itemId: string }> | undefined) ?? []
+        ;(m as Record<string, unknown>)[key] = arr.filter(e => e.itemId !== itemId)
       })
     },
 
@@ -149,8 +154,8 @@ export const sequitoSlice = createSlice({
       // unequip first
       const key = cat === 'armory' ? 'equipment' : `eq_${cat}`
       Object.values(state.sequito).forEach(m => {
-        ;(m as Record<string, unknown>)[key] =
-          ((m as Record<string, unknown>)[key] as Array<{ itemId: string }>).filter(e => e.itemId !== itemId)
+        const arr = ((m as Record<string, unknown>)[key] as Array<{ itemId: string }> | undefined) ?? []
+        ;(m as Record<string, unknown>)[key] = arr.filter(e => e.itemId !== itemId)
       })
       state[cat] = state[cat].filter(x => x.id !== itemId)
     },
@@ -161,7 +166,8 @@ export const sequitoSlice = createSlice({
       if (!item) return
       const key = cat === 'armory' ? 'equipment' : `eq_${cat}`
       const equipped = Object.values(state.sequito).reduce((sum, m) => {
-        return sum + ((m as Record<string, unknown>)[key] as Array<{ itemId: string; qty: number }>)
+        const arr = ((m as Record<string, unknown>)[key] as Array<{ itemId: string; qty: number }> | undefined) ?? []
+        return sum + arr
           .filter(e => e.itemId === itemId)
           .reduce((s, e) => s + e.qty, 0)
       }, 0)
