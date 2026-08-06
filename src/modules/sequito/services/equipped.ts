@@ -13,6 +13,9 @@ export function getEquippedCount(
 ): number {
   const key = equipKeyFor(cat)
   return Object.values(allSequito).reduce((sum, m) => {
-    return sum + (m[key] as EquippedItem[]).filter(e => e.itemId === itemId).reduce((s, e) => s + e.qty, 0)
+    // Séquito persistidos antes de que existiera esta categoría pueden no
+    // tener el array — sin fallback, esto revienta el render.
+    const arr = (m[key] as EquippedItem[] | undefined) ?? []
+    return sum + arr.filter(e => e.itemId === itemId).reduce((s, e) => s + e.qty, 0)
   }, 0)
 }

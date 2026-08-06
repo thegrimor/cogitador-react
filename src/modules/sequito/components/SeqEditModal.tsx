@@ -73,7 +73,9 @@ export function SeqEditModal({ seqId, onClose }: Props) {
   function getEquippedCountForItem(cat: InvCategory, itemId: string): number {
     const eqKey = cat === 'armory' ? 'equipment' : (`eq_${cat}` as keyof typeof member)
     return Object.values(allSequito).reduce((sum, m) => {
-      const arr = m[eqKey] as EquippedItem[]
+      // Séquito persistidos antes de que existiera esta categoría pueden no
+      // tener el array — sin fallback, esto revienta el render.
+      const arr = (m[eqKey] as EquippedItem[] | undefined) ?? []
       return sum + arr.filter(e => e.itemId === itemId).reduce((s, e) => s + e.qty, 0)
     }, 0)
   }
@@ -134,7 +136,7 @@ export function SeqEditModal({ seqId, onClose }: Props) {
 
   function getMemberEquipped(cat: InvCategory): EquippedItem[] {
     const eqKey = cat === 'armory' ? 'equipment' : (`eq_${cat}` as keyof typeof member)
-    return member[eqKey] as EquippedItem[]
+    return (member[eqKey] as EquippedItem[] | undefined) ?? []
   }
 
   return (
