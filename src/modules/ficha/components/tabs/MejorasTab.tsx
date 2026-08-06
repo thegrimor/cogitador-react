@@ -17,11 +17,12 @@ type AugForm = {
   bonus: string
 }
 
-const EMPTY_MECH: MechForm = { name: '', type: 'HERRAMIENTAS', desc: '', abilities: '' }
-const EMPTY_AUG: AugForm = { name: '', loc: 'Ojo/Visión', desc: '', bonus: '' }
+const EMPTY_MECH: MechForm = { name: '', type: 'MANIPULACIÓN', desc: '', abilities: '' }
+const EMPTY_AUG: AugForm = { name: '', loc: 'Ojo / Visión', desc: '', bonus: '' }
 
-const MECH_TYPES = ['HERRAMIENTAS', 'MEDICAE', 'COMBATE', 'UTILITAS', 'OPTICAL', 'OTRO']
-const AUG_LOCS = ['Ojo/Visión', 'Brazo/Mano', 'Pierna', 'Torso/Interno', 'Cerebro/Neural', 'Piel/Externo', 'Otro']
+// Mismos valores que #mchType / #augLoc del HTML legacy
+const MECH_TYPES = ['MANIPULACIÓN', 'COMBATE', 'UTILITAS', 'MEDICAE', 'OPTICAL', 'HERRAMIENTAS', 'OTRO']
+const AUG_LOCS = ['Ojo / Visión', 'Brazo / Mano', 'Pierna', 'Torso / Interno', 'Cerebro / Neural', 'Piel / Externo', 'Otro']
 
 function NoChar() {
   return (

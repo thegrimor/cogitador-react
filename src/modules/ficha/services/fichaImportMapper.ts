@@ -46,6 +46,13 @@ function buildDefaultAttrs(): Record<string, AttributeValues> {
 export function isLegacyExport(raw: unknown): boolean {
   if (typeof raw !== 'object' || raw === null) return false
   const r = raw as Record<string, unknown>
+  // Forma distintiva del legacy: state = {char:{...}, profession, career, xpTotal, attrs...}.
+  // El export propio de React es un Character plano (info.career anidado, sin
+  // envoltorio `char`) — comprobar solo `attrs.WS.dots` no distingue ambos
+  // formatos (los dos usan "dots"), y hacía que reimportar un export propio
+  // se tratara como legacy y corrompiera el nivel de las habilidades.
+  if (typeof r['char'] !== 'object' || r['char'] === null) return false
+  if (typeof r['profession'] !== 'string') return false
   const attrs = r['attrs']
   if (typeof attrs !== 'object' || attrs === null) return false
   const ws = (attrs as Record<string, unknown>)['WS']
@@ -112,12 +119,17 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
     ? (r['fate'] as Record<string, unknown>)
     : {}
 
+  // El legacy guarda sk.level como índice 0-3 (No entrenado/Entrenado/Avanzado/
+  // Maestro) y lo convierte a puntos vía SKILL_BONUS=[-20,0,10,20] al calcular
+  // el total — nunca lo guarda ya convertido. Esta función solo se llama tras
+  // isLegacyExport()===true, así que el índice siempre viene en ese formato.
+  const SKILL_LEVEL_BONUS = [-20, 0, 10, 20]
   const rawSkills = asArray<Record<string, unknown>>(r['skills'])
   const skills: Skill[] = rawSkills.map(s => ({
     id: asString(s['id']) || uid(),
     name: asString(s['name']),
     attr: asString(s['attr'], 'Int'),
-    level: asNumber(s['level']),
+    level: SKILL_LEVEL_BONUS[asNumber(s['level'])] ?? 0,
     bonus: asNumber(s['bonus']),
     notes: asString(s['notes']),
     xp: asNumber(s['xp']),
@@ -217,7 +229,11 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
       role,
       ordo: asString(charInfo['ordo']),
       counterpart,
-      branch: asString(r['branch']),
+      // El legacy guarda el rango exacto en `career` ("Magos|10.000-14.999"), no
+      // solo en `branch` (que suele venir null). Si hay rango con nombre, ese es
+      // la rama elegida — si no se traspasa, getRankForXP() coge por defecto el
+      // último rango que comparte tramo de PE, no el que el jugador tenía.
+      branch: asString(r['branch']) || rank,
     },
     attrs,
     wounds: {

@@ -16,14 +16,15 @@ type ManualForm = {
 
 const EMPTY_MANUAL: ManualForm = {
   name: '',
-  type: 'Combat',
+  type: 'COMBATE',
   req: '',
   desc: '',
   effect: '',
   xp: 0,
 }
 
-const TALENT_TYPES = ['Combat', 'Social', 'Mental', 'Physical', 'Stealth', 'Tech', 'Otro']
+// Mismos valores que el <select id="talType"> del HTML legacy
+const TALENT_TYPES = ['COMBATE', 'MECÁNICO', 'PSÍQUICO', 'GENERAL', 'TECH', 'BENEDICTION']
 
 function NoChar() {
   return (
