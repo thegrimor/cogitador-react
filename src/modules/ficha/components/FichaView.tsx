@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useAppSelector } from '@/core/store/hooks'
 import { CharacterHeader } from './CharacterHeader'
 import { ExperiencePanel } from './ExperiencePanel'
-import { AtributosTab } from './tabs/AtributosTab'
+import { PersonajeTab } from './tabs/PersonajeTab'
+import { CaracteristicasTab } from './tabs/CaracteristicasTab'
+import { EstadoTab } from './tabs/EstadoTab'
 import { HabilidadesTab } from './tabs/HabilidadesTab'
 import { TalentosTab } from './tabs/TalentosTab'
 import { ArmeriaTab } from './tabs/ArmeriaTab'
@@ -12,8 +14,14 @@ import { XpTab } from './tabs/XpTab'
 import { InquisidorTab } from './tabs/InquisidorTab'
 import { CaidosTab } from './tabs/CaidosTab'
 
+// 10 tabs del HTML legacy (charinfo/attrs/vital/skills/talents/armory/
+// mechadendrites/powers/inquisidor/fallen) + 'xp', mejora consciente sin
+// equivalente en el legacy (aprobada explícitamente, no forma parte de la
+// migración 1:1).
 type FichaTabId =
-  | 'atributos'
+  | 'personaje'
+  | 'caracteristicas'
+  | 'estado'
   | 'habilidades'
   | 'talentos'
   | 'armeria'
@@ -29,31 +37,35 @@ interface FichaTab {
 }
 
 const TABS: FichaTab[] = [
-  { id: 'atributos',   label: 'Atrib.'   },
-  { id: 'habilidades', label: 'Habil.'   },
-  { id: 'talentos',    label: 'Talent.'  },
-  { id: 'armeria',     label: 'Armer.'   },
-  { id: 'mejoras',     label: 'Mejoras'  },
-  { id: 'poderes',     label: 'Psíq.'    },
-  { id: 'xp',          label: 'XP'       },
-  { id: 'inquisidor',  label: 'Inquis.'  },
-  { id: 'caidos',      label: 'Caídos'   },
+  { id: 'personaje',       label: 'Personaje' },
+  { id: 'caracteristicas', label: 'Caract.'    },
+  { id: 'estado',          label: 'Estado'     },
+  { id: 'habilidades',     label: 'Habil.'     },
+  { id: 'talentos',        label: 'Talent.'    },
+  { id: 'armeria',         label: 'Armer.'     },
+  { id: 'mejoras',         label: 'Mejoras'    },
+  { id: 'poderes',         label: 'Psíq.'      },
+  { id: 'xp',              label: 'XP'         },
+  { id: 'inquisidor',      label: 'Inquis.'    },
+  { id: 'caidos',          label: 'Caídos'     },
 ]
 
 const TAB_CONTENT: Record<FichaTabId, React.ReactNode> = {
-  atributos:   <AtributosTab />,
-  habilidades: <HabilidadesTab />,
-  talentos:    <TalentosTab />,
-  armeria:     <ArmeriaTab />,
-  mejoras:     <MejorasTab />,
-  poderes:     <PoderesPsiquicosTab />,
-  xp:          <XpTab />,
-  inquisidor:  <InquisidorTab />,
-  caidos:      <CaidosTab />,
+  personaje:       <PersonajeTab />,
+  caracteristicas: <CaracteristicasTab />,
+  estado:          <EstadoTab />,
+  habilidades:     <HabilidadesTab />,
+  talentos:        <TalentosTab />,
+  armeria:         <ArmeriaTab />,
+  mejoras:         <MejorasTab />,
+  poderes:         <PoderesPsiquicosTab />,
+  xp:              <XpTab />,
+  inquisidor:      <InquisidorTab />,
+  caidos:          <CaidosTab />,
 }
 
 export function FichaView() {
-  const [activeTab, setActiveTab] = useState<FichaTabId>('atributos')
+  const [activeTab, setActiveTab] = useState<FichaTabId>('personaje')
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
 
@@ -61,7 +73,7 @@ export function FichaView() {
   const visibleTabs = TABS.filter(t => t.id !== 'inquisidor' || activeChar?.info.role === 'inquisidor')
   // Si el personaje activo cambia y deja de ser Inquisidor, no nos quedamos en un tab oculto
   const effectiveTab: FichaTabId = activeTab === 'inquisidor' && activeChar?.info.role !== 'inquisidor'
-    ? 'atributos'
+    ? 'personaje'
     : activeTab
 
   return (
@@ -69,8 +81,12 @@ export function FichaView() {
       <CharacterHeader />
       <ExperiencePanel />
 
-      {/* Tab bar interno de ficha */}
-      <div className="flex overflow-x-auto border-b border-rim-bright bg-surface-2 scrollbar-none">
+      {/*
+        Tab bar interno de ficha — el legacy usa flex-wrap (varias filas de
+        ~33% de ancho cada tab en móvil), NO scroll horizontal. Ver .tabs/.tab
+        del HTML original.
+      */}
+      <div className="flex flex-wrap border-b-2 border-crimson-dim bg-surface-2">
         {visibleTabs.map((tab) => {
           const isActive = tab.id === effectiveTab
           return (
@@ -78,9 +94,9 @@ export function FichaView() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={[
-                'flex-shrink-0 px-3 py-2 font-display text-[9px] uppercase tracking-[1px] transition-colors border-b-2 whitespace-nowrap',
+                'flex-[1_1_calc(33.333%-2px)] sm:flex-1 sm:min-w-[80px] px-2 py-2 font-display text-[9px] uppercase tracking-[1px] transition-colors border-b-2 whitespace-nowrap text-center',
                 isActive
-                  ? 'text-crimson-bright border-crimson-bright'
+                  ? 'text-crimson-bright border-crimson-bright bg-surface-3'
                   : 'text-parchment-dim border-transparent hover:text-parchment',
               ].join(' ')}
             >
