@@ -56,3 +56,25 @@ Mismo CRUD en los tres recursos, cada registro pertenece al usuario que lo crea
 (`fichaTypes.ts`) pero se guarda tal cual llega, sin validar su estructura
 en el backend — séquito y proyectos siguen siendo stubs en el frontend, así
 que su forma queda abierta hasta que se definan esos módulos.
+
+## Despliegue (Railway)
+
+1. Nuevo servicio → deploy desde este repo → **Root Directory: `server`**.
+   Railway detecta Node vía Nixpacks y usa `npm run build` / `npm start` (ya
+   definidos en `railway.json`).
+2. Añadir un plugin **PostgreSQL** al proyecto y enlazar su `DATABASE_URL`
+   como variable de entorno del servicio (Railway lo ofrece como referencia,
+   no hay que copiarlo a mano).
+3. Variables de entorno del servicio: `JWT_SECRET`, `JWT_EXPIRES_IN`,
+   `CORS_ORIGIN` (la URL del frontend desplegado). `PORT` la inyecta Railway
+   solo.
+4. Migraciones: `npm start` corre `prisma migrate deploy` automáticamente
+   como hook `prestart` antes de arrancar — no hace falta un paso manual.
+   `postinstall` corre `prisma generate` para que el cliente exista tras
+   cada `npm install` del build.
+5. Healthcheck configurado en `railway.json` contra `GET /health`.
+
+Cualquier cambio de schema en local se genera con
+`npm run prisma:migrate -- --name <nombre>` (esto sí requiere una Postgres
+local, ver Setup) y el archivo de migración resultante se commitea — es lo
+que `migrate deploy` aplica en Railway.
