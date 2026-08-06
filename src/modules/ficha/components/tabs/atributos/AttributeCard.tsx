@@ -1,7 +1,7 @@
 import { useAppDispatch } from '@/core/store/hooks'
 import { updateAttribute } from '../../../services/fichaSlice'
 import { getAttrCostsForCareer } from '@/core/data/darkheresy/careers'
-import { getAttrDots, getAttrTotal } from '../../../services/fichaComputed'
+import { getAttrDots, getAttrTotal, getCountedAttrDots } from '../../../services/fichaComputed'
 import type { AttributeDefinition } from '@/core/data/darkheresy/attributes'
 import type { AttributeValues } from '../../../types/fichaTypes'
 
@@ -22,9 +22,12 @@ const FALLBACK_COSTS: Array<number | null> = [500, 750, 1000, 2500, null, null]
 export function AttributeCard({ charId, career, def, values }: Props) {
   const dispatch = useAppDispatch()
   const dots = getAttrDots(values)
-  const total = getAttrTotal(values)
-  const bonus = Math.floor(total / 10)
   const costs = getAttrCostsForCareer(career)[def.key] ?? FALLBACK_COSTS
+  // Dots que realmente suman al total: los heredados de una carrera
+  // anterior que ya no tienen "globito" comprable en la actual no cuentan.
+  const countedDots = getCountedAttrDots(values, costs)
+  const total = getAttrTotal(values, costs)
+  const bonus = Math.floor(total / 10)
 
   function update(field: keyof AttributeValues, value: number | string) {
     dispatch(updateAttribute({ id: charId, key: def.key, field, value }))
@@ -69,7 +72,7 @@ export function AttributeCard({ charId, career, def, values }: Props) {
         </div>
         <span className="font-display text-base text-parchment-dim pb-1.5">+</span>
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          <span className="font-mono text-[7px] tracking-[1px] text-parchment-dim">AVA (+{dots * 10})</span>
+          <span className="font-mono text-[7px] tracking-[1px] text-parchment-dim">AVA (+{countedDots * 10})</span>
           <div className="flex gap-[3px]">
             {DOT_LABELS.map((label, i) => {
               const cost = costs[i]

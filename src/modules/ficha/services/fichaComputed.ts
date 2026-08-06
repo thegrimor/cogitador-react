@@ -13,10 +13,31 @@ export function getAttrDots(values: (Partial<AttributeValues> & { advances?: num
   return Math.min(4, Math.round((values.advances || 0) / 5))
 }
 
+/**
+ * Dots que realmente cuentan para el total: si se pasa la tabla de costes
+ * de la carrera actual, los dots que caen en un tramo N/A (heredados de una
+ * carrera anterior donde sí eran comprables) no se suman al bono — a
+ * diferencia del HTML legacy, que los sumaba igual aunque no tuvieran
+ * "globito" comprable. Sin tabla de costes (p.ej. sin carrera elegida),
+ * se cuentan todos los dots tal cual.
+ */
+export function getCountedAttrDots(values: (Partial<AttributeValues> & { advances?: number }) | undefined, costs?: Array<number | null>): number {
+  const dots = getAttrDots(values)
+  if (!costs) return dots
+  let counted = 0
+  for (let i = 0; i < dots; i++) {
+    if (costs[i] != null) counted++
+  }
+  return counted
+}
+
 /** Total de una característica: BASE + dots×10 + BONUS EXT — fórmula de attrTotal() del HTML legacy. */
-export function getAttrTotal(values: (Partial<AttributeValues> & { advances?: number }) | undefined): number {
+export function getAttrTotal(
+  values: (Partial<AttributeValues> & { advances?: number }) | undefined,
+  costs?: Array<number | null>,
+): number {
   if (!values) return 0
-  return (values.base || 0) + getAttrDots(values) * 10 + (values.bonuses || 0)
+  return (values.base || 0) + getCountedAttrDots(values, costs) * 10 + (values.bonuses || 0)
 }
 
 export function computeXpSpent(char: Character): number {
@@ -45,7 +66,8 @@ export function computeXpSpent(char: Character): number {
 export function computeMovement(char: Character): {
   br: number; step: number; move: number; full: number; charge: number
 } {
-  const agTotal = getAttrTotal(char.attrs['Ag'])
+  const costs = ATTR_ADVANCE_COSTS[char.info.career]?.['Ag']
+  const agTotal = getAttrTotal(char.attrs['Ag'], costs)
   const br = Math.floor(agTotal / 10)
   return { br, step: br, move: br * 2, full: br * 3, charge: br * 4 }
 }
