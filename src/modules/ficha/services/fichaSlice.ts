@@ -340,6 +340,12 @@ export const fichaSlice = createSlice({
       const mejora = char?.inqMejoras?.find(m => m.id === action.payload.mejoraId)
       if (mejora) mejora.notes = action.payload.notes
     },
+
+    // Reemplaza el estado completo — usado por el sync con el backend al hidratar
+    // tras login (ver core/sync).
+    hydrateFicha(_state, action: PayloadAction<FichaState>) {
+      return action.payload
+    },
   },
 })
 
@@ -359,6 +365,7 @@ export const {
   updateNotes,
   deleteCharacter, toggleFilterCareer, killCharacter,
   addInqMejora, removeInqMejora, updateInqMejoraNotes,
+  hydrateFicha,
 } = fichaSlice.actions
 
 export default fichaSlice.reducer

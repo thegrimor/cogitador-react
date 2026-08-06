@@ -1,11 +1,13 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
 import storage from 'redux-persist/es/storage'
+import authReducer from '@/modules/auth/services/authSlice'
 import fichaReducer from '@/modules/ficha/services/fichaSlice'
 import proyectosReducer from '@/modules/proyectos/services/proyectosSlice'
 import sequitoReducer from '@/modules/sequito/services/sequitoSlice'
 
 const rootReducer = combineReducers({
+  auth: authReducer,
   ficha: fichaReducer,
   proyectos: proyectosReducer,
   sequito: sequitoReducer,

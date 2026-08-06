@@ -60,6 +60,12 @@ export const proyectosSlice = createSlice({
       p.daysElapsed = Math.min(Math.max(0, action.payload.days), p.daysTotal)
       if (p.daysElapsed >= p.daysTotal) p.status = 'completed'
     },
+
+    // Reemplaza el estado completo — usado por el sync con el backend al hidratar
+    // tras login (ver core/sync).
+    hydrateProyectos(_state, action: PayloadAction<ProyectosState>) {
+      return action.payload
+    },
   },
 })
 
@@ -70,6 +76,7 @@ export const {
   setProjectStatus,
   updateTotalDays,
   updateElapsedDays,
+  hydrateProyectos,
 } = proyectosSlice.actions
 
 export default proyectosSlice.reducer
