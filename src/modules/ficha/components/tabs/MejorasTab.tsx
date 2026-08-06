@@ -85,23 +85,30 @@ export function MejorasTab() {
 
       {/* Mecadendrites — apilado con Aumentaciones, igual que el HTML legacy (sin sub-tabs) */}
       <div className="flex flex-col gap-0">
-        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5 flex items-center justify-between gap-2">
           <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Mechadendrites</h4>
+          <button
+            onClick={() => setShowMechForm(v => !v)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+          >
+            + Mechadendrite
+          </button>
         </div>
         <div className="flex flex-col gap-0">
-          <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-            <div className="flex gap-2">
+          <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+            <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Mechadendrites del Libro</h4>
+            <div className="flex flex-wrap gap-2 items-end">
               <select
                 value={selMech}
                 onChange={e => setSelMech(e.target.value)}
-                className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
-                <option value="">— Seleccionar mecadendrite —</option>
+                <option value="">— Selecciona mechadendrite —</option>
                 {MECHADENDRITES.map(m => (
                   <option key={m.name} value={m.name}>{m.name}</option>
                 ))}
               </select>
-              <button onClick={addQuickMech} disabled={!selMechDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
+              <button onClick={addQuickMech} disabled={!selMechDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
             </div>
             {selMechDef && (
               <div className="bg-surface border border-rim px-3 py-2 flex flex-col gap-1">
@@ -114,23 +121,20 @@ export function MejorasTab() {
                 </div>
               </div>
             )}
-            <button onClick={() => setShowMechForm(v => !v)} className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment border border-rim-bright px-3 py-1.5 transition-colors text-left">
-              {showMechForm ? '▲ Ocultar formulario manual' : '▼ Añadir manualmente'}
-            </button>
-            {showMechForm && (
-              <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <input placeholder="Nombre" value={mechForm.name} onChange={e => setMechForm(f => ({ ...f, name: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <select value={mechForm.type} onChange={e => setMechForm(f => ({ ...f, type: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors">
-                    {MECH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <input placeholder="Descripción" value={mechForm.desc} onChange={e => setMechForm(f => ({ ...f, desc: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <textarea placeholder="Capacidades (una por línea)" value={mechForm.abilities} onChange={e => setMechForm(f => ({ ...f, abilities: e.target.value }))} rows={3} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors resize-y" />
-                </div>
-                <button onClick={addManualMech} disabled={!mechForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
-              </div>
-            )}
           </div>
+          {showMechForm && (
+            <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
+              <div className="grid grid-cols-2 gap-2">
+                <input placeholder="Nombre" value={mechForm.name} onChange={e => setMechForm(f => ({ ...f, name: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <select value={mechForm.type} onChange={e => setMechForm(f => ({ ...f, type: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors">
+                  {MECH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <input placeholder="Descripción" value={mechForm.desc} onChange={e => setMechForm(f => ({ ...f, desc: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <textarea placeholder="Capacidades (una por línea)" value={mechForm.abilities} onChange={e => setMechForm(f => ({ ...f, abilities: e.target.value }))} rows={3} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors resize-y" />
+              </div>
+              <button onClick={addManualMech} disabled={!mechForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
+            </div>
+          )}
           {char.mechadendrites.length === 0 ? (
             <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin mecadendrites registrados</p></div>
           ) : (
@@ -161,23 +165,30 @@ export function MejorasTab() {
 
       {/* Aumentaciones cibernéticas */}
       <div className="flex flex-col gap-0">
-        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5">
+        <div className="border-b border-rim bg-crimson/5 px-4 py-1.5 flex items-center justify-between gap-2">
           <h4 className="font-display text-[9px] uppercase tracking-[2px] text-gold">// Aumentaciones Cibernéticas</h4>
+          <button
+            onClick={() => setShowAugForm(v => !v)}
+            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+          >
+            + Aumentación
+          </button>
         </div>
         <div className="flex flex-col gap-0">
-          <div className="px-4 py-3 flex flex-col gap-3 border-b border-rim bg-surface-2">
-            <div className="flex gap-2">
+          <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
+            <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Implantes del Libro</h4>
+            <div className="flex flex-wrap gap-2 items-end">
               <select
                 value={selAug}
                 onChange={e => setSelAug(e.target.value)}
-                className="flex-1 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
+                className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
               >
-                <option value="">— Seleccionar augmentación —</option>
+                <option value="">— Selecciona implante —</option>
                 {AUGMENTATIONS.map(a => (
                   <option key={a.name} value={a.name}>{a.name} [{a.loc}]</option>
                 ))}
               </select>
-              <button onClick={addQuickAug} disabled={!selAugDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
+              <button onClick={addQuickAug} disabled={!selAugDef} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">Añadir</button>
             </div>
             {selAugDef && (
               <div className="bg-surface border border-rim px-3 py-2 flex flex-col gap-1">
@@ -186,23 +197,20 @@ export function MejorasTab() {
                 <p className="font-mono text-[11px] text-neon">{selAugDef.bonus}</p>
               </div>
             )}
-            <button onClick={() => setShowAugForm(v => !v)} className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment border border-rim-bright px-3 py-1.5 transition-colors text-left">
-              {showAugForm ? '▲ Ocultar formulario manual' : '▼ Añadir manualmente'}
-            </button>
-            {showAugForm && (
-              <div className="flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <input placeholder="Nombre" value={augForm.name} onChange={e => setAugForm(f => ({ ...f, name: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <select value={augForm.loc} onChange={e => setAugForm(f => ({ ...f, loc: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors">
-                    {AUG_LOCS.map(l => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                  <input placeholder="Descripción" value={augForm.desc} onChange={e => setAugForm(f => ({ ...f, desc: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                  <input placeholder="Bonus" value={augForm.bonus} onChange={e => setAugForm(f => ({ ...f, bonus: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
-                </div>
-                <button onClick={addManualAug} disabled={!augForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
-              </div>
-            )}
           </div>
+          {showAugForm && (
+            <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
+              <div className="grid grid-cols-2 gap-2">
+                <input placeholder="Nombre" value={augForm.name} onChange={e => setAugForm(f => ({ ...f, name: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <select value={augForm.loc} onChange={e => setAugForm(f => ({ ...f, loc: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors">
+                  {AUG_LOCS.map(l => <option key={l} value={l}>{l}</option>)}
+                </select>
+                <input placeholder="Descripción" value={augForm.desc} onChange={e => setAugForm(f => ({ ...f, desc: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+                <input placeholder="Bonus" value={augForm.bonus} onChange={e => setAugForm(f => ({ ...f, bonus: e.target.value }))} className="col-span-2 bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors" />
+              </div>
+              <button onClick={addManualAug} disabled={!augForm.name.trim()} className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Añadir Manual</button>
+            </div>
+          )}
           {char.augmentations.length === 0 ? (
             <div className="px-4 py-10 text-center"><p className="font-mono text-xs text-parchment-dim">Sin augmentaciones registradas</p></div>
           ) : (
