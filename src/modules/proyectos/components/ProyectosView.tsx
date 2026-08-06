@@ -6,7 +6,8 @@ import { AddProjectForm } from './AddProjectForm'
 import { ProjectsGrid } from './ProjectsGrid'
 
 export function ProyectosView() {
-  const globalDay = useAppSelector(s => s.proyectos.globalDay)
+  const { globalDay, projects } = useAppSelector(s => s.proyectos)
+  const active = projects.filter(p => p.status === 'active').length
 
   return (
     <div className="flex flex-col flex-1">
@@ -26,6 +27,9 @@ export function ProyectosView() {
           <span className="block font-mono text-[9px] text-parchment-dim uppercase tracking-[1px] mt-0.5">
             Día de campaña actual
           </span>
+          <span className="block font-mono text-[9px] text-parchment-dim uppercase tracking-[1px]">
+            {active} PROYECTO{active !== 1 ? 'S' : ''} ACTIVO{active !== 1 ? 'S' : ''}
+          </span>
         </div>
       </div>
 
@@ -34,6 +38,11 @@ export function ProyectosView() {
         <TimePanel />
         <AddProjectForm />
         <ProjectsGrid />
+
+        <div className="flex flex-wrap justify-between gap-2 border-t border-rim px-1 py-4 mt-2 font-mono text-[9px] uppercase tracking-[1px] text-parchment-dim">
+          <span>Omnissiah Cogitator v1.0 // Adeptus Mechanicus Ministerium</span>
+          <span>Datos guardados en cogitador local</span>
+        </div>
       </div>
 
       <Toast />

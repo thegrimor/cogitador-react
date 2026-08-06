@@ -10,6 +10,7 @@ import type {
   Augmentation,
   PsychicPower,
   CustomCurrency,
+  InqMejora,
 } from '../types/fichaTypes'
 import { ATTRIBUTES } from '@/core/data/darkheresy'
 
@@ -38,7 +39,7 @@ function asArray<T>(v: unknown): T[] {
 
 function buildDefaultAttrs(): Record<string, AttributeValues> {
   return Object.fromEntries(
-    ATTRIBUTES.map(a => [a.key, { base: 0, advances: 0, bonuses: 0, bonusNote: '' }])
+    ATTRIBUTES.map(a => [a.key, { base: 0, dots: 0, bonuses: 0, bonusNote: '' }])
   )
 }
 
@@ -66,7 +67,22 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
   const rawCareer = asString(r['career'])
   const careerParts = rawCareer.split('|')
   const rank = careerParts.length > 0 ? careerParts[0].trim() : ''
-  const career = asString(charInfo['acolito'] ?? r['profession'])
+  // La carrera/profesión es siempre `profession` — `acolito` es el nombre del Acólito, no una carrera
+  const career = asString(r['profession'])
+
+  const rawInqTalents = asArray<Record<string, unknown>>(r['inqTalents'])
+  const acolitoField = asString(charInfo['acolito'])
+  // Solo el slot Inquisidor tiene inqTalents o el campo "acolito" relleno
+  const role = (rawInqTalents.length > 0 || acolitoField) ? 'inquisidor' : 'sequito'
+  const counterpart = role === 'inquisidor' ? acolitoField : asString(charInfo['inquisitor'])
+  const inqMejoras: InqMejora[] = rawInqTalents.map(t => ({
+    id: asString(t['id']) || uid(),
+    name: asString(t['name']),
+    type: asString(t['tipo']),
+    cost: asNumber(t['xp']),
+    req: asString(t['req']),
+    desc: asString(t['desc']),
+  }))
 
   const attrs: Record<string, AttributeValues> = buildDefaultAttrs()
   const rawAttrs = (typeof r['attrs'] === 'object' && r['attrs'] !== null)
@@ -79,7 +95,9 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
       const attrRaw = raw as Record<string, unknown>
       attrs[key] = {
         base: asNumber(attrRaw['base']),
-        advances: asNumber(attrRaw['dots'] ?? attrRaw['advances']),
+        // El legacy guarda "dots" (0-6). Si el JSON es de una versión anterior con
+        // avances libres, se aproxima 5 puntos = 1 dot.
+        dots: attrRaw['dots'] != null ? asNumber(attrRaw['dots']) : Math.min(4, Math.round(asNumber(attrRaw['advances']) / 5)),
         bonuses: asNumber(attrRaw['bonuses']),
         bonusNote: asString(attrRaw['bonusNote']),
       }
@@ -196,6 +214,10 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
       homeworld: asString(charInfo['homeworld']),
       experience: xpTotal > 0 ? String(xpTotal) : '0',
       xpSpent: '0',
+      role,
+      ordo: asString(charInfo['ordo']),
+      counterpart,
+      branch: asString(r['branch']),
     },
     attrs,
     wounds: {
@@ -227,5 +249,6 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
     quickNotes: asString(r['quickNotes']),
     influenceGeneral: asString(r['influenceGeneral']),
     influencePlanetary: asString(r['influencePlanetary']),
+    inqMejoras,
   }
 }

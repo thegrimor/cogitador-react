@@ -100,13 +100,6 @@ export function LayerRow({ layer, onAddSeq, onEditSeq, searchQuery, allSequito }
           </span>
 
           <button
-            onClick={e => { e.stopPropagation(); onAddSeq(layer.id) }}
-            className="font-display text-[8px] uppercase tracking-[2px] bg-crimson text-white px-2 py-1 hover:bg-crimson-bright transition-colors flex-shrink-0"
-          >
-            + AÑADIR
-          </button>
-
-          <button
             onClick={e => { e.stopPropagation(); handleDelete() }}
             className="text-crimson-dim hover:text-crimson-bright transition-colors text-sm flex-shrink-0 leading-none"
           >
@@ -127,6 +120,15 @@ export function LayerRow({ layer, onAddSeq, onEditSeq, searchQuery, allSequito }
             )}
           </div>
         </SortableContext>
+
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => onAddSeq(layer.id)}
+            className="w-full font-display text-[9px] uppercase tracking-[2px] bg-crimson text-white px-3 py-2 hover:bg-crimson-bright transition-colors"
+          >
+            + Añadir Séquito
+          </button>
+        </div>
       </div>
 
       <ConfirmModal

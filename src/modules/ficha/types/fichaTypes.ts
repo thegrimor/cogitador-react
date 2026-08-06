@@ -1,6 +1,7 @@
 export interface AttributeValues {
   base: number
-  advances: number
+  /** Puntos de mejora comprados (Simple/Intermedio/Cualificado/Experto/Heroico/Maestro), 0-6. Cada dot = +10. */
+  dots: number
   bonuses: number
   bonusNote: string
 }
@@ -14,6 +15,13 @@ export interface CharacterInfo {
   homeworld: string
   experience: string
   xpSpent: string
+  /** 'inquisidor' | 'sequito' — modelo de 2 slots fijos */
+  role: string
+  ordo: string
+  /** Nombre del Acólito (si role='inquisidor') o del Inquisidor (si role='sequito') */
+  counterpart: string
+  /** Rama elegida cuando el rango actual empata en tramo de PE con otra rama de la carrera */
+  branch: string
 }
 
 export interface VitalState {
@@ -110,6 +118,15 @@ export interface CustomCurrency {
   amount: number
 }
 
+export interface InqMejora {
+  id: string
+  name: string
+  type: string
+  cost: number
+  req: string
+  desc: string
+}
+
 export interface Character {
   id: string
   info: CharacterInfo
@@ -137,6 +154,8 @@ export interface Character {
   psychBV: number
   psychDiscipline: string
   psychNotes: string
+  // Inquisidor (solo aplica al slot con role='inquisidor')
+  inqMejoras: InqMejora[]
   // Resources
   moneyThrones: number
   currencies: CustomCurrency[]

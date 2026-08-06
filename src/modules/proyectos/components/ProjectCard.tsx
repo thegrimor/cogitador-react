@@ -198,7 +198,7 @@ export function ProjectCard({ project, onDeleteRequest }: Props) {
         )}
         {status === 'completed' && (
           <button
-            onClick={() => changeStatus('pending')}
+            onClick={() => changeStatus('active')}
             className={`${BTN_SM} bg-surface-4 border border-rim-bright text-parchment-dim hover:text-parchment`}
           >
             ↺ Reabrir

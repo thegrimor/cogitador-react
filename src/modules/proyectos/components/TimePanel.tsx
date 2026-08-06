@@ -2,20 +2,30 @@ import { useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 import { advanceTime } from '@/modules/proyectos/services/proyectosSlice'
 import { showToast } from '@/shared/components/Toast'
+import { ConfirmModal } from '@/shared/components/ConfirmModal'
+import { useConfirm } from '@/shared/hooks/useConfirm'
 
 export function TimePanel() {
   const dispatch = useAppDispatch()
   const { globalDay, projects } = useAppSelector(s => s.proyectos)
   const [days, setDays] = useState(1)
   const importRef = useRef<HTMLInputElement>(null)
+  const confirm = useConfirm()
 
   function handleAdvance() {
     if (days <= 0) {
       showToast('ERROR: Introduce un número de días válido')
       return
     }
+    const completedNames = projects
+      .filter(p => p.status === 'active' && p.daysElapsed + days >= p.daysTotal)
+      .map(p => p.name)
     dispatch(advanceTime(days))
-    showToast(`Tiempo avanzado ${days} día${days !== 1 ? 's' : ''}`)
+    if (completedNames.length > 0) {
+      showToast(`✓ PROYECTOS COMPLETADOS: ${completedNames.join(', ')}`, 4000)
+    } else {
+      showToast(`+${days} días. Día actual: ${globalDay + days}`)
+    }
   }
 
   function handleExport() {
@@ -42,21 +52,26 @@ export function TimePanel() {
       try {
         const raw = event.target?.result
         if (typeof raw !== 'string') return
-        const data = JSON.parse(raw) as { globalDay?: unknown; projects?: unknown }
+        const data = JSON.parse(raw) as { globalDay?: unknown; projects?: unknown[] }
         if (data.projects === undefined || data.globalDay === undefined) {
           showToast('ERROR: Formato de archivo inválido')
           return
         }
-        try {
-          const existing = localStorage.getItem('persist:cogitador-root')
-          const root = existing ? (JSON.parse(existing) as Record<string, string>) : {}
-          root['proyectos'] = JSON.stringify(data)
-          localStorage.setItem('persist:cogitador-root', JSON.stringify(root))
-          showToast('Datos importados. Recargando...')
-          setTimeout(() => window.location.reload(), 800)
-        } catch {
-          showToast('ERROR: No se pudo importar al cogitador local')
-        }
+        confirm.confirm(
+          `¿Importar datos del archivo "${file.name}"? Esto sobreescribirá el estado actual (Día ${globalDay}, ${projects.length} proyectos).`,
+          () => {
+            try {
+              const existing = localStorage.getItem('persist:cogitador-root')
+              const root = existing ? (JSON.parse(existing) as Record<string, string>) : {}
+              root['proyectos'] = JSON.stringify(data)
+              localStorage.setItem('persist:cogitador-root', JSON.stringify(root))
+              showToast('Datos importados. Recargando...')
+              setTimeout(() => window.location.reload(), 800)
+            } catch {
+              showToast('ERROR: No se pudo importar al cogitador local')
+            }
+          }
+        )
       } catch {
         showToast('ERROR: No se pudo parsear el archivo')
       }
@@ -107,6 +122,14 @@ export function TimePanel() {
           onChange={handleImportFile}
         />
       </div>
+
+      <ConfirmModal
+        isOpen={confirm.isOpen}
+        message={confirm.message}
+        onConfirm={confirm.onConfirm}
+        onCancel={confirm.onCancel}
+        confirmLabel="Importar"
+      />
     </div>
   )
 }

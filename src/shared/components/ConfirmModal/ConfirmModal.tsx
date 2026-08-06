@@ -1,3 +1,5 @@
+import { Modal } from '../Modal'
+
 interface Props {
   isOpen: boolean
   message: string
@@ -16,6 +18,7 @@ export function ConfirmModal({
   if (!isOpen) return null
 
   return (
+    <Modal>
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
@@ -51,5 +54,6 @@ export function ConfirmModal({
         </div>
       </div>
     </div>
+    </Modal>
   )
 }

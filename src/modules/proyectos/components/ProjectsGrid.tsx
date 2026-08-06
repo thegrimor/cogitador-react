@@ -61,9 +61,7 @@ export function ProjectsGrid() {
             Sin Proyectos Registrados
           </h3>
           <p className="font-mono text-xs text-parchment-dim">
-            {filter === 'all'
-              ? 'Registra el primer proyecto usando el formulario superior'
-              : 'No hay proyectos que coincidan con el filtro activo'}
+            El cogitador no contiene datos de proyectos{filter !== 'all' ? ' con ese estado' : ''}.
           </p>
         </div>
       ) : (
