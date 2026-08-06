@@ -31,6 +31,12 @@ Estética Adeptus Mechanicus. El sistema de diseño está definido en `src/index
 - **Fuentes:** Orbitron (display/títulos), Share Tech Mono (mono/body), Rajdhani (descripciones)
 - **Animaciones:** `scan` (scanline), `shimmer`, `spin-slow` (20s), `pulse-mech`
 
+### Sistema de temas (selector de estilos)
+
+25 temas de facción (`Cogitador` por defecto + 24 de Warhammer 40K) definidos en `src/core/theme/themes.ts`. Cada uno es un set de valores CSS custom properties (`--color-*`, `--scanline-rgb`, `--vignette-rgb`, `--grid-h-rgb`, `--grid-v-rgb`). `useTheme` (`src/shared/hooks/useTheme.ts`) escribe el `data-theme` elegido en `<html>`, activando el override correspondiente en `src/index.css` (bloques `:root[data-theme="<id>"]`); persiste en `localStorage` (clave `cogitador-react-theme`). Las clases Tailwind (`bg-crimson`, `text-parchment-dim`, etc.) referencian esas variables vía `@theme` y se actualizan solas al cambiar de tema. `ThemePicker` (`src/shared/components/ThemePicker/`) es el desplegable de selección, montado en el header de `App.tsx` — replica el mismo sistema de `cogitador-consulta`.
+
+Nota de stacking: el `<header>` usa `z-20` (por encima del `z-10` de `<main>`) para que el dropdown del `ThemePicker`, que vive dentro del header, no quede tapado por el contenido de las vistas.
+
 ### Perfil del desarrollador
 
 - Perfil principalmente **backend**, acostumbrado a DDD y arquitectura por bounded contexts
@@ -77,6 +83,8 @@ src/
     store/
       store.ts            # Redux store (reducer: ficha)
       hooks.ts            # useAppDispatch, useAppSelector (tipados)
+    theme/
+      themes.ts           # 25 temas de facción (Cogitador + 24 de WH40K), THEMES/DEFAULT_THEME_ID/GROUP_LABELS
   modules/
     ficha/
       components/
@@ -118,7 +126,12 @@ src/
       TabBar/
         TabBar.tsx        # Barra de navegación inferior (ficha / proyectos / séquito)
         index.ts          # Barrel export: TabBar, TabId
-  App.tsx                 # Tab state (useState), renderiza vista activa + TabBar
+      ThemePicker/
+        ThemePicker.tsx   # Dropdown selector de tema visual (agrupado por Imperium/Caos/Xenos/Otros)
+        index.ts          # Barrel export: ThemePicker
+    hooks/
+      useTheme.ts         # Estado del tema activo + persistencia en localStorage
+  App.tsx                 # Tab state (useState), renderiza vista activa + TabBar + ThemePicker en header
   main.tsx                # Entry point: <Provider store><App /></Provider>
   index.css               # Tema Tailwind v4 + estilos base
 ```
