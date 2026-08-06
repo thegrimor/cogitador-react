@@ -3,7 +3,7 @@ import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addSkill, updateSkill, removeSkill, toggleFilterCareer } from '../../services/fichaSlice'
 import { SKILLS } from '@/core/data/darkheresy'
 import { ATTRIBUTES } from '@/core/data/darkheresy'
-import { getRankForXP, getAvailableItemsForRank, normalizeName } from '@/core/data/darkheresy/careers'
+import { getRankForXP, getAvailableItemsForRank, normalizeName, getAttrCostsForCareer } from '@/core/data/darkheresy/careers'
 import { computeXpSpent, getAttrTotal } from '../../services/fichaComputed'
 import { EmptyState } from '../EmptyState'
 import type { Skill } from '../../types/fichaTypes'
@@ -90,7 +90,8 @@ export function HabilidadesTab() {
 
   function calcTotal(skill: Skill): number {
     const levelBonus = skill.level === -20 ? -20 : skill.level
-    return getAttrTotal(char!.attrs[skill.attr]) + levelBonus + skill.bonus
+    const costs = getAttrCostsForCareer(char!.info.career)[skill.attr]
+    return getAttrTotal(char!.attrs[skill.attr], costs) + levelBonus + skill.bonus
   }
 
   function handleQuickAdd() {

@@ -1,6 +1,6 @@
 import { useAppSelector } from '@/core/store/hooks'
 import { getAttrTotal } from '../../services/fichaComputed'
-import { ATTRIBUTES } from '@/core/data/darkheresy'
+import { ATTRIBUTES, getAttrCostsForCareer } from '@/core/data/darkheresy'
 import { EmptyState } from '../EmptyState'
 
 export function CaidosTab() {
@@ -36,7 +36,8 @@ export function CaidosTab() {
               <div className="mt-2 flex gap-1.5 flex-wrap">
                 {Object.entries(char.attrs).map(([key, val]) => {
                   const def = ATTRIBUTES.find(d => d.key === key)
-                  const total = getAttrTotal(val)
+                  const costs = getAttrCostsForCareer(char.info.career)[key]
+                  const total = getAttrTotal(val, costs)
                   return (
                     <div key={key} className="text-center font-mono text-[9px] text-parchment-dim">
                       {def?.abbr ?? key}
