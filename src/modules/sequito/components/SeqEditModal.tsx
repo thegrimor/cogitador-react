@@ -18,7 +18,17 @@ interface Props {
   onClose: () => void
 }
 
-const STAT_KEYS = ['WS', 'BS', 'S', 'T', 'Ag', 'Int', 'Per', 'WP', 'Fel'] as const
+const STAT_DEFS = [
+  { key: 'WS', es: 'HA' },
+  { key: 'BS', es: 'HP' },
+  { key: 'S', es: 'F' },
+  { key: 'T', es: 'R' },
+  { key: 'Ag', es: 'Ag' },
+  { key: 'Int', es: 'Int' },
+  { key: 'Per', es: 'Per' },
+  { key: 'WP', es: 'Vol' },
+  { key: 'Fel', es: 'Em' },
+] as const
 
 const INV_CATS: Array<{ cat: InvCategory; label: string; eqKey: string }> = [
   { cat: 'armory', label: 'ARMAS', eqKey: 'equipment' },
@@ -223,13 +233,16 @@ export function SeqEditModal({ seqId, onClose }: Props) {
                 // CARACTERÍSTICAS
               </div>
               <div className="grid grid-cols-3 gap-1.5">
-                {STAT_KEYS.map(key => (
+                {STAT_DEFS.map(({ key, es }) => (
                   <div
                     key={key}
                     className="bg-surface border border-rim-bright px-2 py-2 text-center"
                   >
-                    <div className="font-mono text-[8px] tracking-[1px] text-parchment-dim mb-0.5">
+                    <div className="font-mono text-[7px] tracking-[1px] text-parchment-dim">
                       {key}
+                    </div>
+                    <div className="font-mono text-[7px] text-parchment-dim mb-0.5">
+                      {es}
                     </div>
                     <input
                       type="number"
