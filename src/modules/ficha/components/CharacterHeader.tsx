@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { ensureBothSlots, selectCharacter, importCharacter, killCharacter } from '../services/fichaSlice'
 import { showToast } from '@/shared/components/Toast'
 import { isLegacyExport, mapLegacyHtmlToCharacter } from '../services/fichaImportMapper'
+import { KillConfirmModal } from './KillConfirmModal'
 import type { Character } from '../types/fichaTypes'
 
 type Role = 'inquisidor' | 'sequito'
@@ -16,6 +17,7 @@ export function CharacterHeader() {
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [showKillModal, setShowKillModal] = useState(false)
 
   // Modelo de 2 slots fijos: sin flujo de alta, se garantizan al montar.
   useEffect(() => {
@@ -67,10 +69,14 @@ export function CharacterHeader() {
 
   function handleKill() {
     if (!activeChar || activeChar.info.role !== 'sequito') return
-    if (confirm(`¿Marcar a ${activeChar.info.name || 'este séquito'} como Caído en combate? Se creará un nuevo Séquito en blanco que hereda el 100% del PE.`)) {
-      dispatch(killCharacter(activeChar.id))
-      showToast(`${activeChar.info.name || 'El séquito'} ha caído en combate`)
-    }
+    setShowKillModal(true)
+  }
+
+  function confirmKill() {
+    if (!activeChar) return
+    dispatch(killCharacter(activeChar.id))
+    showToast(`⚰ ${activeChar.info.name || 'El acólito'} ha caído. Nuevo acólito con ${activeChar.info.experience || 0} PE heredados.`)
+    setShowKillModal(false)
   }
 
   return (
@@ -149,6 +155,15 @@ export function CharacterHeader() {
           )}
         </div>
       </div>
+
+      {showKillModal && activeChar && (
+        <KillConfirmModal
+          name={activeChar.info.name || 'Acólito sin nombre'}
+          xp={Number(activeChar.info.experience) || 0}
+          onConfirm={confirmKill}
+          onCancel={() => setShowKillModal(false)}
+        />
+      )}
     </div>
   )
 }
