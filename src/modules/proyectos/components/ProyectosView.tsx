@@ -38,6 +38,11 @@ export function ProyectosView() {
         <TimePanel />
         <AddProjectForm />
         <ProjectsGrid />
+
+        <div className="flex flex-wrap justify-between gap-2 border-t border-rim px-1 py-4 mt-2 font-mono text-[9px] uppercase tracking-[1px] text-parchment-dim">
+          <span>Omnissiah Cogitator v1.0 // Adeptus Mechanicus Ministerium</span>
+          <span>Datos guardados en cogitador local</span>
+        </div>
       </div>
 
       <Toast />
