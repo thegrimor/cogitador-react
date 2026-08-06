@@ -72,17 +72,25 @@ export function AttributeCard({ charId, career, def, values }: Props) {
               const cost = costs[i]
               const bought = i < dots
               const na = cost == null
+              // El legacy no ofrece la casilla como botón cuando el coste es N/D:
+              // solo un recuadro vacío, sin letra ni interacción (attr-dots-row).
+              if (na) {
+                return (
+                  <div
+                    key={label}
+                    title="N/D"
+                    className="flex-1 h-7 border border-dashed border-rim opacity-30"
+                  />
+                )
+              }
               return (
                 <button
                   key={label}
-                  disabled={na}
                   onClick={() => toggleDot(i)}
-                  title={na ? `${DOT_TITLES[i]}: N/D` : `${DOT_TITLES[i]}: ${cost} PE${bought ? ' (comprado)' : ''}`}
+                  title={`${DOT_TITLES[i]}: ${cost} PE${bought ? ' (comprado)' : ''}`}
                   className={[
                     'flex-1 h-7 font-display text-[10px] uppercase border transition-colors',
-                    na
-                      ? 'border-dashed border-rim text-rim-bright opacity-30 cursor-not-allowed'
-                      : bought
+                    bought
                       ? 'border-crimson bg-crimson/20 text-crimson-bright'
                       : 'border-rim-bright text-parchment-dim hover:border-gold hover:text-gold',
                   ].join(' ')}
