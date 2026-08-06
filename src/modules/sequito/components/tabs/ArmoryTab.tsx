@@ -56,9 +56,15 @@ export function ArmoryTab() {
     setShowManual(true)
   }
 
-  function handlePickFromBook(entry: CatalogEntry) {
-    dispatch(addInventoryItem({ cat: 'armory', item: { name: entry.name, type: entry.type, stock: 1, notes: entry.notes } }))
-    showToast(`"${entry.name}" añadida del libro`)
+  function handlePickFromBook(entry: CatalogEntry, qty: number) {
+    const existing = armory.find(i => i.name === entry.name)
+    if (existing) {
+      dispatch(changeInventoryStock({ cat: 'armory', itemId: existing.id, delta: qty }))
+      showToast(`+${qty} a ${entry.name}`)
+    } else {
+      dispatch(addInventoryItem({ cat: 'armory', item: { name: entry.name, type: entry.type, stock: qty, notes: entry.notes } }))
+      showToast(`${entry.name} añadida`)
+    }
     setShowBook(false)
   }
 

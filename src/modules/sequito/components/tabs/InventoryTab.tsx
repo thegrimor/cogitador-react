@@ -68,9 +68,15 @@ export function InventoryTab({ cat, label, title }: Props) {
     setShowManual(true)
   }
 
-  function handlePickFromBook(entry: CatalogEntry) {
-    dispatch(addInventoryItem({ cat, item: { name: entry.name, type: entry.type, stock: 1, notes: entry.notes } }))
-    showToast(`"${entry.name}" añadido del libro`)
+  function handlePickFromBook(entry: CatalogEntry, qty: number) {
+    const existing = items.find(i => i.name === entry.name)
+    if (existing) {
+      dispatch(changeInventoryStock({ cat, itemId: existing.id, delta: qty }))
+      showToast(`+${qty} a ${entry.name}`)
+    } else {
+      dispatch(addInventoryItem({ cat, item: { name: entry.name, type: entry.type, stock: qty, notes: entry.notes } }))
+      showToast(`${entry.name} añadido`)
+    }
     setShowBook(false)
   }
 
