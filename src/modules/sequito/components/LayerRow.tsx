@@ -92,7 +92,7 @@ export function LayerRow({ layer, onAddSeq, onEditSeq, searchQuery, allSequito }
             onClick={e => e.stopPropagation()}
             onMouseDown={e => e.stopPropagation()}
             onPointerDown={e => e.stopPropagation()}
-            className="flex-1 min-w-0 bg-transparent border-none text-gold font-display text-[11px] uppercase tracking-[2px] outline-none focus:border-b focus:border-gold cursor-text"
+            className="flex-1 min-w-0 bg-transparent border-none text-gold-bright font-display text-[11px] tracking-[2px] outline-none focus:border-b focus:border-gold cursor-text"
           />
 
           <span className="font-mono text-[9px] text-parchment-dim flex-shrink-0">
@@ -101,16 +101,16 @@ export function LayerRow({ layer, onAddSeq, onEditSeq, searchQuery, allSequito }
 
           <button
             onClick={e => { e.stopPropagation(); handleDelete() }}
-            className="text-crimson-dim hover:text-crimson-bright transition-colors text-sm flex-shrink-0 leading-none"
+            className="text-[#3a1a1a] hover:text-crimson-bright transition-colors text-[13px] flex-shrink-0 leading-none"
           >
             ✕
           </button>
         </div>
 
         <SortableContext items={filteredIds} strategy={verticalListSortingStrategy}>
-          <div className="p-2 grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1.5 min-h-[44px]">
+          <div className="p-2 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[5px] min-h-[44px]">
             {filteredIds.length === 0 ? (
-              <div className="col-span-full text-center py-2.5 font-mono text-[9px] tracking-[1px] text-rim-bright border border-dashed border-rim">
+              <div className="col-span-full text-center p-2.5 font-mono text-[9px] tracking-[1px] text-rim-bright border border-dashed border-rim">
                 {searchQuery ? 'SIN RESULTADOS' : 'SIN MIEMBROS'}
               </div>
             ) : (
@@ -121,10 +121,10 @@ export function LayerRow({ layer, onAddSeq, onEditSeq, searchQuery, allSequito }
           </div>
         </SortableContext>
 
-        <div className="px-2 pb-2">
+        <div className="px-2 pt-1 pb-2">
           <button
             onClick={() => onAddSeq(layer.id)}
-            className="w-full font-display text-[9px] uppercase tracking-[2px] bg-crimson text-white px-3 py-2 hover:bg-crimson-bright transition-colors"
+            className="w-full font-display text-[7px] uppercase tracking-[2px] bg-crimson text-white px-[9px] py-1 hover:bg-crimson-bright transition-colors"
           >
             + Añadir Séquito
           </button>
@@ -136,7 +136,7 @@ export function LayerRow({ layer, onAddSeq, onEditSeq, searchQuery, allSequito }
         message={confirm.message}
         onConfirm={confirm.onConfirm}
         onCancel={confirm.onCancel}
-        confirmLabel="Eliminar"
+        title="// CONFIRMAR"
       />
     </>
   )

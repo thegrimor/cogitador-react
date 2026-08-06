@@ -90,108 +90,109 @@ export function ArmoryTab() {
   const editingItem = editingId ? armory.find(i => i.id === editingId) : null
 
   return (
-    <div className="p-4 space-y-3">
-      <div className="flex items-center justify-between gap-2 flex-wrap bg-surface-2 border border-rim-bright px-3 py-2">
+    <div className="p-5">
+      <div className="flex items-center gap-2.5 flex-wrap mb-4">
         <span className="font-display text-[10px] uppercase tracking-[3px] text-gold">// Arsenal</span>
-        <div className="flex gap-1.5">
-          <button
-            onClick={() => setShowBook(true)}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors"
-          >
-            + Del Libro
-          </button>
-          <button
-            onClick={() => { setEditingId(null); setShowManual(true) }}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-1.5 border border-rim-bright text-parchment-dim hover:text-parchment transition-colors"
-          >
-            + Manual
-          </button>
-        </div>
+        <button
+          onClick={() => setShowBook(true)}
+          className="font-display text-[7px] uppercase tracking-[2px] px-[9px] py-1 bg-crimson text-white hover:bg-crimson-bright transition-colors"
+        >
+          + Del Libro
+        </button>
+        <button
+          onClick={() => { setEditingId(null); setShowManual(true) }}
+          className="font-display text-[7px] uppercase tracking-[2px] px-[9px] py-1 bg-surface-3 border border-rim-bright text-parchment-dim hover:text-parchment hover:border-parchment-dim transition-colors"
+        >
+          + Manual
+        </button>
       </div>
 
       <div className="overflow-x-auto">
-        {armory.length === 0 ? (
-          <div className="text-center py-8 font-mono text-[10px] uppercase tracking-[1px] text-parchment-dim">
-            SIN OBJETOS — AÑADE EL PRIMERO
-          </div>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              {['OBJETO', 'STOCK', 'EQUIPADOS', 'DISPONIBLES', 'ACCIONES'].map(h => (
+                <th
+                  key={h}
+                  className="font-display text-[8px] uppercase tracking-[2px] text-parchment-dim text-left px-3 py-2 border-b-2 border-crimson-dim bg-surface-2 whitespace-nowrap"
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {armory.length === 0 ? (
               <tr>
-                {['OBJETO', 'STOCK', 'EQUIPADOS', 'DISPONIBLES', 'ACCIONES'].map(h => (
-                  <th
-                    key={h}
-                    className="font-display text-[8px] uppercase tracking-[2px] text-parchment-dim text-left px-3 py-2 border-b-2 border-crimson-dim bg-surface-2 whitespace-nowrap"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <td colSpan={5} className="text-center p-[30px] font-mono text-[10px] tracking-[1px] text-parchment-dim">
+                  SIN OBJETOS — AÑADE EL PRIMERO
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {armory.map(item => {
+            ) : (
+              armory.map(item => {
                 const equipped = getEquippedCount(item.id)
                 const avail = item.stock - equipped
                 const availCls =
                   avail <= 0 ? 'text-crimson-bright' : avail <= 2 ? 'text-gold' : 'text-neon'
                 return (
                   <tr key={item.id} className="hover:bg-surface-3 transition-colors">
-                    <td className="px-3 py-2 border-b border-rim">
+                    <td className="px-3 py-[9px] border-b border-rim">
                       <button
                         onClick={() => setDetailItemId(item.id)}
-                        className="font-rajdhani font-semibold text-sm text-gold hover:text-gold-bright underline underline-offset-2 decoration-rim-bright text-left"
+                        className="font-rajdhani font-semibold text-sm text-gold hover:text-gold-bright underline underline-offset-[3px] decoration-rim-bright text-left"
                       >
                         {item.name}
                       </button>
-                      {item.type && (
-                        <div className="font-mono text-[9px] text-parchment-dim">{item.type}</div>
-                      )}
                     </td>
-                    <td className="px-3 py-2 border-b border-rim">
+                    <td className="px-3 py-[9px] border-b border-rim">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-display text-[13px] text-gold">{item.stock}</span>
-                        <button
-                          onClick={() => dispatch(changeInventoryStock({ cat: 'armory', itemId: item.id, delta: -1 }))}
-                          className="text-parchment-dim hover:text-crimson-bright transition-colors text-xs w-5 h-5 flex items-center justify-center"
-                        >
-                          −
-                        </button>
-                        <button
-                          onClick={() => dispatch(changeInventoryStock({ cat: 'armory', itemId: item.id, delta: 1 }))}
-                          className="text-neon hover:text-neon/80 transition-colors text-xs w-5 h-5 flex items-center justify-center"
-                        >
-                          +
-                        </button>
+                        <span className="font-display text-[13px] text-gold-bright">{item.stock}</span>
+                        <div className="flex gap-0.5">
+                          <button
+                            onClick={() => dispatch(changeInventoryStock({ cat: 'armory', itemId: item.id, delta: -1 }))}
+                            className="text-parchment-dim hover:text-crimson-bright transition-colors text-[13px] px-[5px] py-0.5"
+                            title="−1"
+                          >
+                            −
+                          </button>
+                          <button
+                            onClick={() => dispatch(changeInventoryStock({ cat: 'armory', itemId: item.id, delta: 1 }))}
+                            className="text-neon hover:text-neon/80 transition-colors text-[13px] px-[5px] py-0.5"
+                            title="+1"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2 border-b border-rim">
-                      <div className="flex items-center gap-2">
-                        <span className="font-display text-[13px] text-neon">{equipped}</span>
+                    <td className="px-3 py-[9px] border-b border-rim">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-display text-[13px] text-blue-400">{equipped}</span>
                         {equipped > 0 && (
                           <button
                             onClick={() => handleUnequipAll(item.id)}
-                            className="font-display text-[7px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-1.5 py-0.5 hover:text-parchment hover:border-parchment-dim transition-colors"
+                            className="font-display text-[7px] uppercase tracking-[2px] px-[9px] py-1 bg-surface-3 border border-rim-bright text-parchment-dim hover:text-parchment hover:border-parchment-dim transition-colors"
                           >
                             RETIRAR TODO
                           </button>
                         )}
                       </div>
                     </td>
-                    <td className="px-3 py-2 border-b border-rim">
+                    <td className="px-3 py-[9px] border-b border-rim">
                       <span className={`font-display text-[13px] ${availCls}`}>{avail}</span>
                     </td>
-                    <td className="px-3 py-2 border-b border-rim">
+                    <td className="px-3 py-[9px] border-b border-rim">
                       <div className="flex gap-1">
                         <button
                           onClick={() => openEdit(item.id)}
-                          className="text-parchment-dim hover:text-gold transition-colors text-xs px-1"
+                          className="text-parchment-dim hover:text-crimson-bright transition-colors text-[13px] px-[5px] py-0.5"
                           title="Editar"
                         >
                           ✎
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="text-parchment-dim hover:text-crimson-bright transition-colors text-xs px-1"
+                          className="text-parchment-dim hover:text-crimson-bright transition-colors text-[13px] px-[5px] py-0.5"
                           title="Eliminar"
                         >
                           ✕
@@ -200,10 +201,10 @@ export function ArmoryTab() {
                     </td>
                   </tr>
                 )
-              })}
-            </tbody>
-          </table>
-        )}
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
       <ConfirmModal
@@ -211,12 +212,12 @@ export function ArmoryTab() {
         message={confirm.message}
         onConfirm={confirm.onConfirm}
         onCancel={confirm.onCancel}
-        confirmLabel="Eliminar"
+        title="// CONFIRMAR"
       />
 
       {showBook && (
         <BookCatalogModal
-          title="ARMA"
+          title=""
           entries={WEAPON_ENTRIES}
           onPick={handlePickFromBook}
           onClose={() => setShowBook(false)}

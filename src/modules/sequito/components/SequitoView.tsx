@@ -90,24 +90,24 @@ export function SequitoView() {
 
   return (
     <div className="flex flex-col h-full bg-surface overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-rim-bright bg-surface-2 flex-shrink-0 flex-wrap">
+      <div className="flex items-center gap-2 px-5 py-3 border-b border-rim-bright bg-surface-2 flex-shrink-0 flex-wrap">
         <input
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Buscar séquito..."
-          className="bg-surface border border-rim-bright text-parchment font-mono text-[11px] px-2.5 py-1.5 outline-none focus:border-gold w-44 placeholder:text-parchment-dim/40"
+          className="bg-surface border border-rim-bright text-parchment font-mono text-[11px] px-2.5 py-1.5 outline-none focus:border-gold w-[180px] placeholder:text-parchment-dim/40"
         />
-        <div className="flex gap-1.5 ml-auto">
+        <div className="flex gap-2 ml-auto">
           <button
             onClick={handleExport}
-            className="font-display text-[8px] uppercase tracking-[2px] border border-rim-bright text-parchment-dim px-3 py-1.5 hover:text-parchment hover:border-parchment-dim transition-colors bg-surface-3"
+            className="font-display text-[7px] uppercase tracking-[2px] border border-rim-bright text-parchment-dim px-[9px] py-1 hover:text-parchment hover:border-parchment-dim transition-colors bg-surface-3"
           >
             ⬇ EXPORTAR
           </button>
           <button
             onClick={() => importRef.current?.click()}
-            className="font-display text-[8px] uppercase tracking-[2px] border border-rim-bright text-parchment-dim px-3 py-1.5 hover:text-parchment hover:border-parchment-dim transition-colors bg-surface-3"
+            className="font-display text-[7px] uppercase tracking-[2px] border border-rim-bright text-parchment-dim px-[9px] py-1 hover:text-parchment hover:border-parchment-dim transition-colors bg-surface-3"
           >
             ⬆ IMPORTAR
           </button>
@@ -121,15 +121,15 @@ export function SequitoView() {
         </div>
       </div>
 
-      <div className="flex border-b-2 border-crimson-dim bg-surface-2 overflow-x-auto flex-shrink-0">
+      <div className="flex px-5 border-b-2 border-crimson-dim bg-surface-2 overflow-x-auto flex-shrink-0">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={[
-              'font-display text-[9px] uppercase tracking-[1px] px-3 py-2.5 cursor-pointer whitespace-nowrap flex-shrink-0 border-b-2 -mb-0.5 transition-colors',
+              'font-display text-[9px] uppercase tracking-[1px] px-3 py-2.5 cursor-pointer whitespace-nowrap flex-shrink-0 border transition-colors',
               activeTab === tab.id
-                ? 'text-crimson-bright border-crimson bg-surface-3'
+                ? 'text-crimson-bright border-crimson-dim border-b-2 border-b-surface-2 -mb-0.5 bg-surface-3'
                 : 'text-parchment-dim border-transparent hover:text-parchment',
             ].join(' ')}
           >
@@ -141,16 +141,13 @@ export function SequitoView() {
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'sequito' && (
           <>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rim-bright bg-surface-2 px-3 py-1.5 font-mono text-[11px] text-parchment-dim">
-              <span>SÉQUITO TOTAL <span className="text-gold font-bold">{totalCount}</span></span>
-              <span className="text-rim-bright">|</span>
-              <span>ACTIVOS <span className="text-neon font-bold">{aliveCount}</span></span>
-              <span className="text-rim-bright">|</span>
-              <span>CAÍDOS <span className="text-crimson-bright font-bold">{deadCount}</span></span>
-              <span className="text-rim-bright">|</span>
-              <span>CAPAS <span className="text-gold font-bold">{groupCount}</span></span>
+            <div className="flex flex-wrap gap-x-5 gap-y-1 border-b border-rim bg-surface-2 px-5 py-2 font-mono text-[10px] text-parchment-dim">
+              <div className="flex items-center gap-1.5">SÉQUITO TOTAL <span className="font-display text-[13px] text-gold">{totalCount}</span></div>
+              <div className="flex items-center gap-1.5">ACTIVOS <span className="font-display text-[13px] text-neon">{aliveCount}</span></div>
+              <div className="flex items-center gap-1.5">CAÍDOS <span className="font-display text-[13px] text-crimson-bright">{deadCount}</span></div>
+              <div className="flex items-center gap-1.5">CAPAS <span className="font-display text-[13px] text-gold">{groupCount}</span></div>
             </div>
-            <div className="p-2">
+            <div>
               <LayerBoard
                 searchQuery={searchQuery}
                 onAddSeq={layerId => setAddSeqLayerId(layerId)}
@@ -187,7 +184,7 @@ export function SequitoView() {
         message={confirm.message}
         onConfirm={confirm.onConfirm}
         onCancel={confirm.onCancel}
-        confirmLabel="Importar"
+        title="// CONFIRMAR"
       />
     </div>
   )

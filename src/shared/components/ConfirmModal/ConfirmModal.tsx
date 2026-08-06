@@ -6,6 +6,7 @@ interface Props {
   onConfirm: () => void
   onCancel: () => void
   confirmLabel?: string
+  title?: string
 }
 
 export function ConfirmModal({
@@ -14,6 +15,7 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
   confirmLabel = 'Confirmar',
+  title = '⚠ CONFIRMACIÓN REQUERIDA',
 }: Props) {
   if (!isOpen) return null
 
@@ -30,7 +32,7 @@ export function ConfirmModal({
       >
         <div className="border-b border-rim-bright px-4 py-3">
           <p className="font-display text-[10px] uppercase tracking-[3px] text-crimson-bright">
-            ⚠ CONFIRMACIÓN REQUERIDA
+            {title}
           </p>
         </div>
 

@@ -150,27 +150,27 @@ export function SeqEditModal({ seqId, onClose }: Props) {
           style={{ maxHeight: '92vh' }}
           onClick={e => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-rim-bright px-4 py-3 flex-shrink-0">
+          <div className="flex items-center justify-between border-b border-rim px-[18px] py-[14px] flex-shrink-0">
             <h3 className="font-display text-[11px] uppercase tracking-[3px] text-crimson truncate mr-4">
               // {member.name.toUpperCase()}
             </h3>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={handleDelete}
-                className="text-crimson-dim hover:text-crimson-bright transition-colors text-xs font-display tracking-widest"
+                className="text-crimson-dim hover:text-crimson-bright transition-colors text-[9px] font-display tracking-[2px] uppercase"
               >
-                ELIMINAR
+                Eliminar
               </button>
               <button
                 onClick={onClose}
-                className="text-parchment-dim hover:text-crimson-bright transition-colors text-lg leading-none"
+                className="text-parchment-dim hover:text-crimson-bright transition-colors text-[13px] px-[5px] py-0.5"
               >
                 ✕
               </button>
             </div>
           </div>
 
-          <div className="overflow-y-auto flex-1 px-4 py-4 space-y-4">
+          <div className="overflow-y-auto flex-1 p-[18px] space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="font-mono text-[8px] uppercase tracking-[2px] text-parchment-dim">
@@ -282,7 +282,7 @@ export function SeqEditModal({ seqId, onClose }: Props) {
                               key={e.itemId}
                               className="flex items-center justify-between bg-surface border border-rim px-2 py-1.5"
                             >
-                              <span className="font-rajdhani font-semibold text-sm text-parchment truncate mr-2">
+                              <span className="font-rajdhani text-[13px] text-white truncate mr-2">
                                 {item.name}
                               </span>
                               <div className="flex items-center gap-2 flex-shrink-0">
@@ -326,7 +326,7 @@ export function SeqEditModal({ seqId, onClose }: Props) {
                       />
                       <button
                         onClick={() => handleEquip(cat)}
-                        className="bg-gold text-black font-display text-[8px] uppercase tracking-[2px] px-3 py-1.5 hover:bg-gold-bright transition-colors flex-shrink-0"
+                        className="bg-gold text-black font-bold font-display text-[7px] uppercase tracking-[2px] px-[9px] py-1 hover:bg-gold-bright transition-colors flex-shrink-0"
                       >
                         DAR
                       </button>
@@ -342,18 +342,18 @@ export function SeqEditModal({ seqId, onClose }: Props) {
             </div>
           </div>
 
-          <div className="flex gap-2 border-t border-rim-bright px-4 py-3 flex-shrink-0">
+          <div className="flex gap-2 border-t border-rim px-[18px] py-3 flex-shrink-0">
             <button
               onClick={onClose}
-              className="flex-1 bg-surface-4 border border-rim-bright py-2 font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment transition-colors"
+              className="flex-1 bg-surface-3 border border-rim-bright py-2 font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment hover:border-parchment-dim transition-colors"
             >
-              Cancelar
+              Cerrar
             </button>
             <button
               onClick={handleSave}
               className="flex-1 bg-crimson py-2 font-display text-[9px] uppercase tracking-[2px] text-white hover:bg-crimson-bright transition-colors"
             >
-              Guardar
+              Confirmar
             </button>
           </div>
         </div>
@@ -365,7 +365,7 @@ export function SeqEditModal({ seqId, onClose }: Props) {
         message={confirm.message}
         onConfirm={confirm.onConfirm}
         onCancel={confirm.onCancel}
-        confirmLabel="Eliminar"
+        title="// CONFIRMAR"
       />
     </>
   )
