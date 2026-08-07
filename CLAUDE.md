@@ -196,6 +196,7 @@ configureStore({
 
 - Usar siempre `useAppDispatch` y `useAppSelector` de `src/core/store/hooks.ts` (tipados)
 - Cuando se añadan nuevos módulos con estado, añadir su reducer aquí
+- **Todo slice nuevo necesita persistencia en backend**, no solo `redux-persist` local. Patrón "owned resource" (ver `server/src/core/factories/ownedResource.ts`): modelo Prisma `{id, userId, name, data: Json, createdAt, updatedAt}` + `service.ts`/`routes.ts` que envuelven `createOwnedResourceRouter` + registrar en `server/src/app.ts` (`/api/<recurso>`) + `hydrateX`/`resetX` en el slice + enganchar en `src/core/sync/CloudSync.tsx` vía `useCloudSyncResource`. Ver `modules/notas` como referencia completa (frontend + backend) de un slice nuevo.
 
 ---
 

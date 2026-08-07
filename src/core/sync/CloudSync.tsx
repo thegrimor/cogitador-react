@@ -2,15 +2,12 @@ import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 import { hydrateFicha } from '@/modules/ficha/services/fichaSlice'
 import { importState as hydrateSequito } from '@/modules/sequito/services/sequitoSlice'
 import { hydrateProyectos } from '@/modules/proyectos/services/proyectosSlice'
+import { hydrateNotas } from '@/modules/notas/services/notasSlice'
 import { useCloudSyncResource } from './useCloudSyncResource'
 
 /**
  * Componente sin render montado solo mientras hay sesión activa (ver App.tsx).
- * Engancha los 3 slices de datos de juego al backend vía useCloudSyncResource.
- *
- * `notas` (ver modules/notas) queda fuera adrede: solo hay slice de frontend,
- * sin contraparte en `server/` — persiste vía redux-persist (localStorage)
- * pero no sincroniza entre dispositivos hasta que se cree ese módulo backend.
+ * Engancha los 4 slices de datos de juego al backend vía useCloudSyncResource.
  */
 export function CloudSync() {
   const dispatch = useAppDispatch()
@@ -18,6 +15,7 @@ export function CloudSync() {
   const fichaState = useAppSelector(s => s.ficha)
   const sequitoState = useAppSelector(s => s.sequito)
   const proyectosState = useAppSelector(s => s.proyectos)
+  const notasState = useAppSelector(s => s.notas)
 
   useCloudSyncResource({
     token: token as string,
@@ -41,6 +39,14 @@ export function CloudSync() {
     recordName: 'main',
     state: proyectosState,
     onHydrate: data => dispatch(hydrateProyectos(data)),
+  })
+
+  useCloudSyncResource({
+    token: token as string,
+    resourcePath: 'notas',
+    recordName: 'main',
+    state: notasState,
+    onHydrate: data => dispatch(hydrateNotas(data)),
   })
 
   return null
