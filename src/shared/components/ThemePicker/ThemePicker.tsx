@@ -35,7 +35,7 @@ export function ThemePicker({ currentTheme, themes, onSelect }: Props) {
     <div ref={containerRef} className="relative">
       <button
         onClick={() => setIsOpen(o => !o)}
-        className="flex items-center gap-1.5 px-2 py-1 border border-rim-bright hover:border-gold transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-surface-3 transition-colors"
         title="Cambiar tema visual"
         aria-label="Selector de tema visual"
       >
@@ -45,9 +45,10 @@ export function ThemePicker({ currentTheme, themes, onSelect }: Props) {
           <span style={{ background: currentTheme.colors.surface4 }} className="block" />
           <span style={{ background: currentTheme.colors.parchment }} className="block" />
         </span>
-        <span className="font-display text-[11px] uppercase tracking-widest text-parchment-dim hidden sm:inline select-none">
+        <span className="font-display text-[11px] uppercase tracking-widest text-parchment-dim flex-1 select-none">
           Tema
         </span>
+        <span className="font-mono text-[10px] text-parchment-dim opacity-60 select-none">▸</span>
       </button>
 
       {isOpen && (
