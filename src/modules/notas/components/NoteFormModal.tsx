@@ -1,25 +1,39 @@
 import { useState } from 'react'
 import { Modal } from '@/shared/components/Modal'
-import type { Note, NoteImportance } from '../../../types/fichaTypes'
+import type { Note, NoteImportance } from '../types/notasTypes'
 import { IMPORTANCE_OPTIONS } from './noteImportance'
+
+const GROUP_VALUE = ''
+
+interface CharacterOption {
+  id: string
+  label: string
+}
 
 interface Props {
   note?: Note
+  /** Personaje preseleccionado según el ámbito activo en NotasView; '' = Grupo. */
+  defaultCharacterId?: string
+  characters: CharacterOption[]
   sectionSuggestions: string[]
-  onSave: (data: { title: string; section: string; importance: NoteImportance; content: string }) => void
+  onSave: (data: { title: string; section: string; importance: NoteImportance; content: string; characterId?: string }) => void
   onCancel: () => void
 }
 
 /** Formulario de creación/edición de nota — mismo modal para ambos casos según venga o no `note`. */
-export function NoteFormModal({ note, sectionSuggestions, onSave, onCancel }: Props) {
+export function NoteFormModal({ note, defaultCharacterId, characters, sectionSuggestions, onSave, onCancel }: Props) {
   const [title, setTitle] = useState(note?.title ?? '')
   const [section, setSection] = useState(note?.section ?? '')
   const [importance, setImportance] = useState<NoteImportance>(note?.importance ?? 'media')
   const [content, setContent] = useState(note?.content ?? '')
+  const [characterId, setCharacterId] = useState(note?.characterId ?? defaultCharacterId ?? GROUP_VALUE)
 
   function handleSave() {
     if (!title.trim()) return
-    onSave({ title: title.trim(), section: section.trim(), importance, content })
+    onSave({
+      title: title.trim(), section: section.trim(), importance, content,
+      characterId: characterId === GROUP_VALUE ? undefined : characterId,
+    })
   }
 
   return (
@@ -65,6 +79,20 @@ export function NoteFormModal({ note, sectionSuggestions, onSave, onCancel }: Pr
           <datalist id="note-section-suggestions">
             {sectionSuggestions.map(s => <option key={s} value={s} />)}
           </datalist>
+
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-[9px] uppercase tracking-[1px] text-parchment-dim">Asignar a</span>
+            <select
+              value={characterId}
+              onChange={e => setCharacterId(e.target.value)}
+              className="bg-surface border border-rim-bright text-parchment font-mono text-sm px-2 py-2 outline-none focus:border-crimson transition-colors"
+            >
+              <option value={GROUP_VALUE}>◇ Grupo (compartida)</option>
+              {characters.map(c => (
+                <option key={c.id} value={c.id}>{c.label}</option>
+              ))}
+            </select>
+          </div>
 
           <textarea
             value={content}

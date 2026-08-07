@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
-import type { Note, NoteImportance } from '../../../types/fichaTypes'
+import type { Note, NoteImportance } from '../types/notasTypes'
 import { NoteCard } from './NoteCard'
-import { EmptyState } from '../../EmptyState'
 import { IMPORTANCE_OPTIONS } from './noteImportance'
 
 interface Props {
@@ -9,13 +8,12 @@ interface Props {
   onCreate: () => void
   onEdit: (note: Note) => void
   onDelete: (noteId: string) => void
-  onMove: (noteId: string) => void
-  moveLabel: string
+  onQuickMoveToGroup?: (noteId: string) => void
   emptyLabel: string
 }
 
 /** Listado de notas agrupadas por sección, con búsqueda y filtro por importancia. */
-export function NotesList({ notes, onCreate, onEdit, onDelete, onMove, moveLabel, emptyLabel }: Props) {
+export function NotesList({ notes, onCreate, onEdit, onDelete, onQuickMoveToGroup, emptyLabel }: Props) {
   const [search, setSearch] = useState('')
   const [importanceFilter, setImportanceFilter] = useState<NoteImportance | ''>('')
 
@@ -65,7 +63,10 @@ export function NotesList({ notes, onCreate, onEdit, onDelete, onMove, moveLabel
       </div>
 
       {sections.length === 0 ? (
-        <EmptyState icon="📜" label={emptyLabel} />
+        <div className="text-center py-10 px-4 border border-dashed border-rim">
+          <div className="text-4xl opacity-30 mb-3">📜</div>
+          <p className="font-mono text-[11px] tracking-[1px] text-parchment-dim uppercase">{emptyLabel}</p>
+        </div>
       ) : (
         sections.map(([section, sectionNotes]) => (
           <div key={section} className="flex flex-col gap-2">
@@ -77,8 +78,7 @@ export function NotesList({ notes, onCreate, onEdit, onDelete, onMove, moveLabel
                   note={note}
                   onEdit={() => onEdit(note)}
                   onDelete={() => onDelete(note.id)}
-                  onMove={() => onMove(note.id)}
-                  moveLabel={moveLabel}
+                  onQuickMoveToGroup={onQuickMoveToGroup ? () => onQuickMoveToGroup(note.id) : undefined}
                 />
               ))}
             </div>

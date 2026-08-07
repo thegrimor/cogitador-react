@@ -118,24 +118,6 @@ export interface CustomCurrency {
   amount: number
 }
 
-export type NoteImportance = 'baja' | 'media' | 'alta' | 'critica'
-
-/**
- * Nota temática libre (título + sección + importancia + contenido).
- * Vive en `Character.notes` (personal) o en `FichaState.groupNotes`
- * (compartida) — el mismo shape en ambos sitios, el scope lo determina la
- * colección que la contiene, no un campo propio.
- */
-export interface Note {
-  id: string
-  title: string
-  section: string
-  importance: NoteImportance
-  content: string
-  createdAt: string
-  updatedAt: string
-}
-
 export interface InqMejora {
   id: string
   name: string
@@ -181,7 +163,6 @@ export interface Character {
   quickNotes: string
   influenceGeneral: string
   influencePlanetary: string
-  notes: Note[]
 }
 
 export interface FallenCharacter extends Character {
@@ -193,6 +174,4 @@ export interface FichaState {
   characters: Character[]
   activeCharacterId: string | null
   fallen: FallenCharacter[]
-  /** Notas de campaña compartidas entre Inquisidor y Séquito (ver Note). */
-  groupNotes: Note[]
 }

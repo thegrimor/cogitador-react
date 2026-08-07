@@ -1,4 +1,4 @@
-import type { NoteImportance } from '../../../types/fichaTypes'
+import type { NoteImportance } from '../types/notasTypes'
 
 export const IMPORTANCE_OPTIONS: { value: NoteImportance; label: string }[] = [
   { value: 'baja',    label: 'Baja'    },

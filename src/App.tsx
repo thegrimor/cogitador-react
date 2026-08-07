@@ -8,6 +8,7 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { FichaView } from '@/modules/ficha'
 import { ProyectosView } from '@/modules/proyectos'
 import { SequitoView } from '@/modules/sequito'
+import { NotasView } from '@/modules/notas'
 import { AuthView } from '@/modules/auth'
 import { CloudSync } from '@/core/sync/CloudSync'
 import { logoutFully } from '@/core/store/logoutFully'
@@ -17,12 +18,14 @@ const VIEWS: Record<TabId, React.ReactNode> = {
   ficha:     <FichaView />,
   proyectos: <ProyectosView />,
   sequito:   <SequitoView />,
+  notas:     <NotasView />,
 }
 
 const TAB_SUBTITLES: Record<TabId, string> = {
   ficha:     '',
   proyectos: '// Registro Operacional',
   sequito:   '// Acólitos y Aliados',
+  notas:     '// Bitácora Temática',
 }
 
 function AppHeader({ activeTab }: { activeTab: TabId }) {

@@ -7,6 +7,10 @@ import { useCloudSyncResource } from './useCloudSyncResource'
 /**
  * Componente sin render montado solo mientras hay sesión activa (ver App.tsx).
  * Engancha los 3 slices de datos de juego al backend vía useCloudSyncResource.
+ *
+ * `notas` (ver modules/notas) queda fuera adrede: solo hay slice de frontend,
+ * sin contraparte en `server/` — persiste vía redux-persist (localStorage)
+ * pero no sincroniza entre dispositivos hasta que se cree ese módulo backend.
  */
 export function CloudSync() {
   const dispatch = useAppDispatch()
