@@ -267,5 +267,6 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
     influenceGeneral: asString(r['influenceGeneral']),
     influencePlanetary: asString(r['influencePlanetary']),
     inqMejoras,
+    notes: [], // El legacy no tenía notas temáticas — arranca vacío
   }
 }

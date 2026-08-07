@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import type {
   FichaState, Character, FallenCharacter, AttributeValues, XpLogEntry,
   Skill, Talent, Weapon, Armor, GearItem,
-  Mechadendrite, Augmentation, PsychicPower, CustomCurrency, InqMejora,
+  Mechadendrite, Augmentation, PsychicPower, CustomCurrency, InqMejora, Note,
 } from '../types/fichaTypes'
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
 
@@ -54,6 +54,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
     influenceGeneral: '',
     influencePlanetary: '',
     inqMejoras: [],
+    notes: [],
   }
 }
 
@@ -61,6 +62,7 @@ const initialState: FichaState = {
   characters: [],
   activeCharacterId: null,
   fallen: [],
+  groupNotes: [],
 }
 
 export const fichaSlice = createSlice({
@@ -288,6 +290,57 @@ export const fichaSlice = createSlice({
       if (char) char[action.payload.field] = action.payload.value
     },
 
+    // — Notas (personales) —
+    addNote(state, action: PayloadAction<{ charId: string; note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'> }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (!char) return
+      if (!char.notes) char.notes = [] // personajes persistidos antes de esta migración
+      const now = new Date().toISOString()
+      char.notes.push({ id: uid(), createdAt: now, updatedAt: now, ...action.payload.note })
+    },
+    updateNote(state, action: PayloadAction<{ charId: string; note: Note }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (!char) return
+      const idx = char.notes?.findIndex(n => n.id === action.payload.note.id) ?? -1
+      if (idx !== -1) char.notes[idx] = { ...action.payload.note, updatedAt: new Date().toISOString() }
+    },
+    removeNote(state, action: PayloadAction<{ charId: string; noteId: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (char) char.notes = (char.notes ?? []).filter(n => n.id !== action.payload.noteId)
+    },
+
+    // — Notas de grupo (compartidas, fuera de cualquier personaje) —
+    addGroupNote(state, action: PayloadAction<{ note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'> }>) {
+      if (!state.groupNotes) state.groupNotes = [] // estado persistido antes de esta migración
+      const now = new Date().toISOString()
+      state.groupNotes.push({ id: uid(), createdAt: now, updatedAt: now, ...action.payload.note })
+    },
+    updateGroupNote(state, action: PayloadAction<{ note: Note }>) {
+      const idx = state.groupNotes?.findIndex(n => n.id === action.payload.note.id) ?? -1
+      if (idx !== -1) state.groupNotes[idx] = { ...action.payload.note, updatedAt: new Date().toISOString() }
+    },
+    removeGroupNote(state, action: PayloadAction<{ noteId: string }>) {
+      state.groupNotes = (state.groupNotes ?? []).filter(n => n.id !== action.payload.noteId)
+    },
+
+    // — Mover nota entre personal y grupo —
+    moveNoteToGroup(state, action: PayloadAction<{ charId: string; noteId: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      const note = char?.notes?.find(n => n.id === action.payload.noteId)
+      if (!char || !note) return
+      char.notes = char.notes.filter(n => n.id !== action.payload.noteId)
+      if (!state.groupNotes) state.groupNotes = []
+      state.groupNotes.push({ ...note, updatedAt: new Date().toISOString() })
+    },
+    moveNoteToCharacter(state, action: PayloadAction<{ charId: string; noteId: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      const note = state.groupNotes?.find(n => n.id === action.payload.noteId)
+      if (!char || !note) return
+      state.groupNotes = state.groupNotes.filter(n => n.id !== action.payload.noteId)
+      if (!char.notes) char.notes = []
+      char.notes.push({ ...note, updatedAt: new Date().toISOString() })
+    },
+
     deleteCharacter(state, action: PayloadAction<string>) {
       state.characters = state.characters.filter(c => c.id !== action.payload)
       if (state.activeCharacterId === action.payload) {
@@ -368,6 +421,9 @@ export const {
   addPower, removePower, updatePsychic,
   updateMoney, addCurrency, updateCurrency, removeCurrency,
   updateNotes,
+  addNote, updateNote, removeNote,
+  addGroupNote, updateGroupNote, removeGroupNote,
+  moveNoteToGroup, moveNoteToCharacter,
   deleteCharacter, toggleFilterCareer, killCharacter,
   addInqMejora, removeInqMejora, updateInqMejoraNotes,
   hydrateFicha, resetFicha,

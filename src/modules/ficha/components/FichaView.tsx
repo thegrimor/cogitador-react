@@ -11,6 +11,7 @@ import { ArmeriaTab } from './tabs/ArmeriaTab'
 import { MejorasTab } from './tabs/MejorasTab'
 import { PoderesPsiquicosTab } from './tabs/PoderesPsiquicosTab'
 import { XpTab } from './tabs/XpTab'
+import { NotasTab } from './tabs/NotasTab'
 import { InquisidorTab } from './tabs/InquisidorTab'
 import { CaidosTab } from './tabs/CaidosTab'
 
@@ -28,6 +29,7 @@ type FichaTabId =
   | 'mejoras'
   | 'poderes'
   | 'xp'
+  | 'notas'
   | 'inquisidor'
   | 'caidos'
 
@@ -46,6 +48,7 @@ const TABS: FichaTab[] = [
   { id: 'mejoras',         label: 'Mejoras'    },
   { id: 'poderes',         label: 'Psíq.'      },
   { id: 'xp',              label: 'XP'         },
+  { id: 'notas',           label: 'Notas'      },
   { id: 'inquisidor',      label: 'Inquis.'    },
   { id: 'caidos',          label: 'Caídos'     },
 ]
@@ -60,6 +63,7 @@ const TAB_CONTENT: Record<FichaTabId, React.ReactNode> = {
   mejoras:         <MejorasTab />,
   poderes:         <PoderesPsiquicosTab />,
   xp:              <XpTab />,
+  notas:           <NotasTab />,
   inquisidor:      <InquisidorTab />,
   caidos:          <CaidosTab />,
 }
