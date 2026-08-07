@@ -5,12 +5,14 @@ import authReducer from '@/modules/auth/services/authSlice'
 import fichaReducer from '@/modules/ficha/services/fichaSlice'
 import proyectosReducer from '@/modules/proyectos/services/proyectosSlice'
 import sequitoReducer from '@/modules/sequito/services/sequitoSlice'
+import { campanaReducer } from '@/modules/campana'
 
 const rootReducer = combineReducers({
   auth: authReducer,
   ficha: fichaReducer,
   proyectos: proyectosReducer,
   sequito: sequitoReducer,
+  campana: campanaReducer,
 })
 
 const persistConfig = {

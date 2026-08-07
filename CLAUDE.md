@@ -17,8 +17,14 @@ El proyecto nació como 3 HTMLs standalone con estética Adeptus Mechanicus (gri
 | `ficha` | Ficha del agente/personaje | En progreso (estructura base + AtributosTab funcional) |
 | `proyectos` | Gestor de proyectos de campaña | Stub (placeholder) |
 | `sequito` | Gestión del séquito (acólitos y aliados) | Stub (placeholder) |
+| `campana` | Partidas: master (dueño) + jugadores, con vista de solo lectura de la ficha/séquito/proyectos de cada jugador | En progreso (Jugadores funcional; Mi perfil funcional; Notas grupales placeholder) |
+| `admin` | Administración mínima de usuarios (rol, borrado) — solo visible para `ADMIN` | Funcional (mínimo) |
 
 Cada módulo existe como HTML funcional previo que sirve de referencia para la migración.
+
+### Roles y partidas
+
+El backend maneja un `Role` global por cuenta: `ADMIN | MASTER | USER`. `MASTER` y `ADMIN` pueden crear partidas (`campana`) e incluir jugadores existentes por username/email; `ADMIN` gestiona todas las partidas, `MASTER` solo las suyas. Dentro de una partida, la ficha/séquito/proyectos de cada jugador se comparten en modo solo lectura con el resto de la partida (master incluido); la información del propio master **nunca** se comparte — no es miembro de su propia partida. La entrada "Ver la campaña" vive en el `AccountMenu` del header (junto a tema y logout), visible para cualquier rol; "Usuarios" (módulo `admin`) solo aparece para `ADMIN`.
 
 ### Diseño — Sistema visual
 
@@ -81,8 +87,9 @@ src/
         psychicPowers.ts  # (vacío, pendiente)
         index.ts
     store/
-      store.ts            # Redux store (reducer: ficha)
+      store.ts            # Redux store (reducers: auth, ficha, proyectos, sequito, campana)
       hooks.ts            # useAppDispatch, useAppSelector (tipados)
+      logoutFully.ts      # Logout + reset de todos los slices de datos + purge de redux-persist
     theme/
       themes.ts           # 25 temas de facción (Cogitador + 24 de WH40K), THEMES/DEFAULT_THEME_ID/GROUP_LABELS
   modules/
@@ -121,6 +128,29 @@ src/
       components/
         SequitoView.tsx   # Placeholder "HOLA MUNDO — SÉQUITO"
       index.ts
+    campana/
+      components/
+        CampanaView.tsx        # Contenedor: listado de partidas o partida activa con tabs
+        CampaignList.tsx       # Listado de mis partidas + alta (solo ADMIN/MASTER)
+        MemberSummaryCard.tsx  # Tarjeta de solo lectura: ficha+séquito+proyectos de un jugador
+        tabs/
+          JugadoresTab.tsx     # Gestión de jugadores (master/admin) + tarjetas de solo lectura
+          MiPerfilTab.tsx      # Resumen de mi propia ficha (lo que ven los demás)
+          NotasGrupalesTab.tsx # Placeholder — sin modelo/API todavía
+      services/
+        campanaApi.ts     # Llamadas a /api/campaigns
+        campanaSlice.ts   # Redux slice: campaigns, current, status, error
+      types/
+        campanaTypes.ts   # CampaignSummary, CampaignDetail, CampaignMember (subconjuntos de solo lectura)
+      index.ts            # Barrel export: CampanaView, campanaReducer, resetCampana
+    admin/
+      components/
+        UsersAdminView.tsx # Tabla de usuarios: cambiar rol / eliminar (solo ADMIN)
+      services/
+        adminApi.ts        # Llamadas a /api/users
+      types/
+        adminTypes.ts
+      index.ts             # Barrel export: UsersAdminView
   shared/
     components/
       TabBar/
@@ -131,7 +161,7 @@ src/
         index.ts          # Barrel export: ThemePicker
     hooks/
       useTheme.ts         # Estado del tema activo + persistencia en localStorage
-  App.tsx                 # Tab state (useState), renderiza vista activa + TabBar + ThemePicker en header
+  App.tsx                 # Tab state + screen state ('app'|'campana'|'admin'), renderiza vista activa + TabBar + ThemePicker/AccountMenu en header
   main.tsx                # Entry point: <Provider store><App /></Provider>
   index.css               # Tema Tailwind v4 + estilos base
 ```
@@ -178,7 +208,8 @@ src/
 No hay React Router configurado. La navegación funciona así:
 - `App.tsx` mantiene `activeTab: 'ficha' | 'proyectos' | 'sequito'` con `useState`
 - `TabBar` emite el tab seleccionado vía prop `onChange`
-- `App.tsx` renderiza el componente de vista correspondiente al tab activo
+- `App.tsx` también mantiene `screen: 'app' | 'campana' | 'admin'` con `useState`: cuando no es `'app'`, se oculta la `TabBar` y se renderiza `CampanaView`/`UsersAdminView` en su lugar. Se entra a esas pantallas desde el `AccountMenu` del header (`onOpenCampana`/`onOpenAdmin`), con un botón "Volver" propio de cada vista para restaurar `screen: 'app'`.
+- `App.tsx` renderiza el componente de vista correspondiente al tab/screen activo
 - React Router se añadirá en el futuro; la estructura de módulos está pensada para facilitar esa migración
 
 ---
@@ -189,7 +220,11 @@ No hay React Router configurado. La navegación funciona así:
 // src/core/store/store.ts
 configureStore({
   reducer: {
-    ficha: fichaReducer   // único slice actual
+    auth: authReducer,
+    ficha: fichaReducer,
+    proyectos: proyectosReducer,
+    sequito: sequitoReducer,
+    campana: campanaReducer,
   }
 })
 ```

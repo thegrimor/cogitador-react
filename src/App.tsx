@@ -9,6 +9,8 @@ import { FichaView } from '@/modules/ficha'
 import { ProyectosView } from '@/modules/proyectos'
 import { SequitoView } from '@/modules/sequito'
 import { AuthView } from '@/modules/auth'
+import { CampanaView } from '@/modules/campana'
+import { UsersAdminView } from '@/modules/admin'
 import { CloudSync } from '@/core/sync/CloudSync'
 import { logoutFully } from '@/core/store/logoutFully'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
@@ -25,10 +27,17 @@ const TAB_SUBTITLES: Record<TabId, string> = {
   sequito:   '// Acólitos y Aliados',
 }
 
-function AppHeader({ activeTab }: { activeTab: TabId }) {
+interface AppHeaderProps {
+  activeTab: TabId
+  onOpenCampana: () => void
+  onOpenAdmin: () => void
+}
+
+function AppHeader({ activeTab, onOpenCampana, onOpenAdmin }: AppHeaderProps) {
   const dispatch = useAppDispatch()
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
+  const user = useAppSelector(s => s.auth.user)
   const [currentTheme, setTheme, themes] = useTheme()
 
   const subtitle = activeTab === 'ficha'
@@ -59,6 +68,23 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
             <ThemePicker currentTheme={currentTheme} themes={themes} onSelect={setTheme} />
             <div className="my-1 border-t border-rim-bright" />
             <button
+              onClick={onOpenCampana}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-parchment transition-colors"
+            >
+              <span className="text-sm leading-none select-none">☩</span>
+              Ver la campaña
+            </button>
+            {user?.role === 'ADMIN' && (
+              <button
+                onClick={onOpenAdmin}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-parchment transition-colors"
+              >
+                <span className="text-sm leading-none select-none">⚙</span>
+                Usuarios
+              </button>
+            )}
+            <div className="my-1 border-t border-rim-bright" />
+            <button
               onClick={() => logoutFully(dispatch)}
               className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-crimson-bright transition-colors"
             >
@@ -72,8 +98,11 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
   )
 }
 
+type Screen = 'app' | 'campana' | 'admin'
+
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('ficha')
+  const [screen, setScreen] = useState<Screen>('app')
   const token = useAppSelector(s => s.auth.token)
 
   if (!token) {
@@ -91,13 +120,19 @@ function App() {
       <div className="scanline" />
 
       <CloudSync />
-      <AppHeader activeTab={activeTab} />
+      <AppHeader
+        activeTab={activeTab}
+        onOpenCampana={() => setScreen('campana')}
+        onOpenAdmin={() => setScreen('admin')}
+      />
 
-      <main className="relative z-10 flex flex-1 flex-col pb-16">
-        {VIEWS[activeTab]}
+      <main className={['relative z-10 flex flex-1 flex-col', screen === 'app' ? 'pb-16' : ''].join(' ')}>
+        {screen === 'campana' && <CampanaView onBack={() => setScreen('app')} />}
+        {screen === 'admin' && <UsersAdminView onBack={() => setScreen('app')} />}
+        {screen === 'app' && VIEWS[activeTab]}
       </main>
 
-      <TabBar active={activeTab} onChange={setActiveTab} />
+      {screen === 'app' && <TabBar active={activeTab} onChange={setActiveTab} />}
       <Toast />
     </div>
   )
