@@ -66,6 +66,11 @@ export const proyectosSlice = createSlice({
     hydrateProyectos(_state, action: PayloadAction<ProyectosState>) {
       return action.payload
     },
+
+    // Vacía el slice — usado en el borrado total al hacer logout (ver core/store).
+    resetProyectos() {
+      return initialState
+    },
   },
 })
 
@@ -77,6 +82,7 @@ export const {
   updateTotalDays,
   updateElapsedDays,
   hydrateProyectos,
+  resetProyectos,
 } = proyectosSlice.actions
 
 export default proyectosSlice.reducer

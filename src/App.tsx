@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { TabBar } from '@/shared/components/TabBar'
 import type { TabId } from '@/shared/components/TabBar'
 import { ThemePicker } from '@/shared/components/ThemePicker'
+import { AccountMenu } from '@/shared/components/AccountMenu'
 import { Toast } from '@/shared/components/Toast'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { FichaView } from '@/modules/ficha'
 import { ProyectosView } from '@/modules/proyectos'
 import { SequitoView } from '@/modules/sequito'
-import { AuthView, logout } from '@/modules/auth'
+import { AuthView } from '@/modules/auth'
 import { CloudSync } from '@/core/sync/CloudSync'
+import { logoutFully } from '@/core/store/logoutFully'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 
 const VIEWS: Record<TabId, React.ReactNode> = {
@@ -52,15 +54,18 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
             {subtitle || '// Adeptus Mechanicus'}
           </p>
         </div>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <ThemePicker currentTheme={currentTheme} themes={themes} onSelect={setTheme} />
-          <button
-            onClick={() => dispatch(logout())}
-            title="Cerrar sesión"
-            className="font-display text-[8px] uppercase tracking-[2px] bg-surface-4 border border-rim-bright text-parchment-dim px-2 py-1.5 hover:text-crimson-bright hover:border-crimson transition-colors"
-          >
-            ⏻
-          </button>
+        <div className="ml-auto shrink-0">
+          <AccountMenu>
+            <ThemePicker currentTheme={currentTheme} themes={themes} onSelect={setTheme} />
+            <div className="my-1 border-t border-rim-bright" />
+            <button
+              onClick={() => logoutFully(dispatch)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-crimson-bright transition-colors"
+            >
+              <span className="text-sm leading-none select-none">⏻</span>
+              Cerrar sesión
+            </button>
+          </AccountMenu>
         </div>
       </div>
     </header>

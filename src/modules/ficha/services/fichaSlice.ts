@@ -346,6 +346,11 @@ export const fichaSlice = createSlice({
     hydrateFicha(_state, action: PayloadAction<FichaState>) {
       return action.payload
     },
+
+    // Vacía el slice — usado en el borrado total al hacer logout (ver core/store).
+    resetFicha() {
+      return initialState
+    },
   },
 })
 
@@ -365,7 +370,7 @@ export const {
   updateNotes,
   deleteCharacter, toggleFilterCareer, killCharacter,
   addInqMejora, removeInqMejora, updateInqMejoraNotes,
-  hydrateFicha,
+  hydrateFicha, resetFicha,
 } = fichaSlice.actions
 
 export default fichaSlice.reducer
