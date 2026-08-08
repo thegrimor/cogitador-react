@@ -3,7 +3,7 @@ import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addTalent, removeTalent, toggleFilterCareer } from '../../services/fichaSlice'
 import { TALENTS, type TalentDefinition } from '@/core/data/darkheresy'
 import {
-  getRankForXP, getAvailableItemsForRank, normalizeName, CAREERS_DATA, CAREER_RANKS_DATA,
+  getRankForXP, getAvailableItemsForRank, normalizeName, CAREERS_DATA, CAREER_RANKS_DATA, getRobustoLimit,
 } from '@/core/data/darkheresy/careers'
 import { computeXpSpent } from '../../services/fichaComputed'
 import { EmptyState } from '../EmptyState'
@@ -64,6 +64,10 @@ export function TalentosTab() {
     return acc
   }, {})
 
+  // Tope de Robusto según carrera+rango (manual básico) — null = sin dato de rango, sin tope
+  const robustoLimit = rankInfo ? getRobustoLimit(char.info.career, rankInfo.rank) : null
+  const maxCounts: Record<string, number> = robustoLimit != null ? { Robusto: robustoLimit } : {}
+
   // Con "Solo carrera" activo y datos de rango disponibles: una sección por rango obtenido
   // hasta el actual, de menos a más poderoso. Si no, una única lista alfabética.
   function buildSections(): TalentSection[] {
@@ -86,6 +90,8 @@ export function TalentosTab() {
   }
 
   function handlePickerAdd(talent: TalentDefinition, xp: number) {
+    const max = maxCounts[talent.name]
+    if (max != null && (ownedCounts[talent.name] ?? 0) >= max) return
     dispatch(addTalent({
       charId: char!.id,
       talent: {
@@ -145,6 +151,7 @@ export function TalentosTab() {
         <TalentPickerModal
           sections={buildSections()}
           ownedCounts={ownedCounts}
+          maxCounts={maxCounts}
           onAdd={handlePickerAdd}
           onClose={() => setShowPicker(false)}
         />
