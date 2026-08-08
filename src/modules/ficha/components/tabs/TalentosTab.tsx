@@ -59,7 +59,10 @@ export function TalentosTab() {
     : TALENTS
 
   const sortedTalents = [...char.talents].sort((a, b) => a.name.localeCompare(b.name, 'es'))
-  const ownedNames = new Set(char.talents.map(t => t.name))
+  const ownedCounts = char.talents.reduce<Record<string, number>>((acc, t) => {
+    acc[t.name] = (acc[t.name] ?? 0) + 1
+    return acc
+  }, {})
 
   // Con "Solo carrera" activo y datos de rango disponibles: una sección por rango obtenido
   // hasta el actual, de menos a más poderoso. Si no, una única lista alfabética.
@@ -83,7 +86,6 @@ export function TalentosTab() {
   }
 
   function handlePickerAdd(talent: TalentDefinition, xp: number) {
-    if (char!.talents.some(t => t.name === talent.name)) return
     dispatch(addTalent({
       charId: char!.id,
       talent: {
@@ -142,7 +144,7 @@ export function TalentosTab() {
       {showPicker && (
         <TalentPickerModal
           sections={buildSections()}
-          ownedNames={ownedNames}
+          ownedCounts={ownedCounts}
           onAdd={handlePickerAdd}
           onClose={() => setShowPicker(false)}
         />

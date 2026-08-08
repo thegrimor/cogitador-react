@@ -10,7 +10,8 @@ export interface TalentSection {
 
 interface Props {
   sections: TalentSection[]
-  ownedNames: Set<string>
+  /** Nº de veces que el personaje ya tiene cada talento (por nombre) — no bloquea, solo informa: hay talentos como Robusto que se pueden repetir. */
+  ownedCounts: Record<string, number>
   onAdd: (talent: TalentDefinition, xp: number) => void
   onClose: () => void
 }
@@ -20,7 +21,7 @@ interface Props {
  * carrera, de menos a más poderoso, o una única lista alfabética sin carrera activa) con
  * descripción, efecto y PE editable visibles por fila, sin paso intermedio de confirmación.
  */
-export function TalentPickerModal({ sections, ownedNames, onAdd, onClose }: Props) {
+export function TalentPickerModal({ sections, ownedCounts, onAdd, onClose }: Props) {
   const [query, setQuery] = useState('')
   const [xpByName, setXpByName] = useState<Record<string, number>>({})
 
@@ -64,16 +65,21 @@ export function TalentPickerModal({ sections, ownedNames, onAdd, onClose }: Prop
                 </h4>
               )}
               {section.talents.map(t => {
-                const owned = ownedNames.has(t.name)
+                const count = ownedCounts[t.name] ?? 0
                 return (
                   <div
                     key={t.name}
                     className={[
                       'border px-3 py-2.5 flex flex-col gap-1.5',
-                      owned ? 'border-rim bg-surface/50 opacity-50' : 'border-rim-bright bg-surface',
+                      count > 0 ? 'border-gold/50 bg-surface' : 'border-rim-bright bg-surface',
                     ].join(' ')}
                   >
-                    <div className="font-rajdhani font-bold text-[14px] text-parchment-bright">{t.name}</div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-rajdhani font-bold text-[14px] text-parchment-bright">{t.name}</span>
+                      {count > 0 && (
+                        <span className="font-mono text-[9px] uppercase tracking-[1px] text-gold">✓ Ya tienes ×{count}</span>
+                      )}
+                    </div>
                     <div className="flex gap-2 items-center flex-wrap">
                       <span className="font-mono text-[9px] bg-gold/20 text-gold px-1.5 py-0.5">{t.type}</span>
                       <span className="font-mono text-[9px] text-parchment-dim">Req: {t.req}</span>
@@ -81,26 +87,22 @@ export function TalentPickerModal({ sections, ownedNames, onAdd, onClose }: Prop
                     {t.desc && <p className="font-rajdhani text-[12px] text-parchment-dim">{t.desc}</p>}
                     {t.effect && <p className="font-mono text-[10px] text-neon">► {t.effect}</p>}
 
-                    {owned ? (
-                      <span className="font-mono text-[9px] uppercase tracking-[1px] text-gold self-end">✓ Ya adquirido</span>
-                    ) : (
-                      <div className="flex gap-2 items-center justify-end mt-1">
-                        <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">PE</span>
-                        <input
-                          type="number"
-                          min={0}
-                          value={xpFor(t.name)}
-                          onChange={e => setXpByName(m => ({ ...m, [t.name]: Number(e.target.value) || 0 }))}
-                          className="w-16 bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-1.5 py-1 outline-none focus:border-gold transition-colors"
-                        />
-                        <button
-                          onClick={() => onAdd(t, xpFor(t.name))}
-                          className="font-display text-[8px] uppercase tracking-[1px] px-2.5 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
-                        >
-                          Añadir
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex gap-2 items-center justify-end mt-1">
+                      <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">PE</span>
+                      <input
+                        type="number"
+                        min={0}
+                        value={xpFor(t.name)}
+                        onChange={e => setXpByName(m => ({ ...m, [t.name]: Number(e.target.value) || 0 }))}
+                        className="w-16 bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-1.5 py-1 outline-none focus:border-gold transition-colors"
+                      />
+                      <button
+                        onClick={() => onAdd(t, xpFor(t.name))}
+                        className="font-display text-[8px] uppercase tracking-[1px] px-2.5 py-1.5 bg-crimson text-white hover:bg-crimson-bright transition-colors shrink-0"
+                      >
+                        Añadir
+                      </button>
+                    </div>
                   </div>
                 )
               })}

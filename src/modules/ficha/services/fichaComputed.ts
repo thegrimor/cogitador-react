@@ -1,6 +1,17 @@
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
-import { ATTR_ADVANCE_COSTS } from '@/core/data/darkheresy/careers'
+import { ATTR_ADVANCE_COSTS, normalizeName } from '@/core/data/darkheresy/careers'
 import type { Character, AttributeValues } from '../types/fichaTypes'
+
+/**
+ * Heridas base + bono de talentos Robusto (cada uno da +1 Herida, sin límite en 1ª ed.) = total.
+ * Migración in-place: personajes persistidos antes de `woundsBase` no tienen ese campo — se
+ * estima la base a partir del `wounds.max` ya guardado, restando los Robustos que ya tuvieran.
+ */
+export function computeWounds(char: Character): { base: number; robustos: number; total: number } {
+  const robustos = char.talents.filter(t => normalizeName(t.name) === 'robusto').length
+  const base = char.woundsBase ?? Math.max(0, (char.wounds?.max || 0) - robustos)
+  return { base, robustos, total: base + robustos }
+}
 
 /**
  * Dots comprados de una característica, con migración de personajes persistidos

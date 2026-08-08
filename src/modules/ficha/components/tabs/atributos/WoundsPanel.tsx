@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useAppDispatch } from '@/core/store/hooks'
 import {
-  updateWounds, updateFate, updateVital,
+  updateWounds, updateWoundsBase, updateFate, updateVital,
   updateMoney, addCurrency, updateCurrency, removeCurrency, updateNotes,
   killCharacter,
 } from '../../../services/fichaSlice'
-import { computeMovement } from '../../../services/fichaComputed'
+import { computeMovement, computeWounds } from '../../../services/fichaComputed'
 import { showToast } from '@/shared/components/Toast'
 import { KillConfirmModal } from '../../KillConfirmModal'
 import type { Character } from '../../../types/fichaTypes'
@@ -31,6 +31,8 @@ interface PipRowProps {
   onChangeMax: (v: number) => void
   onDelta: (delta: number) => void
   onInc: () => void
+  /** Sustituye el campo MÁX plano por "base editable + bono automático = total" (heridas + Robusto). */
+  maxBreakdown?: { base: number; bonus: number; bonusLabel: string; onChangeBase: (v: number) => void }
 }
 
 /**
@@ -40,21 +42,40 @@ interface PipRowProps {
  */
 function PipRow({
   title, maxLabel, icon, current, max, emptyMessage, aliveTitle, deadTitle,
-  filledClass, emptyClass, decLabel, incLabel, onChangeCurrent, onChangeMax, onDelta, onInc,
+  filledClass, emptyClass, decLabel, incLabel, onChangeCurrent, onChangeMax, onDelta, onInc, maxBreakdown,
 }: PipRowProps) {
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <span className="font-mono text-[9px] text-parchment-dim tracking-[2px]">// {title}</span>
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[9px] text-parchment-dim">{maxLabel}</span>
-          <input
-            type="number"
-            min={0}
-            value={max}
-            onChange={e => onChangeMax(parseInt(e.target.value) || 0)}
-            className="w-12 bg-surface border border-rim-bright text-gold-bright font-display text-[13px] text-center px-1.5 py-0.5 outline-none focus:border-gold transition-colors"
-          />
+          {maxBreakdown ? (
+            <>
+              <span className="font-mono text-[9px] text-parchment-dim">BASE</span>
+              <input
+                type="number"
+                min={0}
+                value={maxBreakdown.base}
+                onChange={e => maxBreakdown.onChangeBase(parseInt(e.target.value) || 0)}
+                className="w-12 bg-surface border border-rim-bright text-gold-bright font-display text-[13px] text-center px-1.5 py-0.5 outline-none focus:border-gold transition-colors"
+              />
+              <span className="font-mono text-[9px] text-parchment-dim whitespace-nowrap">
+                + {maxBreakdown.bonus} {maxBreakdown.bonusLabel} =
+              </span>
+              <span className="font-display text-[13px] text-gold-bright" title="Total de heridas máximas">{max}</span>
+            </>
+          ) : (
+            <>
+              <span className="font-mono text-[9px] text-parchment-dim">{maxLabel}</span>
+              <input
+                type="number"
+                min={0}
+                value={max}
+                onChange={e => onChangeMax(parseInt(e.target.value) || 0)}
+                className="w-12 bg-surface border border-rim-bright text-gold-bright font-display text-[13px] text-center px-1.5 py-0.5 outline-none focus:border-gold transition-colors"
+              />
+            </>
+          )}
           <button
             onClick={() => onDelta(-1)}
             className="font-display text-[8px] uppercase tracking-[1px] border border-rim-bright text-parchment-dim px-2 py-1 hover:text-parchment hover:border-parchment-dim transition-colors"
@@ -160,6 +181,7 @@ function CounterRow({ title, value, max, color, icon, iconClass, emptyMessage, o
 export function WoundsPanel({ char }: Props) {
   const dispatch = useAppDispatch()
   const mov = computeMovement(char)
+  const wounds = computeWounds(char)
   const [showKillModal, setShowKillModal] = useState(false)
 
   function confirmKill() {
@@ -191,8 +213,8 @@ export function WoundsPanel({ char }: Props) {
             maxLabel="MÁX"
             icon="♥"
             current={char.wounds.current}
-            max={char.wounds.max}
-            emptyMessage="Define las heridas máximas arriba"
+            max={wounds.total}
+            emptyMessage="Define las heridas base arriba"
             aliveTitle="Sano (clic para herir)"
             deadTitle="Herido (clic para sanar)"
             filledClass="text-crimson [text-shadow:0_0_8px_rgba(196,30,30,0.6)]"
@@ -200,14 +222,20 @@ export function WoundsPanel({ char }: Props) {
             decLabel="Herida −1"
             incLabel="Recuperar +1"
             onChangeCurrent={v => dispatch(updateWounds({ id: char.id, field: 'current', value: Math.max(0, v) }))}
-            onChangeMax={v => dispatch(updateWounds({ id: char.id, field: 'max', value: v }))}
+            onChangeMax={() => {}}
+            maxBreakdown={{
+              base: wounds.base,
+              bonus: wounds.robustos,
+              bonusLabel: wounds.robustos === 1 ? 'Robusto' : 'Robustos',
+              onChangeBase: v => dispatch(updateWoundsBase({ id: char.id, value: v })),
+            }}
             onDelta={delta => dispatch(updateWounds({
               id: char.id, field: 'current',
-              value: Math.max(0, Math.min(char.wounds.max, char.wounds.current + delta)),
+              value: Math.max(0, Math.min(wounds.total, char.wounds.current + delta)),
             }))}
             onInc={() => dispatch(updateWounds({
               id: char.id, field: 'current',
-              value: Math.max(0, Math.min(char.wounds.max, char.wounds.current + 1)),
+              value: Math.max(0, Math.min(wounds.total, char.wounds.current + 1)),
             }))}
           />
           <PipRow

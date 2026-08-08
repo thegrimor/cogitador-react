@@ -6,6 +6,7 @@ import type {
   Mechadendrite, Augmentation, PsychicPower, CustomCurrency, InqMejora,
 } from '../types/fichaTypes'
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
+import { normalizeName } from '@/core/data/darkheresy/careers'
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
@@ -15,6 +16,17 @@ function buildDefaultAttrs() {
   return Object.fromEntries(
     ATTRIBUTES.map(a => [a.key, { base: 0, dots: 0, bonuses: 0, bonusNote: '' }])
   )
+}
+
+/**
+ * wounds.max = woundsBase + nº de talentos Robusto (cada uno da +1 Herida, sin límite en 1ª ed.).
+ * Personajes persistidos antes de `woundsBase` no lo tienen (undefined) — se estima una vez a
+ * partir del wounds.max ya guardado, restando los Robustos que ya tuvieran.
+ */
+function syncWoundsMax(char: Character) {
+  const robustos = char.talents.filter(t => normalizeName(t.name) === 'robusto').length
+  if (char.woundsBase == null) char.woundsBase = Math.max(0, (char.wounds.max || 0) - robustos)
+  char.wounds.max = char.woundsBase + robustos
 }
 
 function buildDefaultCharacter(info: Character['info']): Character {
@@ -31,6 +43,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
     },
     attrs: buildDefaultAttrs(),
     wounds: { current: 0, max: 0 },
+    woundsBase: 0,
     fate:   { current: 0, max: 0 },
     xpLog:  [],
     filterCareer: false,
@@ -134,6 +147,13 @@ export const fichaSlice = createSlice({
       if (char) char.wounds[action.payload.field] = action.payload.value
     },
 
+    updateWoundsBase(state, action: PayloadAction<{ id: string; value: number }>) {
+      const char = state.characters.find(c => c.id === action.payload.id)
+      if (!char) return
+      char.woundsBase = Math.max(0, action.payload.value)
+      syncWoundsMax(char)
+    },
+
     updateFate(state, action: PayloadAction<{ id: string; field: 'current' | 'max'; value: number }>) {
       const char = state.characters.find(c => c.id === action.payload.id)
       if (char) char.fate[action.payload.field] = action.payload.value
@@ -187,11 +207,15 @@ export const fichaSlice = createSlice({
     // — Talents —
     addTalent(state, action: PayloadAction<{ charId: string; talent: Omit<Talent, 'id'> }>) {
       const char = state.characters.find(c => c.id === action.payload.charId)
-      if (char) char.talents.push({ id: uid(), ...action.payload.talent })
+      if (!char) return
+      char.talents.push({ id: uid(), ...action.payload.talent })
+      syncWoundsMax(char)
     },
     removeTalent(state, action: PayloadAction<{ charId: string; talentId: string }>) {
       const char = state.characters.find(c => c.id === action.payload.charId)
-      if (char) char.talents = char.talents.filter(t => t.id !== action.payload.talentId)
+      if (!char) return
+      char.talents = char.talents.filter(t => t.id !== action.payload.talentId)
+      syncWoundsMax(char)
     },
 
     // — Weapons —
@@ -356,7 +380,7 @@ export const fichaSlice = createSlice({
 
 export const {
   addCharacter, ensureBothSlots, importCharacter, selectCharacter, updateCharInfo,
-  updateAttribute, updateWounds, updateFate, updateVital,
+  updateAttribute, updateWounds, updateWoundsBase, updateFate, updateVital,
   addXpEntry, removeXpEntry,
   addSkill, updateSkill, removeSkill,
   addTalent, removeTalent,
