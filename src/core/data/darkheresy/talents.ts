@@ -148,7 +148,7 @@ export const TALENTS: TalentDefinition[] = [
   { name: 'Rito de miedo', type: 'Otro', req: 'Tecnosacerdote (respirador)', desc: '', effect: 'Miedo 1 en radio 50m durante 2 minutos; canto infrasónico' },
   { name: 'Rito de pavor', type: 'Otro', req: 'Tecnosacerdote (respirador)', desc: '', effect: 'Miedo en 50m; -10 a todas las tiradas de humanos en el radio' },
   { name: 'Rito de pureza mental', type: 'Otro', req: 'Tecnosacerdote (circuitos craneales)', desc: '', effect: 'Inmune al miedo, acobardamiento y efectos emocionales' },
-  { name: 'Robusto', type: 'Otro', req: '—', desc: '', effect: '+1 Herida adicional. Se puede adquirir sin límite de veces' },
+  { name: 'Robusto', type: 'Otro', req: '—', desc: '', effect: '+1 Herida adicional. Puede adquirirse varias veces (tope según carrera y rango)' },
   { name: 'Sentido desarrollado', type: 'Otro', req: '—', desc: '', effect: '+10 a tiradas basadas en un sentido concreto (grupo: Gusto, Oído, Olfato, Tacto, Vista)' },
   { name: 'Sometimiento', type: 'Combat', req: '—', desc: '', effect: 'Declaras intento de someter; media acción para aturdir con ataque especial' },
   { name: 'Sueño ligero', type: 'Otro', req: 'Per 30', desc: '', effect: 'Siempre se te considera despierto a efectos de Perspicacia' },
