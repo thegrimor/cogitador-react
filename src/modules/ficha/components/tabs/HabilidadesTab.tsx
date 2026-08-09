@@ -1,25 +1,21 @@
 import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addSkill, updateSkill, removeSkill, toggleFilterCareer } from '../../services/fichaSlice'
-import { SKILLS } from '@/core/data/darkheresy'
+import { SKILLS, findCoveringMasterSkill, type SkillDefinition } from '@/core/data/darkheresy'
 import { ATTRIBUTES } from '@/core/data/darkheresy'
-import { getRankForXP, getAvailableItemsForRank, normalizeName, getAttrCostsForCareer } from '@/core/data/darkheresy/careers'
+import {
+  getRankForXP, getAvailableItemsForRank, normalizeName, getAttrCostsForCareer, CAREERS_DATA, CAREER_RANKS_DATA,
+} from '@/core/data/darkheresy/careers'
 import { computeXpSpent, getAttrTotal } from '../../services/fichaComputed'
 import { EmptyState } from '../EmptyState'
 import type { Skill } from '../../types/fichaTypes'
+import { SkillPickerModal, type SkillSection } from './habilidades/SkillPickerModal'
 
 const LEVEL_OPTIONS: { value: number; label: string }[] = [
   { value: -20, label: 'No entrenado' },
   { value: 0,   label: 'Entrenado'    },
   { value: 10,  label: 'Avanzado'     },
   { value: 20,  label: 'Maestro'      },
-]
-
-// El selector rápido del libro no ofrece "No entrenado" — igual que el HTML legacy
-const QUICK_LEVEL_OPTIONS: { value: number; label: string }[] = [
-  { value: 0,  label: 'Entrenado'      },
-  { value: 10, label: 'Avanzado (+10)' },
-  { value: 20, label: 'Maestro (+20)'  },
 ]
 
 function levelLabel(level: number): string {
@@ -70,9 +66,7 @@ export function HabilidadesTab() {
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const char = characters.find(c => c.id === activeCharacterId)
 
-  const [selectedSkillName, setSelectedSkillName] = useState('')
-  const [quickLevel, setQuickLevel] = useState(0)
-  const [quickXp, setQuickXp] = useState(100)
+  const [showPicker, setShowPicker] = useState(false)
   const [showManual, setShowManual] = useState(false)
   const [manual, setManual] = useState<ManualForm>(EMPTY_MANUAL)
 
@@ -86,7 +80,10 @@ export function HabilidadesTab() {
     ? SKILLS.filter(s => available.has(normalizeName(s.name)))
     : SKILLS
 
-  const selectedDef = SKILLS.find(s => s.name === selectedSkillName)
+  // Habilidades Maestras (Ascension) ya adquiridas como mejora de Inquisidor — marcan las
+  // habilidades individuales que sustituyen, sin borrarlas.
+  const ownedMejoraNames = new Set((char.inqMejoras ?? []).map(m => m.name))
+  const ownedLevels = Object.fromEntries(char.skills.map(s => [s.name, s.level]))
 
   function calcTotal(skill: Skill): number {
     const levelBonus = skill.level === -20 ? -20 : skill.level
@@ -94,21 +91,40 @@ export function HabilidadesTab() {
     return getAttrTotal(char!.attrs[skill.attr], costs) + levelBonus + skill.bonus
   }
 
-  function handleQuickAdd() {
-    if (!selectedDef) return
-    if (char!.skills.some(s => s.name === selectedDef.name && s.level === quickLevel)) return
+  // Con "Solo carrera" activo y datos de rango disponibles: una sección por rango obtenido
+  // hasta el actual, de menos a más poderoso. Si no, una única lista alfabética.
+  function buildSections(): SkillSection[] {
+    const careerRanks = CAREERS_DATA[char!.info.career]
+    const careerItemsByRank = CAREER_RANKS_DATA[char!.info.career]
+    if (char!.filterCareer && rankInfo && careerRanks && careerItemsByRank && Object.keys(careerItemsByRank).length > 0) {
+      const currentIdx = careerRanks.findIndex(r => r.rank === rankInfo.rank)
+      const sections: SkillSection[] = []
+      for (let i = 0; i <= currentIdx; i++) {
+        const rankName = careerRanks[i].rank
+        const names = new Set((careerItemsByRank[rankName] ?? []).map(normalizeName))
+        const skills = SKILLS
+          .filter(s => names.has(normalizeName(s.name)))
+          .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+        if (skills.length) sections.push({ label: rankName, skills })
+      }
+      if (sections.length) return sections
+    }
+    return [{ label: '', skills: [...filteredSkills].sort((a, b) => a.name.localeCompare(b.name, 'es')) }]
+  }
+
+  function handlePickerAdd(skill: SkillDefinition, level: number, xp: number) {
+    if (char!.skills.some(s => s.name === skill.name)) return
     dispatch(addSkill({
       charId: char!.id,
       skill: {
-        name: selectedDef.name,
-        attr: selectedDef.attr,
-        level: quickLevel,
+        name: skill.name,
+        attr: skill.attr,
+        level,
         bonus: 0,
-        notes: selectedDef.notes ?? '',
-        xp: quickXp,
+        notes: skill.notes ?? '',
+        xp,
       },
     }))
-    setSelectedSkillName('')
   }
 
   function handleManualAdd() {
@@ -151,57 +167,23 @@ export function HabilidadesTab() {
         </div>
       </div>
 
-      <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
-        <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Selector Rápido del Libro</h4>
-        <div className="flex flex-wrap gap-2 items-end">
-          <select
-            value={selectedSkillName}
-            onChange={e => setSelectedSkillName(e.target.value)}
-            className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-          >
-            <option value="">— Selecciona habilidad del libro —</option>
-            {filteredSkills.map(s => (
-              <option key={s.name} value={s.name}>{s.name} ({s.attr})</option>
-            ))}
-          </select>
-          <div className="flex flex-col gap-0.5 w-20 shrink-0">
-            <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">Nivel</span>
-            <select
-              value={quickLevel}
-              onChange={e => setQuickLevel(Number(e.target.value))}
-              className="w-full bg-surface border border-rim-bright text-parchment font-mono text-xs px-1.5 py-2 outline-none focus:border-crimson transition-colors"
-            >
-              {QUICK_LEVEL_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-0.5 w-20 shrink-0">
-            <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">Coste PE</span>
-            <input
-              type="number"
-              value={quickXp}
-              min={0}
-              onChange={e => setQuickXp(Number(e.target.value) || 0)}
-              className="w-full bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-2 py-1.5 outline-none focus:border-gold transition-colors"
-            />
-          </div>
-          <button
-            onClick={handleQuickAdd}
-            disabled={!selectedDef}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
-          >
-            Añadir
-          </button>
-        </div>
-
-        {selectedDef && (
-          <div className="bg-surface border border-rim px-3 py-2 flex gap-3 items-start">
-            <span className="font-mono text-[10px] bg-gold/20 text-gold px-2 py-0.5 shrink-0">{selectedDef.attr}</span>
-            <p className="font-mono text-[11px] text-parchment-dim">{selectedDef.notes ?? 'Habilidad estándar'}</p>
-          </div>
-        )}
+      <div className="mx-4 mt-3">
+        <button
+          onClick={() => setShowPicker(true)}
+          className="w-full font-display text-[10px] uppercase tracking-[2px] px-3 py-2.5 bg-surface-3 border border-rim-bright border-t-2 border-t-gold text-gold hover:bg-surface-4 transition-colors"
+        >
+          ⚡ Añadir Habilidad del Libro
+        </button>
       </div>
+
+      {showPicker && (
+        <SkillPickerModal
+          sections={buildSections()}
+          ownedLevels={ownedLevels}
+          onAdd={handlePickerAdd}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
 
       {showManual && (
         <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
@@ -276,17 +258,29 @@ export function HabilidadesTab() {
           {char.skills.map(skill => {
             const total = calcTotal(skill)
             const dotsFilled = LEVEL_INDEX.indexOf(skill.level)
+            const coveringMaster = findCoveringMasterSkill(skill.name, ownedMejoraNames)
             return (
               // Réplica de .skill-row: fila única con nombre+notas, atributo,
               // 3 puntos de nivel clicables, bonus (solo lectura — el legacy
               // no permite editarlo tras crear la habilidad), total en % y
               // coste PE. flex-wrap añadido sobre el original (que no lo
               // lleva) para no romper el layout en móvil con nombres largos.
-              <div key={skill.id} className="flex items-center flex-wrap gap-2.5 px-3 py-2 bg-surface-2 hover:bg-surface-3 transition-colors">
+              <div
+                key={skill.id}
+                className={[
+                  'flex items-center flex-wrap gap-2.5 px-3 py-2 bg-surface-2 hover:bg-surface-3 transition-colors',
+                  coveringMaster ? 'opacity-60' : '',
+                ].join(' ')}
+              >
                 <div className="flex-1 min-w-[120px]">
                   <div className="font-rajdhani font-semibold text-sm text-parchment leading-tight truncate">{skill.name}</div>
                   {skill.notes && (
                     <div className="font-mono text-[10px] text-parchment-dim truncate">{skill.notes}</div>
+                  )}
+                  {coveringMaster && (
+                    <div className="font-mono text-[9px] uppercase tracking-[1px] text-gold truncate">
+                      ⬡ Cubierta por {coveringMaster.name} (+20)
+                    </div>
                   )}
                 </div>
                 <span className="font-mono text-[10px] text-parchment-dim w-[30px] text-center shrink-0">{skill.attr}</span>

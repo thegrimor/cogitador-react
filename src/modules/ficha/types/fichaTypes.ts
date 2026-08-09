@@ -133,6 +133,8 @@ export interface Character {
   info: CharacterInfo
   attrs: AttributesState
   wounds: VitalState
+  /** Heridas base (sin contar el bonus de talentos Robusto) — wounds.max = woundsBase + nº de Robusto. */
+  woundsBase: number
   fate: VitalState
   xpLog: XpLogEntry[]
   filterCareer: boolean

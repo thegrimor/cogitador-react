@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
 import { addTalent, removeTalent, toggleFilterCareer } from '../../services/fichaSlice'
-import { TALENTS } from '@/core/data/darkheresy'
-import { getRankForXP, getAvailableItemsForRank, normalizeName } from '@/core/data/darkheresy/careers'
+import { TALENTS, type TalentDefinition } from '@/core/data/darkheresy'
+import {
+  getRankForXP, getAvailableItemsForRank, normalizeName, CAREERS_DATA, CAREER_RANKS_DATA, getRobustoLimit,
+} from '@/core/data/darkheresy/careers'
 import { computeXpSpent } from '../../services/fichaComputed'
 import { EmptyState } from '../EmptyState'
+import { TalentPickerModal, type TalentSection } from './talentos/TalentPickerModal'
 
 type ManualForm = {
   name: string
@@ -42,8 +45,7 @@ export function TalentosTab() {
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const char = characters.find(c => c.id === activeCharacterId)
 
-  const [selectedTalentName, setSelectedTalentName] = useState('')
-  const [quickXp, setQuickXp] = useState(100)
+  const [showPicker, setShowPicker] = useState(false)
   const [showManual, setShowManual] = useState(false)
   const [manual, setManual] = useState<ManualForm>(EMPTY_MANUAL)
 
@@ -56,23 +58,51 @@ export function TalentosTab() {
     ? TALENTS.filter(t => available.has(normalizeName(t.name)))
     : TALENTS
 
-  const selectedDef = TALENTS.find(t => t.name === selectedTalentName)
+  const sortedTalents = [...char.talents].sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  const ownedCounts = char.talents.reduce<Record<string, number>>((acc, t) => {
+    acc[t.name] = (acc[t.name] ?? 0) + 1
+    return acc
+  }, {})
 
-  function handleQuickAdd() {
-    if (!selectedDef) return
-    if (char!.talents.some(t => t.name === selectedDef.name)) return
+  // Tope de Robusto según carrera+rango (manual básico) — null = sin dato de rango, sin tope
+  const robustoLimit = rankInfo ? getRobustoLimit(char.info.career, rankInfo.rank) : null
+  const maxCounts: Record<string, number> = robustoLimit != null ? { Robusto: robustoLimit } : {}
+
+  // Con "Solo carrera" activo y datos de rango disponibles: una sección por rango obtenido
+  // hasta el actual, de menos a más poderoso. Si no, una única lista alfabética.
+  function buildSections(): TalentSection[] {
+    const careerRanks = CAREERS_DATA[char!.info.career]
+    const careerItemsByRank = CAREER_RANKS_DATA[char!.info.career]
+    if (char!.filterCareer && rankInfo && careerRanks && careerItemsByRank && Object.keys(careerItemsByRank).length > 0) {
+      const currentIdx = careerRanks.findIndex(r => r.rank === rankInfo.rank)
+      const sections: TalentSection[] = []
+      for (let i = 0; i <= currentIdx; i++) {
+        const rankName = careerRanks[i].rank
+        const names = new Set((careerItemsByRank[rankName] ?? []).map(normalizeName))
+        const talents = TALENTS
+          .filter(t => names.has(normalizeName(t.name)))
+          .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+        if (talents.length) sections.push({ label: rankName, talents })
+      }
+      if (sections.length) return sections
+    }
+    return [{ label: '', talents: [...filteredTalents].sort((a, b) => a.name.localeCompare(b.name, 'es')) }]
+  }
+
+  function handlePickerAdd(talent: TalentDefinition, xp: number) {
+    const max = maxCounts[talent.name]
+    if (max != null && (ownedCounts[talent.name] ?? 0) >= max) return
     dispatch(addTalent({
       charId: char!.id,
       talent: {
-        name: selectedDef.name,
-        type: selectedDef.type,
-        req: selectedDef.req,
-        desc: selectedDef.desc,
-        effect: selectedDef.effect,
-        xp: quickXp,
+        name: talent.name,
+        type: talent.type,
+        req: talent.req,
+        desc: talent.desc,
+        effect: talent.effect,
+        xp,
       },
     }))
-    setSelectedTalentName('')
   }
 
   function handleManualAdd() {
@@ -108,49 +138,24 @@ export function TalentosTab() {
         </div>
       </div>
 
-      <div className="mx-4 mt-3 bg-surface-3 border border-rim-bright border-t-2 border-t-gold px-3 py-3 flex flex-col gap-2">
-        <h4 className="font-display text-[9px] uppercase tracking-[3px] text-gold">⚡ Selector Rápido del Libro</h4>
-        <div className="flex flex-wrap gap-2 items-end">
-          <select
-            value={selectedTalentName}
-            onChange={e => setSelectedTalentName(e.target.value)}
-            className="flex-1 min-w-[200px] bg-surface border border-rim-bright text-parchment font-mono text-sm px-3 py-2 outline-none focus:border-crimson transition-colors"
-          >
-            <option value="">— Selecciona talento del libro —</option>
-            {filteredTalents.map(t => (
-              <option key={t.name} value={t.name}>{t.name}</option>
-            ))}
-          </select>
-          <div className="flex flex-col gap-0.5 w-20 shrink-0">
-            <span className="font-mono text-[8px] uppercase tracking-[1px] text-parchment-dim">Coste PE</span>
-            <input
-              type="number"
-              value={quickXp}
-              min={0}
-              onChange={e => setQuickXp(Number(e.target.value) || 0)}
-              className="w-full bg-surface border border-rim-bright text-gold-bright font-display text-sm text-center px-2 py-1.5 outline-none focus:border-gold transition-colors"
-            />
-          </div>
-          <button
-            onClick={handleQuickAdd}
-            disabled={!selectedDef}
-            className="font-display text-[9px] uppercase tracking-[2px] px-3 py-2 bg-crimson text-white hover:bg-crimson-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
-          >
-            Añadir
-          </button>
-        </div>
-
-        {selectedDef && (
-          <div className="bg-surface border border-rim px-3 py-2 flex flex-col gap-1">
-            <div className="flex gap-2 items-center">
-              <span className="font-mono text-[10px] bg-gold/20 text-gold px-2 py-0.5">{selectedDef.type}</span>
-              <span className="font-mono text-[10px] text-parchment-dim">Req: {selectedDef.req}</span>
-            </div>
-            <p className="font-mono text-[11px] text-parchment-dim">{selectedDef.desc}</p>
-            <p className="font-mono text-[11px] text-neon">{selectedDef.effect}</p>
-          </div>
-        )}
+      <div className="mx-4 mt-3">
+        <button
+          onClick={() => setShowPicker(true)}
+          className="w-full font-display text-[10px] uppercase tracking-[2px] px-3 py-2.5 bg-surface-3 border border-rim-bright border-t-2 border-t-gold text-gold hover:bg-surface-4 transition-colors"
+        >
+          ⚡ Añadir Talento del Libro
+        </button>
       </div>
+
+      {showPicker && (
+        <TalentPickerModal
+          sections={buildSections()}
+          ownedCounts={ownedCounts}
+          maxCounts={maxCounts}
+          onAdd={handlePickerAdd}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
 
       {showManual && (
         <div className="mx-4 mt-3 flex flex-col gap-2 border border-rim bg-surface px-3 py-3">
@@ -213,7 +218,7 @@ export function TalentosTab() {
         </div>
       ) : (
         <div className="flex flex-col gap-2 p-2">
-          {char.talents.map(talent => (
+          {sortedTalents.map(talent => (
             // Réplica de .talent-card: borde izquierdo de acento, nombre 15px,
             // "REQUISITOS: X", efecto con prefijo ►, descripción siempre visible
             // (el legacy no la oculta tras un toggle), columna derecha con

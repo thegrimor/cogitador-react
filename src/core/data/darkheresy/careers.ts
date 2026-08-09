@@ -173,7 +173,7 @@ export const CAREER_RANKS_DATA: Record<string, Record<string, string[]>> = {
     'Mecartesano': ['Código (Acólito)','Competencia tecnológica','Conducir (Bípode)','Conducir (Vehículo terrestre)','Demolición','Medicae','Oficio (Armero)','Oficio (Herrero)','Oficio (Minero)','Oficio (Tecnómata)','Saber académico (Quimia)','Saber popular (Tecnologías)','Seguridad','Desenfundado rápido','Imitador','Maestro de armas','Mandíbula de hierro','Protocolo (Adeptus Mechanicus)','Recarga de lumen','Robusto','Sentido desarrollado (Vista)','Tiro certero','Descarga de lumen','Lucha a ciegas'],
     'Electrosacerdote': ['Conducir (Aerodeslizador)','Conducir (Bípode)','Conducir (Vehículo terrestre)','Hablar idioma (Gótico clásico)','Leer/escribir','Lengua secreta (Tecnología)','Lógica','Oficio (Constructor)','Saber académico (Numerología)','Saber popular (Credo imperial)','Saber popular (Culto a la máquina)','Saber popular (Imperio)','Saber prohibido (Adeptus Mechanicus)','Auxilio eléctrico','Nervios de acero','Resorte','Robusto','Sentido desarrollado (Oído)','Sentido desarrollado (Tacto)','Tirador excepcional','Uso de mecadendrita (Herramientas)','Entrenamiento con armas básicas (Bólter)','Entrenamiento con armas básicas (Lanzadores)','Entrenamiento con armas c/c (Conmoción)','Entrenamiento con pistolas (Bólter)','Implante lógico','Rayo de lumen','Uso de mecadendrita (Medicae)'],
     'Visioingeniero': ['Competencia química','Conducir (Aerodeslizador)','Conducir (Bípode)','Demolición','Navegación (Estelar)','Navegación (Superficie)','Oficio (Armero)','Oficio (Constructor)','Oficio (Tecnómata)','Pilotar (Aeronave militar)','Saber académico (Astromancia)','Saber académico (Numerología)','Saber académico (Quimia)','Saber popular (Culto a la máquina)','Saber popular (Guerra)','Seguridad','Tasar','Lengua secreta (Acólito)','Perspicacia','Saber popular (Guardia Imperial)','Ambidiestro','Ataque lacerante','Atracción férrica','Cavidad oculta','Combate con dos armas (CaC)','Combate con dos armas (Proyectiles)','Entrenamiento con armas básicas (Lanzallamas)','Entrenamiento con armas pesadas (PS)','Entrenamiento con pistolas (Lanzallamas)','Memoria fotográfica','Resistencia a venenos','Sentido desarrollado (Olfato)','Uso de mecadendrita (Manipulador)','Uso de mecadendrita (Óptica)','Entrenamiento con armas c/c (Sierra)','Resistencia al miedo','Robusto'],
-    'Tecnosacerdote': ['Competencia tecnológica','Conducir (Aerodeslizador)','Hablar idioma (Gótico clásico)','Lengua secreta (Tecnología)','Lógica','Oficio (Armero)','Oficio (Constructor)','Oficio (Tecnómata)','Saber académico (Arcaico)','Saber académico (Credo imperial)','Saber académico (Quimia)','Saber popular (Adeptus Mechanicus)','Saber popular (Credo imperial)','Saber popular (Imperio)','Saber popular (Tecnologías)','Saber prohibido (Adeptus Mechanicus)','Saber prohibido (Arcanotecnología)','Seguridad','Ataque veloz','Disparos independientes','Maestría en combate','Maestro de esgrima','Reserva de energía','Rito de pavor','Robusto','Suspensión magnética','Uso de mecadendrita (Arma)','Voz inquietante','Mando','Intimidar','Indagar','Esquivar','Entrenamiento con armas básicas (Fusión)','Entrenamiento con armas básicas (Plasma)','Entrenamiento con armas c/c (Energía)','Entrenamiento con pistolas (Fusión)'],
+    'Tecnosacerdote': ['Competencia tecnológica','Conducir (Aerodeslizador)','Hablar idioma (Gótico clásico)','Lengua secreta (Tecnología)','Lógica','Oficio (Armero)','Oficio (Constructor)','Oficio (Tecnómata)','Saber académico (Arcaico)','Saber académico (Credo imperial)','Saber académico (Quimia)','Saber popular (Culto a la máquina)','Saber popular (Credo imperial)','Saber popular (Imperio)','Saber popular (Tecnologías)','Saber prohibido (Adeptus Mechanicus)','Saber prohibido (Arcanotecnología)','Seguridad','Ataque veloz','Disparos independientes','Maestría en combate','Maestro de esgrima','Reserva de energía','Rito de pavor','Robusto','Suspensión magnética','Uso de mecadendrita (Arma)','Voz inquietante','Mando','Intimidar','Indagar','Esquivar','Entrenamiento con armas básicas (Fusión)','Entrenamiento con armas básicas (Plasma)','Entrenamiento con armas c/c (Energía)','Entrenamiento con pistolas (Fusión)'],
     'Tecnomante': ['Buscar','Código (Sociedad secreta)','Hablar idioma (Gótico clásico)','Interrogar','Medicae','Saber académico (Burocracia)','Saber académico (Juicio)','Saber popular (Adeptus Arbites)','Saber popular (Credo imperial)','Saber popular (Eclesiarquía)','Saber popular (Imperio)','Tasar','Armadura de desprecio','Bendecir armas','Coraje','Estabilizadores sanguíneos','Impávido','Ortopraxis','Quirurgo experto','Engañar','Entrenamiento con arma exótica (Pistola de agujas)','Entrenamiento con armas arrojadizas (Conmoción)','Robusto'],
     'Mecadiácono': ['Buscar','Demolición','Lengua secreta (Ejército)','Oficio (Apotecario)','Oficio (Cantero)','Oficio (Curtidor)','Oficio (Embalsamador)','Saber académico (Arcaico)','Saber popular (Bajos fondos)','Tasar','Trucos de manos','Bendecir armas','Blanco difícil','Brazos fuertes','Disparo doble','Estabilizadores sanguíneos','Fuego purificador','Golpe doble','Mandíbula de hierro','Disciplina férrea','Engañar','Escrutinio','Indagar','Medicae','Entrenamiento con armas pesadas (Lanzadores)','Entrenamiento con armas pesadas (Láser)','Entrenamiento con armas pesadas (Primitivas)','Robusto'],
     'Cibervidente': ['Buscar','Saber académico (Burocracia)','Saber académico (Juicio)','Saber académico (Leyendas)','Saber académico (Ocultismo)','Saber popular (Adeptus Arbites)','Saber popular (Eclesiarquía)','Saber prohibido (Arcanotecnología)','Saber prohibido (Disformidad)','Engañar','Interrogar','Alma oscura','Disparo doble','Evasivo','Fortaleza mental','Imperturbable','Invocación férrica','Levitación magnética','Potenciadores sanguíneos','Predicción','Protocolo (Administratum)','Reacción rápida','Reflejos rápidos','Resistencia a poderes psíquicos','Tirador de élite','Entrenamiento con armas c/c (Energía)','Robusto'],
@@ -229,7 +229,7 @@ export const CAREER_RANKS_DATA: Record<string, Record<string, string[]>> = {
     'Cantus':       ['Actuar (Cantar)','Carisma','Escrutinio','Hablar idioma (Gótico clásico)','Lógica','Nadar','Oficio (Apotecaria)','Oficio (Copista)','Saber académico (Credo imperial)','Saber popular (Credo imperial)','Saber popular (Eclesiarquía)','Saber popular (Imperio)','Trepar','Flagelante','Meditación','Resistencia al miedo','Supervivencia','Robusto','Odio (Mutantes)','Odio (Psíquicos)'],
     'Constantia':   ['Buscar','Engañar','Esconderse','Esquivar','Hablar idioma (Gótico clásico)','Leer/escribir','Nadar','Navegación (Superficie)','Perspicacia','Saber académico (Heráldica)','Saber académico (Leyendas)','Saber popular (Administratum)','Entrenamiento con armas básicas (Bólter)','Entrenamiento con pistolas (Bólter)','Indagar','Saber académico (Arcaico)','Robusto','Fe inquebrantable','Resistencia a poderes psíquicos','Armadura de desprecio'],
     'Dialogante':   ['Carisma','Código (Acólito)','Engañar','Hablar idioma (Gótico clásico)','Indagar','Intimidar','Leer labios','Leer/escribir','Lengua secreta (Acólito)','Lengua secreta (Eclesiarquía)','Lógica','Perspicacia','Saber académico (Burocracia)','Saber académico (Credo imperial)','Saber académico (Filosofía)','Saber académico (Ocultismo)','Saber popular (Administratum)','Saber popular (Eclesiarquía)','Saber popular (Imperio)','Tasar','Protocolo (Eclesiarquía)','Purgar al impuro','Saber académico (Criptología)','Robusto','Voz inquietante'],
-    'Hospitalaria': ['Carisma','Competencia química','Medicae','Oficio (Apotecaria)','Perspicacia','Saber popular (Guardia imperial)','Auxilio divino','Difícil de matar','Protocolo (Ejército)','Resistencia al calor','Resistencia al frío','Robusto','Nervios de acero'],
+    'Hospitalaria': ['Carisma','Competencia química','Medicae','Oficio (Apotecaria)','Perspicacia','Saber popular (Guardia Imperial)','Auxilio divino','Difícil de matar','Protocolo (Ejército)','Resistencia al calor','Resistencia al frío','Robusto','Nervios de acero'],
     'Militante':    ['Intimidar','Perspicacia','Saber popular (Guerra)','Trepar','Ataque combinado','Desenfundado rápido','Entrenamiento con armas básicas (Lanzallamas)','Fuego purificador','La cólera de los justos','Nervios de acero','Reacción rápida','Recarga rápida','Robusto','Entrenamiento con armas básicas (Fusión)','Entrenamiento con armas pesadas (Bólter)','Entrenamiento con armas pesadas (Fusión)','Entrenamiento con armas pesadas (Lanzallamas)','Maestra de armas','Odio (Herejes)'],
     'Famulata':     ['Carisma','Disfraz','Engañar','Indagar','Leer labios','Lengua secreta (Administratum)','Lengua secreta (Eclesiarquía)','Saber académico (Burocracia)','Saber académico (Filosofía)','Saber académico (Heráldica)','Saber académico (Leyendas)','Saber popular (Imperio)','Saber académico (Arcaico)','Saber académico (Criptología)','Saber prohibido (Herejía)','Saber prohibido (Sectas)','Protocolo (Nobleza)','Cavidad oculta','Predicción','Protocolo (Administratum)','Robusto'],
     'Curial':       ['Carisma','Competencia química','Engañar','Indagar','Medicae','Oficio (Apotecaria)','Saber académico (Quimia)','Saber popular (Guerra)','Resistencia a venenos','Robusto','Sentido desarrollado (Olfato)','Sentido desarrollado (Tacto)','Competencia tecnológica','Interrogar','Lengua secreta (Eclesiarquía)','Estabilizadores sanguíneos','Sentido desarrollado (Vista)','Uso de electroinjerto'],
@@ -317,4 +317,43 @@ export function getAvailableItemsForRank(profession: string, currentRankName: st
     ;(careerData[rankName] ?? []).forEach(name => available.add(normalizeName(name)))
   }
   return available
+}
+
+/**
+ * Excepciones al tope de compras de Robusto/Robusta por rango (tablas de carrera del manual
+ * básico y de "Profesiones del sector Calixis", nota "puedes adquirir este talento un máximo
+ * de N veces en este rango"). Un rango que ofrezca Robusto y no aparezca aquí usa el tope por
+ * defecto (1, la regla general de cualquier mejora de una tabla de rango). Cubre las 5 carreras
+ * con `CAREER_RANKS_DATA` poblado.
+ */
+export const ROBUSTO_RANK_CAP_EXCEPTIONS: Record<string, Record<string, number>> = {
+  'Adepto': { 'Sabio': 2 },
+  'Clérigo': { 'Novicio': 3, 'Iniciado': 2, 'Predicador': 2 },
+  'Guardia Imperial': {
+    'Recluta': 3, 'Veterano': 2, 'Soldado de choque': 2, 'Capitán': 2,
+    'Tirador de élite': 2, 'Soldado de asalto': 2, 'Comandante': 2, 'Francotirador': 2,
+  },
+  'Tecnosacerdote': { 'Tecnógrafo': 2 },
+  'Adepta Sororitas': { 'Novicia': 2, 'Cantus': 2, 'Celeste': 2, 'Legada': 2 },
+}
+
+/**
+ * Tope total de veces que se puede adquirir Robusto para esta carrera+rango: suma el tope de
+ * cada rango alcanzado que lo ofrezca (1 por defecto, o la excepción del manual). Devuelve null
+ * si la carrera no tiene datos de rango — sin tope conocido, no se bloquea.
+ */
+export function getRobustoLimit(profession: string, currentRankName: string): number | null {
+  const careerData = CAREER_RANKS_DATA[profession]
+  if (!careerData || Object.keys(careerData).length === 0) return null
+  const ranks = CAREERS_DATA[profession] ?? []
+  const currentIdx = ranks.findIndex(r => r.rank === currentRankName)
+  if (currentIdx === -1) return null
+  let total = 0
+  for (let i = 0; i <= currentIdx; i++) {
+    const rankName = ranks[i].rank
+    const items = careerData[rankName]
+    if (!items?.some(name => normalizeName(name) === 'robusto')) continue
+    total += ROBUSTO_RANK_CAP_EXCEPTIONS[profession]?.[rankName] ?? 1
+  }
+  return total
 }

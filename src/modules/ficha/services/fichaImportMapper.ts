@@ -13,6 +13,7 @@ import type {
   InqMejora,
 } from '../types/fichaTypes'
 import { ATTRIBUTES } from '@/core/data/darkheresy'
+import { normalizeName } from '@/core/data/darkheresy/careers'
 
 function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
@@ -241,6 +242,11 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
       current: asNumber((wounds as Record<string, unknown>)['current']),
       max: asNumber((wounds as Record<string, unknown>)['max']),
     },
+    // El export legacy no tenía base/Robusto separados — se estima restando los Robustos ya presentes.
+    woundsBase: Math.max(
+      0,
+      asNumber((wounds as Record<string, unknown>)['max']) - talents.filter(t => normalizeName(t.name) === 'robusto').length,
+    ),
     fate: {
       current: asNumber((fate as Record<string, unknown>)['current']),
       max: asNumber((fate as Record<string, unknown>)['max']),

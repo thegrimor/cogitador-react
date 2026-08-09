@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
+import { loginFully, registerFully } from '@/core/store/loginFully'
 import { showToast } from '@/shared/components/Toast'
-import { clearAuthError, forgotPassword, login, register, resetPassword } from '../services/authSlice'
+import { clearAuthError, forgotPassword, resetPassword } from '../services/authSlice'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'
 
@@ -68,12 +69,12 @@ export function AuthView() {
 
   async function handleLogin(e: FormEvent) {
     e.preventDefault()
-    dispatch(login({ identifier, password }))
+    loginFully(dispatch, { identifier, password })
   }
 
   async function handleRegister(e: FormEvent) {
     e.preventDefault()
-    dispatch(register({ username, email, password }))
+    registerFully(dispatch, { username, email, password })
   }
 
   async function handleForgot(e: FormEvent) {
