@@ -5,6 +5,7 @@ import { resetFicha } from '@/modules/ficha/services/fichaSlice'
 import { resetSequito } from '@/modules/sequito/services/sequitoSlice'
 import { resetProyectos } from '@/modules/proyectos/services/proyectosSlice'
 import { resetCampana } from '@/modules/campana'
+import { resetNotas } from '@/modules/notas/services/notasSlice'
 
 /**
  * Logout con borrado total: limpia sesión + los slices de datos de juego,
@@ -22,5 +23,6 @@ export async function logoutFully(dispatch: AppDispatch) {
   dispatch(resetSequito())
   dispatch(resetProyectos())
   dispatch(resetCampana())
+  dispatch(resetNotas())
   await persistor.purge()
 }

@@ -14,9 +14,11 @@ El proyecto nació como 3 HTMLs standalone con estética Adeptus Mechanicus (gri
 
 | Módulo | Descripción | Estado |
 |---|---|---|
-| `ficha` | Ficha del agente/personaje | En progreso (estructura base + AtributosTab funcional) |
-| `proyectos` | Gestor de proyectos de campaña | Stub (placeholder) |
-| `sequito` | Gestión del séquito (acólitos y aliados) | Stub (placeholder) |
+| `ficha` | Ficha del agente/personaje | En progreso (11 tabs, la mayoría funcionales — ver detalle abajo) |
+| `proyectos` | Gestor de proyectos de campaña | Funcional (grid de proyectos, panel de tiempo, stats) |
+| `sequito` | Gestión del séquito (acólitos y aliados) | Funcional (layers, armería, inventario) |
+| `notas` | Notas temáticas por sección (Grupo o personaje) | Funcional (persistencia backend propia) |
+| `auth` | Login/registro y sesión | Funcional (backend propio en `server/`) |
 | `campana` | Partidas: master (dueño) + jugadores, con vista de solo lectura de la ficha/séquito/proyectos de cada jugador | En progreso (Jugadores funcional; Mi perfil funcional; Notas grupales placeholder) |
 | `admin` | Administración mínima de usuarios (rol, borrado) — solo visible para `ADMIN` | Funcional (mínimo) |
 
@@ -79,54 +81,86 @@ Arquitectura modular inspirada en DDD. Cada módulo representa un bounded contex
 ```
 src/
   core/
+    api/
+      client.ts           # Cliente fetch al backend (server/), maneja token de auth
     data/
-      darkheresy/         # Datos del sistema de juego (atributos, skills, talentos, poderes)
+      darkheresy/         # Datos del sistema de juego (atributos, skills, talentos, carreras, poderes, equipo)
         attributes.ts     # 9 atributos base (WS, BS, S, T, Ag, Int, Per, WP, Fel)
-        skills.ts         # (vacío, pendiente)
-        talents.ts        # (vacío, pendiente)
-        psychicPowers.ts  # (vacío, pendiente)
+        skills.ts         # Habilidades (Saber académico/popular/prohibido, etc.)
+        talents.ts        # Talentos del libro
+        careers.ts        # Carreras, rangos por PE, ítems desbloqueados por rango
+        psychicPowers.ts  # Poderes psíquicos
+        weapons.ts / armor.ts / gear.ts / mechadendrites.ts / augmentations.ts
+        inquisidorRanks.ts
         index.ts
     store/
-      store.ts            # Redux store (reducers: auth, ficha, proyectos, sequito, campana)
+      store.ts            # Redux store persistido (redux-persist) — reducers: auth, ficha, proyectos, sequito, notas, campana
       hooks.ts            # useAppDispatch, useAppSelector (tipados)
-      logoutFully.ts      # Logout + reset de todos los slices de datos + purge de redux-persist
+      logoutFully.ts / loginFully.ts # Reset/hidratación completa de slices al cerrar/abrir sesión
+    sync/
+      CloudSync.tsx        # Sincroniza slices de juego con el backend tras login
+      useCloudSyncResource.ts
     theme/
       themes.ts           # 25 temas de facción (Cogitador + 24 de WH40K), THEMES/DEFAULT_THEME_ID/GROUP_LABELS
   modules/
+    auth/
+      components/
+        AuthView.tsx       # Login / registro / recuperación de contraseña
+      services/
+        authSlice.ts       # login, register, forgotPassword, resetPassword
+        authApi.ts
+      index.ts
     ficha/
       components/
-        FichaView.tsx           # Contenedor principal con tabs internos
-        CharacterHeader.tsx     # Selector de personaje + botón crear
-        CharacterCreateModal.tsx# Formulario de creación de personaje
+        FichaView.tsx           # Contenedor principal, 11 tabs internos
+        CharacterHeader.tsx     # Selector Inquisidor/Séquito (2 slots fijos) + exportar/importar
         ExperiencePanel.tsx     # Visualización y gestión de XP
+        KillConfirmModal.tsx    # Confirmación de "Caído en combate"
         tabs/
-          AtributosTab.tsx      # Tab atributos (funcional)
-          HabilidadesTab.tsx    # (vacío)
-          TalentosTab.tsx       # (vacío)
-          ArmeriaTab.tsx        # (vacío)
-          EquipoTab.tsx         # (vacío)
-          MejorasTab.tsx        # (vacío)
-          PoderesPsiquicosTab.tsx # (vacío)
-          XpTab.tsx             # (vacío)
+          PersonajeTab.tsx        # Carrera, rango, datos de identificación
+          CaracteristicasTab.tsx  # 9 atributos (antes AtributosTab)
+          EstadoTab.tsx           # Heridas, destino, insania, corrupción
+          HabilidadesTab.tsx      # Habilidades
+          TalentosTab.tsx         # Talentos — ver TalentPickerModal
+          ArmeriaTab.tsx          # Armas y armaduras
+          MejorasTab.tsx          # Mecadendritas y augmentaciones
+          PoderesPsiquicosTab.tsx # Poderes psíquicos
+          XpTab.tsx               # Log de experiencia
+          InquisidorTab.tsx       # Mejoras exclusivas de rol Inquisidor
+          CaidosTab.tsx           # Historial de personajes caídos
           atributos/
             AttributeCard.tsx   # Card de atributo individual
+            AttrCostTable.tsx   # Tabla de coste de mejora por atributo
             CharInfoGrid.tsx    # Grid de info del personaje
             WoundsPanel.tsx     # Panel de heridas/vida
+          talentos/
+            TalentPickerModal.tsx # Catálogo de talentos a pantalla completa (buscador,
+                                   # secciones por rango de carrera, PE editable por fila)
       services/
-        fichaSlice.ts     # Redux slice: addCharacter, selectCharacter,
-                          # updateCharInfo, updateAttribute, updateWounds,
-                          # updateFate, addXpEntry, removeXpEntry
+        fichaSlice.ts       # Redux slice: personajes, atributos, heridas, talentos, habilidades, etc.
+        fichaComputed.ts    # computeXpSpent y derivados
+        fichaImportMapper.ts# Mapeo de export legacy (HTML) a Character
       types/
-        fichaTypes.ts     # Character, CharacterInfo, AttributeValues,
-                          # VitalState, XpLogEntry
-      index.ts            # Barrel export: FichaView
+        fichaTypes.ts       # Character y sub-tipos (Skill, Talent, Weapon, Armor, PsychicPower, ...)
+      index.ts              # Barrel export: FichaView
     proyectos/
       components/
-        ProyectosView.tsx # Placeholder "HOLA MUNDO — PROYECTOS"
+        ProyectosView.tsx, ProjectsGrid.tsx, ProjectCard.tsx, AddProjectForm.tsx, StatsBar.tsx, TimePanel.tsx
+      services/
+        proyectosSlice.ts
+      types/
+        proyectosTypes.ts
       index.ts
     sequito/
       components/
-        SequitoView.tsx   # Placeholder "HOLA MUNDO — SÉQUITO"
+        SequitoView.tsx, SequitoCard.tsx, LayerBoard.tsx, LayerRow.tsx, AddSeqModal.tsx, SeqEditModal.tsx,
+        ItemFormModal.tsx, ItemDetailModal.tsx, BookCatalogModal.tsx
+        tabs/
+          ArmoryTab.tsx, InventoryTab.tsx
+      services/
+        sequitoSlice.ts, equipped.ts
+      types/
+        sequitoTypes.ts
       index.ts
     campana/
       components/
@@ -159,22 +193,30 @@ src/
       ThemePicker/
         ThemePicker.tsx   # Dropdown selector de tema visual (agrupado por Imperium/Caos/Xenos/Otros)
         index.ts          # Barrel export: ThemePicker
+      AccountMenu/         # Menú de cuenta desplegable (tema + cerrar sesión)
+      Modal/                # Portal a document.body — usado por todos los modales
+      ConfirmModal/ / Toast/
     hooks/
       useTheme.ts         # Estado del tema activo + persistencia en localStorage
-  App.tsx                 # Tab state + screen state ('app'|'campana'|'admin'), renderiza vista activa + TabBar + ThemePicker/AccountMenu en header
+  App.tsx                 # Tab state + screen state ('app'|'campana'|'admin'), gate de auth (token), renderiza vista activa + TabBar + ThemePicker/AccountMenu en header
   main.tsx                # Entry point: <Provider store><App /></Provider>
   index.css               # Tema Tailwind v4 + estilos base
+server/                   # Backend propio (Express + Prisma) — usuarios, roles, datos de ficha/séquito/proyectos
 ```
 
 Los módulos son independientes entre sí. Solo se importa desde el `index.ts` de cada módulo, nunca directamente desde sus carpetas internas.
 
 ### Estado actual del módulo `ficha`
 
-- **Redux state funcional**: CRUD de personajes, gestión de atributos, heridas, puntos de destino, log de XP
-- **CharacterHeader**: selector con lista desplegable + modal de creación
-- **AtributosTab**: completamente funcional (CharInfoGrid + 9 AttributeCards + WoundsPanel)
-- **Todos los demás tabs**: vacíos (componentes scaffold sin contenido)
-- **Datos del sistema** (`skills.ts`, `talents.ts`, `psychicPowers.ts`): vacíos, pendientes de implementar
+- **Redux state funcional**: CRUD de personajes (modelo de 2 slots fijos, Inquisidor/Séquito), atributos, heridas,
+  destino, insania/corrupción, habilidades, talentos, armería, mejoras, poderes psíquicos, log de XP, caídos
+- **CharacterHeader**: selector de los 2 slots fijos + exportar/importar JSON (con mapeo desde export legacy)
+- **11 tabs**, la mayoría funcionales: Personaje, Características, Estado, Habilidades, Talentos, Armería,
+  Mejoras, Poderes Psíquicos, XP, Inquisidor, Caídos
+- **TalentosTab**: listado ordenado alfabéticamente + `TalentPickerModal` (catálogo a pantalla completa,
+  agrupado por rango de carrera cuando el filtro "Solo carrera" está activo) + alta manual
+- **Datos del sistema** (`skills.ts`, `talents.ts`, `careers.ts`, `psychicPowers.ts`, equipo): poblados
+- **Sincronización con backend**: vía `CloudSync` tras login (requiere `auth.token`)
 
 ### Tests
 
@@ -217,13 +259,14 @@ No hay React Router configurado. La navegación funciona así:
 ## Redux Store
 
 ```typescript
-// src/core/store/store.ts
+// src/core/store/store.ts (persistido con redux-persist, key 'cogitador-root')
 configureStore({
   reducer: {
     auth: authReducer,
     ficha: fichaReducer,
     proyectos: proyectosReducer,
     sequito: sequitoReducer,
+    notas: notasReducer,
     campana: campanaReducer,
   }
 })
@@ -231,6 +274,7 @@ configureStore({
 
 - Usar siempre `useAppDispatch` y `useAppSelector` de `src/core/store/hooks.ts` (tipados)
 - Cuando se añadan nuevos módulos con estado, añadir su reducer aquí
+- **Todo slice nuevo necesita persistencia en backend**, no solo `redux-persist` local. Patrón "owned resource" (ver `server/src/core/factories/ownedResource.ts`): modelo Prisma `{id, userId, name, data: Json, createdAt, updatedAt}` + `service.ts`/`routes.ts` que envuelven `createOwnedResourceRouter` + registrar en `server/src/app.ts` (`/api/<recurso>`) + `hydrateX`/`resetX` en el slice + enganchar en `src/core/sync/CloudSync.tsx` vía `useCloudSyncResource`. Ver `modules/notas` como referencia completa (frontend + backend) de un slice nuevo.
 
 ---
 
