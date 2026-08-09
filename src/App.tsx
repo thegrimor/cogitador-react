@@ -147,13 +147,18 @@ function AuthenticatedApp({ role }: AuthenticatedAppProps) {
         onOpenAdmin={() => setScreen('admin')}
       />
 
-      <main className={['relative z-10 flex flex-1 flex-col', screen === 'app' ? 'pb-16' : ''].join(' ')}>
+      <main className="relative z-10 flex flex-1 flex-col pb-16">
         {screen === 'campana' && <CampanaView onBack={() => setScreen('app')} />}
         {screen === 'admin' && <UsersAdminView onBack={() => setScreen('app')} />}
         {screen === 'app' && VIEWS[activeTab]}
       </main>
 
-      {screen === 'app' && <TabBar active={activeTab} onChange={setActiveTab} tabs={visibleTabs} />}
+      {/* Siempre visible — tocar un tab desde "Ver la campaña"/"Usuarios" saca de esa pantalla. */}
+      <TabBar
+        active={activeTab}
+        onChange={tab => { setActiveTab(tab); setScreen('app') }}
+        tabs={visibleTabs}
+      />
       <Toast />
     </div>
   )
