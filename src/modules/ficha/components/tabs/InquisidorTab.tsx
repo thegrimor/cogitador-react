@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAppSelector, useAppDispatch } from '@/core/store/hooks'
-import { addInqMejora, removeInqMejora, updateInqMejoraNotes } from '../../services/fichaSlice'
-import { INQUISIDOR_RANKS, type InquisidorMejora } from '@/core/data/darkheresy'
+import { addInqMejora, removeInqMejora, updateInqMejoraNotes, addSkill } from '../../services/fichaSlice'
+import { INQUISIDOR_RANKS, MASTER_SKILLS, getCoveredSkills, type InquisidorMejora } from '@/core/data/darkheresy'
 import { getInquisidorRank } from '@/core/data/darkheresy/careers'
 import { computeXpSpent } from '../../services/fichaComputed'
 import { EmptyState } from '../EmptyState'
@@ -64,6 +64,20 @@ export function InquisidorTab() {
       charId: char!.id,
       mejora: { name: mejora.name, type: mejora.type, cost: mejora.cost, req: mejora.req, desc: mejora.desc ?? '', notes: '' },
     }))
+
+    // Habilidad Maestra (Ascension): da de alta a Maestro (+20) las habilidades que sustituye
+    // y que el personaje todavía no tenga — así no hace falta haberlas entrenado antes.
+    const master = MASTER_SKILLS.find(m => m.name === mejora.name)
+    if (master) {
+      const ownedSkillNames = new Set(char!.skills.map(s => s.name))
+      for (const skillDef of getCoveredSkills(master)) {
+        if (ownedSkillNames.has(skillDef.name)) continue
+        dispatch(addSkill({
+          charId: char!.id,
+          skill: { name: skillDef.name, attr: skillDef.attr, level: 20, bonus: 0, notes: skillDef.notes ?? '', xp: 0 },
+        }))
+      }
+    }
   }
 
   return (
