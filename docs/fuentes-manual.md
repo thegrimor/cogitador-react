@@ -8,8 +8,10 @@ Notas de referencia para no depender de volver a subir los PDFs. Solo datos de j
 - **Manual Básico** (core rulebook, ES) — carreras (cap. II, pág. 40-94), habilidades (cap. III,
   pág. 96-108), talentos (cap. IV), arsenal (cap. V), poderes psíquicos (cap. VI).
 - **Profesiones del sector Calixis** — carrera Adepta Sororitas completa (pág. 42-51).
-- **Ascension** — progresión de Inquisidor rango 9-16 (cap. III, pág. 95-98) y Habilidades
-  Maestras (cap. IV, pág. 101-103).
+- **Ascension** — progresión de Inquisidor rango 9-16 (cap. III, pág. 95-98), Habilidades
+  Maestras (cap. IV, pág. 101-103), Talentos de Prestigio (pág. 104-109), Talentos de Influencia
+  — Protocolo/Buena Reputación/Rival/Enemigo (pág. 110-113) y Talentos de Reputación y Poder
+  (pág. 114-122, mejoras nombradas tipo Belicista/Conciliador/Red de Acólitos/etc.).
 
 ## Verificado contra el código
 
@@ -21,7 +23,26 @@ Notas de referencia para no depender de volver a subir los PDFs. Solo datos de j
 - `src/core/data/darkheresy/careers.ts` `ROBUSTO_RANK_CAP_EXCEPTIONS` — tope de compras de
   Robusto/Robusta por rango, de las mismas 5 carreras.
 - `src/core/data/darkheresy/inquisidorRanks.ts` — rango 9 a 16 verificado íntegro contra
-  Ascension pág. 95-98 (solo se corrigió el naming "Organización Reincidente (Específica)").
+  Ascension pág. 95-98 (naming "Organización Reincidente (Específica)" corregido). Las 143
+  mejoras tienen descripción: Habilidades Maestras y las mejoras nombradas con texto literal del
+  libro (pág. 101-122); Protocolo/Buena Reputación/Rival/Enemigo con la regla genérica de
+  "Talentos de Influencia" (pág. 112-113) — el nombre del grupo entre paréntesis ya identifica a
+  cuál se aplica. Se corrigió además el tipo de "Tirador Sin Igual" (es Talento de Prestigio, no
+  de Influencia — estaba mal en los datos).
+
+### Talentos de Prestigio y de Influencia — cómo funcionan (Ascension, pág. 104 y 110-113)
+
+- **Talento de Prestigio** que "sustituye" varios talentos: comprarlo con PE cuesta el precio
+  íntegro **aunque ya tengas** alguno de los talentos que sustituye (no hay descuento/reembolso).
+  Solo si ya tienes **todos** los que sustituye, puedes cambiarlos por el de Prestigio **gratis**
+  (sin gastar PE) — mismo mecanismo que las Habilidades Maestras.
+- **Protocolo (Grupo)** — Em 30: +10 Empatía con ese grupo.
+- **Buena Reputación (Grupo)** — Em 50 + Protocolo del mismo grupo: se acumula con Protocolo
+  hasta +20 Empatía; también se aplica a pruebas de Influencia.
+- **Rival (Grupo)**: -10 Empatía con ese grupo.
+- **Enemigo (Grupo)** — requiere Rival del mismo grupo: se acumula hasta -20 Empatía.
+- Ninguno de estos 4 está implementado mecánicamente en la app (solo como mejora comprable con
+  su descripción) — no hay pruebas de Empatía/Influencia automatizadas.
 
 ## Pendiente de verificar (sin fuente disponible todavía)
 
