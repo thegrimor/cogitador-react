@@ -1,4 +1,4 @@
-export type TabId = 'ficha' | 'proyectos' | 'sequito' | 'notas'
+export type TabId = 'ficha' | 'grupo' | 'proyectos' | 'sequito' | 'notas'
 
 interface Tab {
   id: TabId
@@ -9,19 +9,23 @@ interface Tab {
 interface TabBarProps {
   active: TabId
   onChange: (tab: TabId) => void
+  /** Subconjunto de tabs a mostrar, en el mismo orden de TABS. Por defecto, todas. */
+  tabs?: TabId[]
 }
 
 const TABS: Tab[] = [
   { id: 'ficha',     label: 'Ficha',     symbol: '✦' },
+  { id: 'grupo',     label: 'Grupo',     symbol: '⚔' },
   { id: 'proyectos', label: 'Proyectos', symbol: '⚙' },
   { id: 'sequito',   label: 'Séquito',   symbol: '☩' },
   { id: 'notas',     label: 'Notas',     symbol: '📜' },
 ]
 
-export function TabBar({ active, onChange }: TabBarProps) {
+export function TabBar({ active, onChange, tabs }: TabBarProps) {
+  const visibleTabs = tabs ? TABS.filter(t => tabs.includes(t.id)) : TABS
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-rim-bright bg-surface-2">
-      {TABS.map((tab) => {
+      {visibleTabs.map((tab) => {
         const isActive = tab.id === active
         return (
           <button

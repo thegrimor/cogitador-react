@@ -9,6 +9,7 @@ datasource db {
 
 enum Role {
   ADMIN
+  MASTER
   USER
 }
 
@@ -21,13 +22,47 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  characters     Character[]
-  sequitoEntries SequitoEntry[]
-  proyectos      Proyecto[]
-  notas          Nota[]
-  resetTokens    PasswordResetToken[]
+  characters          Character[]
+  sequitoEntries      SequitoEntry[]
+  proyectos           Proyecto[]
+  notas               Nota[]
+  resetTokens         PasswordResetToken[]
+  campaignsMastered   Campaign[]       @relation("CampaignsMastered")
+  campaignMemberships CampaignMember[]
 
   @@map("users")
+}
+
+// Partida de rol: un master (dueño, controla la info) y N jugadores
+// (members) cuyos datos de Ficha/Séquito/Proyectos se comparten en modo
+// solo lectura dentro de la partida. La info del propio master nunca se
+// expone — no es un CampaignMember de su propia partida.
+model Campaign {
+  id        String           @id @default(uuid())
+  name      String
+  masterId  String
+  master    User             @relation("CampaignsMastered", fields: [masterId], references: [id], onDelete: Cascade)
+  members   CampaignMember[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([masterId])
+  @@map("campaigns")
+}
+
+// Tabla puente jugador↔partida. Un jugador puede pertenecer a varias
+// partidas (relación muchos-a-muchos).
+model CampaignMember {
+  id         String   @id @default(uuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt   DateTime @default(now())
+
+  @@unique([campaignId, userId])
+  @@index([userId])
+  @@map("campaign_members")
 }
 
 model PasswordResetToken {

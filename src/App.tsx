@@ -10,12 +10,15 @@ import { ProyectosView } from '@/modules/proyectos'
 import { SequitoView } from '@/modules/sequito'
 import { NotasView } from '@/modules/notas'
 import { AuthView } from '@/modules/auth'
+import { CampanaView } from '@/modules/campana'
+import { UsersAdminView } from '@/modules/admin'
 import { CloudSync } from '@/core/sync/CloudSync'
 import { logoutFully } from '@/core/store/logoutFully'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 
 const VIEWS: Record<TabId, React.ReactNode> = {
   ficha:     <FichaView />,
+  grupo:     <CampanaView />,
   proyectos: <ProyectosView />,
   sequito:   <SequitoView />,
   notas:     <NotasView />,
@@ -23,15 +26,34 @@ const VIEWS: Record<TabId, React.ReactNode> = {
 
 const TAB_SUBTITLES: Record<TabId, string> = {
   ficha:     '',
+  grupo:     '// Grupo de la Partida',
   proyectos: '// Registro Operacional',
   sequito:   '// Acólitos y Aliados',
   notas:     '// Bitácora Temática',
 }
 
-function AppHeader({ activeTab }: { activeTab: TabId }) {
+// MASTER/ADMIN no juegan personajes propios — su ficha nunca sale ahí, ni
+// como pestaña ni como pantalla de entrada. En su lugar tienen "Grupo"
+// (partidas + jugadores, lo que para USER vive en "Ver la campaña" del
+// menú de cuenta), y conservan su propio séquito, proyectos y notas.
+const PLAYER_TABS: TabId[] = ['ficha', 'proyectos', 'sequito', 'notas']
+const GM_TABS: TabId[] = ['grupo', 'proyectos', 'sequito', 'notas']
+
+function isGmRole(role: string | undefined) {
+  return role === 'MASTER' || role === 'ADMIN'
+}
+
+interface AppHeaderProps {
+  activeTab: TabId
+  onOpenCampana: () => void
+  onOpenAdmin: () => void
+}
+
+function AppHeader({ activeTab, onOpenCampana, onOpenAdmin }: AppHeaderProps) {
   const dispatch = useAppDispatch()
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
+  const user = useAppSelector(s => s.auth.user)
   const [currentTheme, setTheme, themes] = useTheme()
 
   const subtitle = activeTab === 'ficha'
@@ -61,6 +83,26 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
           <AccountMenu>
             <ThemePicker currentTheme={currentTheme} themes={themes} onSelect={setTheme} />
             <div className="my-1 border-t border-rim-bright" />
+            {/* MASTER/ADMIN ya tienen "Grupo" como tab — esta entrada es solo para USER */}
+            {!isGmRole(user?.role) && (
+              <button
+                onClick={onOpenCampana}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-parchment transition-colors"
+              >
+                <span className="text-sm leading-none select-none">☩</span>
+                Ver la campaña
+              </button>
+            )}
+            {user?.role === 'ADMIN' && (
+              <button
+                onClick={onOpenAdmin}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-parchment transition-colors"
+              >
+                <span className="text-sm leading-none select-none">⚙</span>
+                Usuarios
+              </button>
+            )}
+            <div className="my-1 border-t border-rim-bright" />
             <button
               onClick={() => logoutFully(dispatch)}
               className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-crimson-bright transition-colors"
@@ -75,9 +117,51 @@ function AppHeader({ activeTab }: { activeTab: TabId }) {
   )
 }
 
+type Screen = 'app' | 'campana' | 'admin'
+
+interface AuthenticatedAppProps {
+  role: string | undefined
+}
+
+/**
+ * Montado con `key={token}` desde App — así cada sesión (login/logout)
+ * arranca este componente de cero, y activeTab/screen se inicializan ya
+ * con el valor correcto según el rol sin necesidad de un effect que los
+ * corrija después (evitaba un render de más con el valor por defecto).
+ */
+function AuthenticatedApp({ role }: AuthenticatedAppProps) {
+  const gm = isGmRole(role)
+  // MASTER/ADMIN entran directo al tab "Grupo" (su ficha no existe); USER a Ficha.
+  const [activeTab, setActiveTab] = useState<TabId>(gm ? 'grupo' : 'ficha')
+  const [screen, setScreen] = useState<Screen>('app')
+  const visibleTabs = gm ? GM_TABS : PLAYER_TABS
+
+  return (
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden font-mono text-parchment bg-surface">
+      <div className="scanline" />
+
+      <CloudSync />
+      <AppHeader
+        activeTab={activeTab}
+        onOpenCampana={() => setScreen('campana')}
+        onOpenAdmin={() => setScreen('admin')}
+      />
+
+      <main className={['relative z-10 flex flex-1 flex-col', screen === 'app' ? 'pb-16' : ''].join(' ')}>
+        {screen === 'campana' && <CampanaView onBack={() => setScreen('app')} />}
+        {screen === 'admin' && <UsersAdminView onBack={() => setScreen('app')} />}
+        {screen === 'app' && VIEWS[activeTab]}
+      </main>
+
+      {screen === 'app' && <TabBar active={activeTab} onChange={setActiveTab} tabs={visibleTabs} />}
+      <Toast />
+    </div>
+  )
+}
+
 function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('ficha')
   const token = useAppSelector(s => s.auth.token)
+  const user = useAppSelector(s => s.auth.user)
 
   if (!token) {
     return (
@@ -89,21 +173,7 @@ function App() {
     )
   }
 
-  return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden font-mono text-parchment bg-surface">
-      <div className="scanline" />
-
-      <CloudSync />
-      <AppHeader activeTab={activeTab} />
-
-      <main className="relative z-10 flex flex-1 flex-col pb-16">
-        {VIEWS[activeTab]}
-      </main>
-
-      <TabBar active={activeTab} onChange={setActiveTab} />
-      <Toast />
-    </div>
-  )
+  return <AuthenticatedApp key={token} role={user?.role} />
 }
 
 export default App

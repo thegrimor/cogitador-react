@@ -5,6 +5,7 @@ import authReducer from '@/modules/auth/services/authSlice'
 import fichaReducer from '@/modules/ficha/services/fichaSlice'
 import proyectosReducer from '@/modules/proyectos/services/proyectosSlice'
 import sequitoReducer from '@/modules/sequito/services/sequitoSlice'
+import { campanaReducer } from '@/modules/campana'
 import notasReducer from '@/modules/notas/services/notasSlice'
 
 const rootReducer = combineReducers({
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   ficha: fichaReducer,
   proyectos: proyectosReducer,
   sequito: sequitoReducer,
+  campana: campanaReducer,
   notas: notasReducer,
 })
 

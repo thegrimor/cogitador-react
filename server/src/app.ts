@@ -7,6 +7,7 @@ import { usersRouter } from '@/modules/users/users.routes.js';
 import { fichaRouter } from '@/modules/ficha/ficha.routes.js';
 import { sequitoRouter } from '@/modules/sequito/sequito.routes.js';
 import { proyectosRouter } from '@/modules/proyectos/proyectos.routes.js';
+import { campaignsRouter } from '@/modules/campaigns/campaigns.routes.js';
 import { notasRouter } from '@/modules/notas/notas.routes.js';
 
 export function createApp() {
@@ -22,6 +23,7 @@ export function createApp() {
   app.use('/api/fichas', fichaRouter);
   app.use('/api/sequito', sequitoRouter);
   app.use('/api/proyectos', proyectosRouter);
+  app.use('/api/campaigns', campaignsRouter);
   app.use('/api/notas', notasRouter);
 
   app.use(notFoundHandler);

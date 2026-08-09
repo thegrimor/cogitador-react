@@ -2,7 +2,7 @@ export interface AuthUser {
   id: string
   username: string
   email: string
-  role: 'ADMIN' | 'USER'
+  role: 'ADMIN' | 'MASTER' | 'USER'
 }
 
 export interface LoginInput {

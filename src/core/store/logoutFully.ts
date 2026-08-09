@@ -4,10 +4,11 @@ import { logout } from '@/modules/auth/services/authSlice'
 import { resetFicha } from '@/modules/ficha/services/fichaSlice'
 import { resetSequito } from '@/modules/sequito/services/sequitoSlice'
 import { resetProyectos } from '@/modules/proyectos/services/proyectosSlice'
+import { resetCampana } from '@/modules/campana'
 import { resetNotas } from '@/modules/notas/services/notasSlice'
 
 /**
- * Logout con borrado total: limpia sesión + los 4 slices de datos de juego,
+ * Logout con borrado total: limpia sesión + los slices de datos de juego,
  * tanto en memoria como en el `localStorage` de redux-persist. Sin esto, un
  * segundo usuario en el mismo dispositivo vería (aunque sea un instante) los
  * datos del usuario anterior hasta que el próximo login los pisara.
@@ -21,6 +22,7 @@ export async function logoutFully(dispatch: AppDispatch) {
   dispatch(resetFicha())
   dispatch(resetSequito())
   dispatch(resetProyectos())
+  dispatch(resetCampana())
   dispatch(resetNotas())
   await persistor.purge()
 }
