@@ -17,6 +17,7 @@ El proyecto nació como 3 HTMLs standalone con estética Adeptus Mechanicus (gri
 | `ficha` | Ficha del agente/personaje | En progreso (11 tabs, la mayoría funcionales — ver detalle abajo) |
 | `proyectos` | Gestor de proyectos de campaña | Funcional (grid de proyectos, panel de tiempo, stats) |
 | `sequito` | Gestión del séquito (acólitos y aliados) | Funcional (layers, armería, inventario) |
+| `notas` | Notas temáticas por sección (Grupo o personaje) | Funcional (persistencia backend propia) |
 | `auth` | Login/registro y sesión | Funcional (backend propio en `server/`) |
 
 Cada módulo existe como HTML funcional previo que sirve de referencia para la migración.
@@ -241,6 +242,7 @@ configureStore({
 
 - Usar siempre `useAppDispatch` y `useAppSelector` de `src/core/store/hooks.ts` (tipados)
 - Cuando se añadan nuevos módulos con estado, añadir su reducer aquí
+- **Todo slice nuevo necesita persistencia en backend**, no solo `redux-persist` local. Patrón "owned resource" (ver `server/src/core/factories/ownedResource.ts`): modelo Prisma `{id, userId, name, data: Json, createdAt, updatedAt}` + `service.ts`/`routes.ts` que envuelven `createOwnedResourceRouter` + registrar en `server/src/app.ts` (`/api/<recurso>`) + `hydrateX`/`resetX` en el slice + enganchar en `src/core/sync/CloudSync.tsx` vía `useCloudSyncResource`. Ver `modules/notas` como referencia completa (frontend + backend) de un slice nuevo.
 
 ---
 

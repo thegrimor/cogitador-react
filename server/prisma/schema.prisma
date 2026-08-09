@@ -24,6 +24,7 @@ model User {
   characters     Character[]
   sequitoEntries SequitoEntry[]
   proyectos      Proyecto[]
+  notas          Nota[]
   resetTokens    PasswordResetToken[]
 
   @@map("users")
@@ -85,4 +86,20 @@ model Proyecto {
 
   @@index([userId])
   @@map("proyectos")
+}
+
+// Notas temáticas (módulo `notas`). `data` guarda el NotasState completo
+// (notes: Note[], con characterId? apuntando a un Character — sin FK real
+// porque characterId vive dentro del JSON, no como columna).
+model Nota {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("notas")
 }
