@@ -5,6 +5,7 @@ import type { OwnedRecord } from '@/core/factories/ownedResource.js';
 import { characterService } from '@/modules/ficha/ficha.service.js';
 import { sequitoService } from '@/modules/sequito/sequito.service.js';
 import { proyectosService } from '@/modules/proyectos/proyectos.service.js';
+import { notasService } from '@/modules/notas/notas.service.js';
 
 const masterSelect = { id: true, username: true } as const;
 const memberSelect = { user: { select: masterSelect } } as const;
@@ -71,6 +72,7 @@ export async function getCampaignDetail(id: string, requesterId: string, request
       ficha: pickMain(await characterService.listByUser(m.userId)),
       sequito: pickMain(await sequitoService.listByUser(m.userId)),
       proyectos: pickMain(await proyectosService.listByUser(m.userId)),
+      notas: pickMain(await notasService.listByUser(m.userId)),
     })),
   );
 

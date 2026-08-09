@@ -46,12 +46,26 @@ export interface CampaignMemberProyectos {
   projects: CampaignMemberProject[]
 }
 
+export interface CampaignMemberNote {
+  id: string
+  title: string
+  section: string
+  importance: string
+  content: string
+  characterId?: string
+}
+
+export interface CampaignMemberNotas {
+  notes: CampaignMemberNote[]
+}
+
 export interface CampaignMember {
   id: string
   username: string
   ficha: CampaignMemberFicha | null
   sequito: CampaignMemberSequito | null
   proyectos: CampaignMemberProyectos | null
+  notas: CampaignMemberNotas | null
 }
 
 export interface CampaignDetail {

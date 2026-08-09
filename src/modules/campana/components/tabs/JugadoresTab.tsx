@@ -17,7 +17,10 @@ export function JugadoresTab({ campaign, isManager }: Props) {
   const token = useAppSelector(s => s.auth.token)
   const [identifier, setIdentifier] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const confirm = useConfirm()
+
+  const selectedMember = campaign.members.find(m => m.id === selectedId) ?? null
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -40,10 +43,35 @@ export function JugadoresTab({ campaign, isManager }: Props) {
       dispatch(removePlayer({ token, campaignId: campaign.id, userId })).then(result => {
         if (removePlayer.fulfilled.match(result)) {
           showToast('Jugador eliminado de la partida')
+          setSelectedId(null)
           dispatch(fetchCampaignDetail({ token, id: campaign.id }))
         }
       })
     })
+  }
+
+  if (selectedMember) {
+    return (
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={() => setSelectedId(null)}
+          className="self-start font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment transition-colors"
+        >
+          ← Jugadores
+        </button>
+        <MemberSummaryCard
+          member={selectedMember}
+          onRemove={isManager ? () => handleRemove(selectedMember.id, selectedMember.username) : undefined}
+        />
+        <ConfirmModal
+          isOpen={confirm.isOpen}
+          message={confirm.message}
+          onConfirm={confirm.onConfirm}
+          onCancel={confirm.onCancel}
+          confirmLabel="Quitar"
+        />
+      </div>
+    )
   }
 
   return (
@@ -73,13 +101,33 @@ export function JugadoresTab({ campaign, isManager }: Props) {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {campaign.members.map(m => (
-          <MemberSummaryCard
+          <div
             key={m.id}
-            member={m}
-            onRemove={isManager ? () => handleRemove(m.id, m.username) : undefined}
-          />
+            className="flex items-center justify-between border border-rim-bright bg-surface-2 px-4 py-3"
+          >
+            <button
+              onClick={() => setSelectedId(m.id)}
+              className="flex-1 text-left font-display text-sm text-white hover:text-gold transition-colors truncate"
+            >
+              {m.username}
+            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-parchment-dim">→</span>
+              {isManager && (
+                <button
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleRemove(m.id, m.username)
+                  }}
+                  className="font-display text-[8px] uppercase tracking-[1px] border border-crimson-dim text-crimson-dim px-2 py-1 hover:bg-surface-3 transition-colors"
+                >
+                  Quitar
+                </button>
+              )}
+            </div>
+          </div>
         ))}
       </div>
 

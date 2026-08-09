@@ -166,10 +166,13 @@ src/
       components/
         CampanaView.tsx        # Contenedor: listado de partidas o partida activa con tabs
         CampaignList.tsx       # Listado de mis partidas + alta (solo ADMIN/MASTER)
-        MemberSummaryCard.tsx  # Tarjeta de solo lectura: ficha+séquito+proyectos de un jugador
+        MemberSummaryCard.tsx  # Cabecera (username + quitar) + ProfileSections de un jugador
+        ProfileSections.tsx    # Bloque solo-lectura reutilizado: ficha (personajes con nombre
+                                # real, no los 2 slots vacíos) + séquito + proyectos + notas
         tabs/
-          JugadoresTab.tsx     # Gestión de jugadores (master/admin) + tarjetas de solo lectura
-          MiPerfilTab.tsx      # Resumen de mi propia ficha (lo que ven los demás)
+          JugadoresTab.tsx     # Lista de jugadores (alta/baja si master/admin) + detalle al
+                                # pinchar uno (MemberSummaryCard de ese jugador)
+          MiPerfilTab.tsx      # ProfileSections con mi propio estado (lo que ven los demás)
           NotasGrupalesTab.tsx # Placeholder — sin modelo/API todavía
       services/
         campanaApi.ts     # Llamadas a /api/campaigns
