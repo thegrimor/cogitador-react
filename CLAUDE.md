@@ -17,6 +17,7 @@ El proyecto nació como 3 HTMLs standalone con estética Adeptus Mechanicus (gri
 | `ficha` | Ficha del agente/personaje | En progreso (11 tabs, la mayoría funcionales — ver detalle abajo) |
 | `proyectos` | Gestor de proyectos de campaña | Funcional (grid de proyectos, panel de tiempo, stats) |
 | `sequito` | Gestión del séquito (acólitos y aliados) | Funcional (layers, armería, inventario) |
+| `notas` | Notas temáticas por sección (Grupo o personaje) | Funcional (persistencia backend propia) |
 | `auth` | Login/registro y sesión | Funcional (backend propio en `server/`) |
 
 Cada módulo existe como HTML funcional previo que sirve de referencia para la migración.
