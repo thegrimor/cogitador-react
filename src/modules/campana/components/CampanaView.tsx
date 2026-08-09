@@ -7,7 +7,9 @@ import { MiPerfilTab } from './tabs/MiPerfilTab'
 import { NotasGrupalesTab } from './tabs/NotasGrupalesTab'
 
 interface Props {
-  onBack: () => void
+  /** Solo cuando se usa como pantalla independiente (USER, vía "Ver la campaña" del menú de cuenta).
+   *  Master/admin la usan embebida como tab "Grupo" — sin onBack, no hay "volver" al nivel de lista. */
+  onBack?: () => void
 }
 
 type CampanaTab = 'jugadores' | 'perfil' | 'notas'
@@ -49,17 +51,19 @@ export function CampanaView({ onBack }: Props) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex items-center gap-3 border-b border-rim-bright bg-surface-2 px-4 py-2.5">
-        <button
-          onClick={activeCampaignId ? backToList : onBack}
-          className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment transition-colors"
-        >
-          ← {activeCampaignId ? 'Partidas' : 'Volver'}
-        </button>
-        {activeCampaignId && current && (
-          <p className="font-display text-xs text-gold tracking-[1px] truncate">{current.name}</p>
-        )}
-      </div>
+      {(activeCampaignId || onBack) && (
+        <div className="flex items-center gap-3 border-b border-rim-bright bg-surface-2 px-4 py-2.5">
+          <button
+            onClick={activeCampaignId ? backToList : onBack}
+            className="font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment transition-colors"
+          >
+            ← {activeCampaignId ? 'Partidas' : 'Volver'}
+          </button>
+          {activeCampaignId && current && (
+            <p className="font-display text-xs text-gold tracking-[1px] truncate">{current.name}</p>
+          )}
+        </div>
+      )}
 
       {!activeCampaignId ? (
         <CampaignList

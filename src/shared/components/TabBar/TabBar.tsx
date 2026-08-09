@@ -1,4 +1,4 @@
-export type TabId = 'ficha' | 'proyectos' | 'sequito' | 'notas'
+export type TabId = 'ficha' | 'grupo' | 'proyectos' | 'sequito' | 'notas'
 
 interface Tab {
   id: TabId
@@ -15,6 +15,7 @@ interface TabBarProps {
 
 const TABS: Tab[] = [
   { id: 'ficha',     label: 'Ficha',     symbol: '✦' },
+  { id: 'grupo',     label: 'Grupo',     symbol: '⚔' },
   { id: 'proyectos', label: 'Proyectos', symbol: '⚙' },
   { id: 'sequito',   label: 'Séquito',   symbol: '☩' },
   { id: 'notas',     label: 'Notas',     symbol: '📜' },

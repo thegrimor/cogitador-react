@@ -26,7 +26,9 @@ Cada módulo existe como HTML funcional previo que sirve de referencia para la m
 
 ### Roles y partidas
 
-El backend maneja un `Role` global por cuenta: `ADMIN | MASTER | USER`. `MASTER` y `ADMIN` pueden crear partidas (`campana`) e incluir jugadores existentes por username/email; `ADMIN` gestiona todas las partidas, `MASTER` solo las suyas. Dentro de una partida, la ficha/séquito/proyectos de cada jugador se comparten en modo solo lectura con el resto de la partida (master incluido); la información del propio master **nunca** se comparte — no es miembro de su propia partida. La entrada "Ver la campaña" vive en el `AccountMenu` del header (junto a tema y logout), visible para cualquier rol; "Usuarios" (módulo `admin`) solo aparece para `ADMIN`.
+El backend maneja un `Role` global por cuenta: `ADMIN | MASTER | USER`. `MASTER` y `ADMIN` pueden crear partidas (`campana`) e incluir jugadores existentes por username/email; `ADMIN` gestiona todas las partidas, `MASTER` solo las suyas. Dentro de una partida, la ficha/séquito/proyectos de cada jugador se comparten en modo solo lectura con el resto de la partida (master incluido); la información del propio master **nunca** se comparte — no es miembro de su propia partida.
+
+`MASTER`/`ADMIN` no juegan personajes propios: no tienen tab Ficha (arrancan directo en el tab **Grupo**, que es `CampanaView` embebida en la `TabBar` — sus partidas y, dentro de cada una, el resto de jugadores), y sí conservan sus propios Proyectos/Séquito/Notas. `USER` conserva Ficha/Proyectos/Séquito/Notas de siempre y accede a su partida vía "Ver la campaña" en el `AccountMenu` del header (junto a tema y logout) — esa entrada del menú no aparece para `MASTER`/`ADMIN`, que ya tienen el tab. "Usuarios" (módulo `admin`) solo aparece para `ADMIN`.
 
 ### Diseño — Sistema visual
 
@@ -164,7 +166,9 @@ src/
       index.ts
     campana/
       components/
-        CampanaView.tsx        # Contenedor: listado de partidas o partida activa con tabs
+        CampanaView.tsx        # Contenedor: listado de partidas o partida activa con tabs.
+                                # `onBack` opcional — con él es pantalla standalone (USER, vía
+                                # AccountMenu); sin él va embebida como tab "Grupo" (master/admin)
         CampaignList.tsx       # Listado de mis partidas + alta (solo ADMIN/MASTER)
         MemberSummaryCard.tsx  # Cabecera (username + quitar) + ProfileSections de un jugador
         ProfileSections.tsx    # Bloque solo-lectura reutilizado: ficha (personajes con nombre
@@ -191,7 +195,7 @@ src/
   shared/
     components/
       TabBar/
-        TabBar.tsx        # Barra de navegación inferior (ficha / proyectos / séquito)
+        TabBar.tsx        # Barra de navegación inferior; prop `tabs` filtra qué tabs mostrar por rol
         index.ts          # Barrel export: TabBar, TabId
       ThemePicker/
         ThemePicker.tsx   # Dropdown selector de tema visual (agrupado por Imperium/Caos/Xenos/Otros)
@@ -251,9 +255,10 @@ src/
 ## Navegación actual
 
 No hay React Router configurado. La navegación funciona así:
-- `App.tsx` mantiene `activeTab: 'ficha' | 'proyectos' | 'sequito'` con `useState`
-- `TabBar` emite el tab seleccionado vía prop `onChange`
-- `App.tsx` también mantiene `screen: 'app' | 'campana' | 'admin'` con `useState`: cuando no es `'app'`, se oculta la `TabBar` y se renderiza `CampanaView`/`UsersAdminView` en su lugar. Se entra a esas pantallas desde el `AccountMenu` del header (`onOpenCampana`/`onOpenAdmin`), con un botón "Volver" propio de cada vista para restaurar `screen: 'app'`.
+- `App.tsx` mantiene `activeTab: TabId` (`'ficha' | 'grupo' | 'proyectos' | 'sequito' | 'notas'`) con `useState`
+- `TabBar` recibe la lista de tabs visibles vía prop `tabs` (por defecto todas) y emite el tab seleccionado vía `onChange`. `MASTER`/`ADMIN` no tienen `'ficha'` en su lista — en su lugar tienen `'grupo'` (`CampanaView` embebida, sin `onBack`: ahí ven sus partidas y, dentro de cada una, a los demás jugadores). `USER` sí tiene `'ficha'` y no tiene `'grupo'`.
+- El componente `AuthenticatedApp` (dentro de `App.tsx`, montado con `key={token}`) calcula el tab/screen inicial directo por rol en el `useState` — `'grupo'` para master/admin, `'ficha'` para el resto — sin efecto que lo corrija después.
+- `App.tsx` también mantiene `screen: 'app' | 'campana' | 'admin'` con `useState`: cuando no es `'app'`, se oculta la `TabBar` y se renderiza `CampanaView`/`UsersAdminView` en su lugar. `screen: 'campana'` solo lo usa `USER` (vía "Ver la campaña" del `AccountMenu`, con botón "Volver" propio de `CampanaView` para restaurar `screen: 'app'`); `screen: 'admin'` solo `ADMIN` (vía "Usuarios").
 - `App.tsx` renderiza el componente de vista correspondiente al tab/screen activo
 - React Router se añadirá en el futuro; la estructura de módulos está pensada para facilitar esa migración
 
@@ -322,6 +327,9 @@ Si aparece un error de build, TypeScript o lint, el agente **notifica al usuario
 
 ### Git — esperar confirmación explícita
 **El agente nunca hace `git add`, `git commit`, `git push` ni ninguna operación git sin que el usuario lo pida explícitamente.** Esto incluye commits de documentación, configuración o cualquier otro tipo.
+
+### No asumir aprobación por silencio
+**Prohibido el "si no me corriges, sigo adelante".** Cuando el agente plantea opciones o dice "voy a hacer X salvo que digas otra cosa", no puede tratar la ausencia de respuesta (o un mensaje automático tipo stop-hook) como un sí. Hay que esperar una confirmación explícita del usuario antes de ejecutar.
 
 ---
 

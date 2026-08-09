@@ -18,6 +18,7 @@ import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 
 const VIEWS: Record<TabId, React.ReactNode> = {
   ficha:     <FichaView />,
+  grupo:     <CampanaView />,
   proyectos: <ProyectosView />,
   sequito:   <SequitoView />,
   notas:     <NotasView />,
@@ -25,16 +26,18 @@ const VIEWS: Record<TabId, React.ReactNode> = {
 
 const TAB_SUBTITLES: Record<TabId, string> = {
   ficha:     '',
+  grupo:     '// Grupo de la Partida',
   proyectos: '// Registro Operacional',
   sequito:   '// Acólitos y Aliados',
   notas:     '// Bitácora Temática',
 }
 
 // MASTER/ADMIN no juegan personajes propios — su ficha nunca sale ahí, ni
-// como pestaña ni como pantalla de entrada. Sí tienen su propio séquito,
-// proyectos y notas.
+// como pestaña ni como pantalla de entrada. En su lugar tienen "Grupo"
+// (partidas + jugadores, lo que para USER vive en "Ver la campaña" del
+// menú de cuenta), y conservan su propio séquito, proyectos y notas.
 const PLAYER_TABS: TabId[] = ['ficha', 'proyectos', 'sequito', 'notas']
-const GM_TABS: TabId[] = ['proyectos', 'sequito', 'notas']
+const GM_TABS: TabId[] = ['grupo', 'proyectos', 'sequito', 'notas']
 
 function isGmRole(role: string | undefined) {
   return role === 'MASTER' || role === 'ADMIN'
@@ -80,13 +83,16 @@ function AppHeader({ activeTab, onOpenCampana, onOpenAdmin }: AppHeaderProps) {
           <AccountMenu>
             <ThemePicker currentTheme={currentTheme} themes={themes} onSelect={setTheme} />
             <div className="my-1 border-t border-rim-bright" />
-            <button
-              onClick={onOpenCampana}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-parchment transition-colors"
-            >
-              <span className="text-sm leading-none select-none">☩</span>
-              Ver la campaña
-            </button>
+            {/* MASTER/ADMIN ya tienen "Grupo" como tab — esta entrada es solo para USER */}
+            {!isGmRole(user?.role) && (
+              <button
+                onClick={onOpenCampana}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left font-display text-[11px] uppercase tracking-widest text-parchment-dim hover:bg-surface-3 hover:text-parchment transition-colors"
+              >
+                <span className="text-sm leading-none select-none">☩</span>
+                Ver la campaña
+              </button>
+            )}
             {user?.role === 'ADMIN' && (
               <button
                 onClick={onOpenAdmin}
@@ -125,8 +131,9 @@ interface AuthenticatedAppProps {
  */
 function AuthenticatedApp({ role }: AuthenticatedAppProps) {
   const gm = isGmRole(role)
-  const [activeTab, setActiveTab] = useState<TabId>(gm ? 'proyectos' : 'ficha')
-  const [screen, setScreen] = useState<Screen>(gm ? 'campana' : 'app')
+  // MASTER/ADMIN entran directo al tab "Grupo" (su ficha no existe); USER a Ficha.
+  const [activeTab, setActiveTab] = useState<TabId>(gm ? 'grupo' : 'ficha')
+  const [screen, setScreen] = useState<Screen>('app')
   const visibleTabs = gm ? GM_TABS : PLAYER_TABS
 
   return (
