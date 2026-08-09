@@ -4,9 +4,11 @@ import type { AppDispatch } from './store'
 import { resetFicha } from '@/modules/ficha/services/fichaSlice'
 import { resetSequito } from '@/modules/sequito/services/sequitoSlice'
 import { resetProyectos } from '@/modules/proyectos/services/proyectosSlice'
+import { resetNotas } from '@/modules/notas/services/notasSlice'
+import { resetCampana } from '@/modules/campana'
 
 /**
- * Login/registro con reseteo previo de los 3 slices de datos de juego.
+ * Login/registro con reseteo previo de los slices de datos de juego.
  * Sin esto, un dispositivo con datos locales de otra cuenta (logout
  * incompleto, sesión expirada) subiría esos datos "sucios" como parte de
  * la cuenta nueva en el primer sync con el backend (ver core/sync):
@@ -19,6 +21,8 @@ export async function loginFully(dispatch: AppDispatch, input: LoginInput) {
     dispatch(resetFicha())
     dispatch(resetSequito())
     dispatch(resetProyectos())
+    dispatch(resetNotas())
+    dispatch(resetCampana())
   }
   return result
 }
@@ -29,6 +33,8 @@ export async function registerFully(dispatch: AppDispatch, input: RegisterInput)
     dispatch(resetFicha())
     dispatch(resetSequito())
     dispatch(resetProyectos())
+    dispatch(resetNotas())
+    dispatch(resetCampana())
   }
   return result
 }

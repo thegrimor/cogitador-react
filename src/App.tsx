@@ -30,6 +30,16 @@ const TAB_SUBTITLES: Record<TabId, string> = {
   notas:     '// Bitácora Temática',
 }
 
+// MASTER/ADMIN no juegan personajes propios — su ficha nunca sale ahí, ni
+// como pestaña ni como pantalla de entrada. Sí tienen su propio séquito,
+// proyectos y notas.
+const PLAYER_TABS: TabId[] = ['ficha', 'proyectos', 'sequito', 'notas']
+const GM_TABS: TabId[] = ['proyectos', 'sequito', 'notas']
+
+function isGmRole(role: string | undefined) {
+  return role === 'MASTER' || role === 'ADMIN'
+}
+
 interface AppHeaderProps {
   activeTab: TabId
   onOpenCampana: () => void
@@ -103,20 +113,21 @@ function AppHeader({ activeTab, onOpenCampana, onOpenAdmin }: AppHeaderProps) {
 
 type Screen = 'app' | 'campana' | 'admin'
 
-function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('ficha')
-  const [screen, setScreen] = useState<Screen>('app')
-  const token = useAppSelector(s => s.auth.token)
+interface AuthenticatedAppProps {
+  role: string | undefined
+}
 
-  if (!token) {
-    return (
-      <div className="relative flex min-h-screen flex-col overflow-x-hidden font-mono text-parchment bg-surface">
-        <div className="scanline" />
-        <AuthView />
-        <Toast />
-      </div>
-    )
-  }
+/**
+ * Montado con `key={token}` desde App — así cada sesión (login/logout)
+ * arranca este componente de cero, y activeTab/screen se inicializan ya
+ * con el valor correcto según el rol sin necesidad de un effect que los
+ * corrija después (evitaba un render de más con el valor por defecto).
+ */
+function AuthenticatedApp({ role }: AuthenticatedAppProps) {
+  const gm = isGmRole(role)
+  const [activeTab, setActiveTab] = useState<TabId>(gm ? 'proyectos' : 'ficha')
+  const [screen, setScreen] = useState<Screen>(gm ? 'campana' : 'app')
+  const visibleTabs = gm ? GM_TABS : PLAYER_TABS
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden font-mono text-parchment bg-surface">
@@ -135,10 +146,27 @@ function App() {
         {screen === 'app' && VIEWS[activeTab]}
       </main>
 
-      {screen === 'app' && <TabBar active={activeTab} onChange={setActiveTab} />}
+      {screen === 'app' && <TabBar active={activeTab} onChange={setActiveTab} tabs={visibleTabs} />}
       <Toast />
     </div>
   )
+}
+
+function App() {
+  const token = useAppSelector(s => s.auth.token)
+  const user = useAppSelector(s => s.auth.user)
+
+  if (!token) {
+    return (
+      <div className="relative flex min-h-screen flex-col overflow-x-hidden font-mono text-parchment bg-surface">
+        <div className="scanline" />
+        <AuthView />
+        <Toast />
+      </div>
+    )
+  }
+
+  return <AuthenticatedApp key={token} role={user?.role} />
 }
 
 export default App
