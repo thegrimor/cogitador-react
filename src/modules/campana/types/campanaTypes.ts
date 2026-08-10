@@ -1,3 +1,5 @@
+import type { Character } from '@/modules/ficha'
+
 export interface CampaignSummary {
   id: string
   name: string
@@ -7,19 +9,13 @@ export interface CampaignSummary {
   createdAt: string
 }
 
-// Subconjuntos de solo lectura de Character/SequitoState/ProyectosState —
-// deliberadamente propios y acotados a lo que se pinta aquí, sin importar
-// los tipos internos de ficha/sequito/proyectos (los módulos son opacos
-// entre sí, solo se habla con ellos vía el backend).
-export interface CampaignMemberCharacter {
-  id: string
-  info: { name: string; rank: string; career: string; homeworld: string }
-  wounds: { current: number; max: number }
-  fate: { current: number; max: number }
-}
-
+// Séquito/proyectos/notas: subconjuntos de solo lectura, propios y acotados
+// a lo que se pinta aquí (los módulos son opacos entre sí, solo se habla
+// con ellos vía el backend). La ficha es la excepción: se reutiliza el tipo
+// real de `ficha` porque "entrar al perfil" de un jugador renderiza su
+// FichaView real (ver ProfileSections/ReadOnlyFicha), no un resumen propio.
 export interface CampaignMemberFicha {
-  characters: CampaignMemberCharacter[]
+  characters: Character[]
 }
 
 export interface CampaignMemberSequitoEntry {
