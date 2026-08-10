@@ -3,7 +3,6 @@ import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 import { clearActiveCampaign, fetchCampaignDetail, fetchMyCampaigns } from '../services/campanaSlice'
 import { CampaignList } from './CampaignList'
 import { JugadoresTab } from './tabs/JugadoresTab'
-import { MiPerfilTab } from './tabs/MiPerfilTab'
 import { NotasGrupalesTab } from './tabs/NotasGrupalesTab'
 
 interface Props {
@@ -12,11 +11,10 @@ interface Props {
   onBack?: () => void
 }
 
-type CampanaTab = 'jugadores' | 'perfil' | 'notas'
+type CampanaTab = 'jugadores' | 'notas'
 
 const TABS: Array<{ id: CampanaTab; label: string }> = [
   { id: 'jugadores', label: 'Jugadores' },
-  { id: 'perfil', label: 'Mi perfil' },
   { id: 'notas', label: 'Notas' },
 ]
 
@@ -99,7 +97,6 @@ export function CampanaView({ onBack }: Props) {
               <p className="font-mono text-xs text-parchment-dim">Cargando partida...</p>
             )}
             {current && tab === 'jugadores' && <JugadoresTab campaign={current} isManager={isManager} />}
-            {tab === 'perfil' && <MiPerfilTab />}
             {tab === 'notas' && <NotasGrupalesTab />}
           </div>
         </div>

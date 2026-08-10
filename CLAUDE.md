@@ -19,7 +19,7 @@ El proyecto nació como 3 HTMLs standalone con estética Adeptus Mechanicus (gri
 | `sequito` | Gestión del séquito (acólitos y aliados) | Funcional (layers, armería, inventario) |
 | `notas` | Notas temáticas por sección (Grupo o personaje) | Funcional (persistencia backend propia) |
 | `auth` | Login/registro y sesión | Funcional (backend propio en `server/`) |
-| `campana` | Partidas: master (dueño) + jugadores, con vista de solo lectura de la ficha/séquito/proyectos de cada jugador | En progreso (Jugadores funcional; Mi perfil funcional; Notas grupales placeholder) |
+| `campana` | Partidas: master (dueño) + jugadores, con vista de solo lectura de la ficha/séquito/proyectos de cada jugador | En progreso (Jugadores funcional; Notas grupales placeholder) |
 | `admin` | Administración mínima de usuarios (rol, borrado) — solo visible para `ADMIN` | Funcional (mínimo) |
 
 Cada módulo existe como HTML funcional previo que sirve de referencia para la migración.
@@ -176,7 +176,6 @@ src/
         tabs/
           JugadoresTab.tsx     # Lista de jugadores (alta/baja si master/admin) + detalle al
                                 # pinchar uno (MemberSummaryCard de ese jugador)
-          MiPerfilTab.tsx      # ProfileSections con mi propio estado (lo que ven los demás)
           NotasGrupalesTab.tsx # Placeholder — sin modelo/API todavía
       services/
         campanaApi.ts     # Llamadas a /api/campaigns
@@ -258,7 +257,7 @@ No hay React Router configurado. La navegación funciona así:
 - `App.tsx` mantiene `activeTab: TabId` (`'ficha' | 'grupo' | 'proyectos' | 'sequito' | 'notas'`) con `useState`
 - `TabBar` recibe la lista de tabs visibles vía prop `tabs` (por defecto todas) y emite el tab seleccionado vía `onChange`. `MASTER`/`ADMIN` no tienen `'ficha'` en su lista — en su lugar tienen `'grupo'` (`CampanaView` embebida, sin `onBack`: ahí ven sus partidas y, dentro de cada una, a los demás jugadores). `USER` sí tiene `'ficha'` y no tiene `'grupo'`.
 - El componente `AuthenticatedApp` (dentro de `App.tsx`, montado con `key={token}`) calcula el tab/screen inicial directo por rol en el `useState` — `'grupo'` para master/admin, `'ficha'` para el resto — sin efecto que lo corrija después.
-- `App.tsx` también mantiene `screen: 'app' | 'campana' | 'admin'` con `useState`: cuando no es `'app'`, se oculta la `TabBar` y se renderiza `CampanaView`/`UsersAdminView` en su lugar. `screen: 'campana'` solo lo usa `USER` (vía "Ver la campaña" del `AccountMenu`, con botón "Volver" propio de `CampanaView` para restaurar `screen: 'app'`); `screen: 'admin'` solo `ADMIN` (vía "Usuarios").
+- `App.tsx` también mantiene `screen: 'app' | 'campana' | 'admin'` con `useState`: cuando no es `'app'`, se renderiza `CampanaView`/`UsersAdminView` en lugar del tab activo. `screen: 'campana'` solo lo usa `USER` (vía "Ver la campaña" del `AccountMenu`, con botón "Volver" propio de `CampanaView` para restaurar `screen: 'app'`); `screen: 'admin'` solo `ADMIN` (vía "Usuarios"). La `TabBar` es siempre visible (no se oculta en estas pantallas) — tocar cualquier tab desde ahí hace `setScreen('app')` además de cambiar de tab, así que también sirve para salir de "Ver la campaña"/"Usuarios".
 - `App.tsx` renderiza el componente de vista correspondiente al tab/screen activo
 - React Router se añadirá en el futuro; la estructura de módulos está pensada para facilitar esa migración
 
