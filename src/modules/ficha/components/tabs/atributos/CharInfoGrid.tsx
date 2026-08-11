@@ -90,6 +90,23 @@ export function CharInfoGrid({ char }: Props) {
               </select>
             </div>
           )}
+
+          <div className="mt-2.5">
+            <label className="block font-display text-[8px] uppercase tracking-[2px] text-gold mb-1">
+              Subclase
+            </label>
+            <select
+              value={char.info.subclass ?? ''}
+              onChange={e => dispatch(updateCharInfo({ id: char.id, field: 'subclass', value: e.target.value }))}
+              className="w-full bg-surface-2 border border-gold text-gold-bright font-mono text-xs px-2 py-1.5 outline-none"
+            >
+              <option value="" className="bg-surface-3">— Ninguna —</option>
+              <option value="inquisidor" className="bg-surface-3">Inquisidor</option>
+              <option value="paria" disabled={char.info.career === 'Psíquico Imperial'} className="bg-surface-3">
+                Paria{char.info.career === 'Psíquico Imperial' ? ' (incompatible con Psíquico Imperial)' : ''}
+              </option>
+            </select>
+          </div>
         </div>
 
         {/* Campos de identificación — cajas individuales, igual que .info-field del legacy */}
@@ -133,18 +150,20 @@ export function CharInfoGrid({ char }: Props) {
             />
           </div>
 
-          <div className="bg-surface border border-rim-bright px-3 py-2.5">
-            <label className="block font-display text-[9px] uppercase tracking-[2px] text-parchment-dim mb-1.5">
-              Ordo
-            </label>
-            <input
-              type="text"
-              value={char.info.ordo ?? ''}
-              placeholder="Ej: Xenos"
-              onChange={e => dispatch(updateCharInfo({ id: char.id, field: 'ordo', value: e.target.value }))}
-              className="w-full bg-transparent font-rajdhani text-[15px] font-semibold text-parchment outline-none placeholder:text-parchment-dim/40"
-            />
-          </div>
+          {char.info.subclass === 'inquisidor' && (
+            <div className="bg-surface border border-rim-bright px-3 py-2.5">
+              <label className="block font-display text-[9px] uppercase tracking-[2px] text-parchment-dim mb-1.5">
+                Ordo
+              </label>
+              <input
+                type="text"
+                value={char.info.ordo ?? ''}
+                placeholder="Ej: Xenos"
+                onChange={e => dispatch(updateCharInfo({ id: char.id, field: 'ordo', value: e.target.value }))}
+                className="w-full bg-transparent font-rajdhani text-[15px] font-semibold text-parchment outline-none placeholder:text-parchment-dim/40"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

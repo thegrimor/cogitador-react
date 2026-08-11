@@ -12,12 +12,14 @@ import { MejorasTab } from './tabs/MejorasTab'
 import { PoderesPsiquicosTab } from './tabs/PoderesPsiquicosTab'
 import { XpTab } from './tabs/XpTab'
 import { InquisidorTab } from './tabs/InquisidorTab'
+import { PariaTab } from './tabs/PariaTab'
 import { CaidosTab } from './tabs/CaidosTab'
+import type { Character } from '../types/fichaTypes'
 
 // 10 tabs del HTML legacy (charinfo/attrs/vital/skills/talents/armory/
 // mechadendrites/powers/inquisidor/fallen) + 'xp', mejora consciente sin
 // equivalente en el legacy (aprobada explícitamente, no forma parte de la
-// migración 1:1).
+// migración 1:1) + 'paria', subclase nueva (ver CLAUDE.md).
 type FichaTabId =
   | 'personaje'
   | 'caracteristicas'
@@ -29,6 +31,7 @@ type FichaTabId =
   | 'poderes'
   | 'xp'
   | 'inquisidor'
+  | 'paria'
   | 'caidos'
 
 interface FichaTab {
@@ -47,6 +50,7 @@ const TABS: FichaTab[] = [
   { id: 'poderes',         label: 'Psíq.'      },
   { id: 'xp',              label: 'XP'         },
   { id: 'inquisidor',      label: 'Inquis.'    },
+  { id: 'paria',           label: 'Paria'      },
   { id: 'caidos',          label: 'Caídos'     },
 ]
 
@@ -61,7 +65,17 @@ const TAB_CONTENT: Record<FichaTabId, React.ReactNode> = {
   poderes:         <PoderesPsiquicosTab />,
   xp:              <XpTab />,
   inquisidor:      <InquisidorTab />,
+  paria:           <PariaTab />,
   caidos:          <CaidosTab />,
+}
+
+// Un Nulo/Paria nunca tiene Poderes Psíquicos, Factor Psíquico, Fe Pura ni Hechicería
+// (regla del rasgo Nulo) — por eso se comprueba subclass antes que carrera/talentos.
+function hasPsychicAccess(char?: Character) {
+  if (!char) return false
+  if (char.info.subclass === 'paria') return false
+  if (char.info.career === 'Psíquico Imperial') return true
+  return char.talents.some(t => /^Factor psíquico/i.test(t.name))
 }
 
 export function FichaView() {
@@ -69,12 +83,19 @@ export function FichaView() {
   const { characters, activeCharacterId } = useAppSelector(s => s.ficha)
   const activeChar = characters.find(c => c.id === activeCharacterId)
 
-  // El tab Inquisidor solo es visible para el slot con role='inquisidor'
-  const visibleTabs = TABS.filter(t => t.id !== 'inquisidor' || activeChar?.info.role === 'inquisidor')
-  // Si el personaje activo cambia y deja de ser Inquisidor, no nos quedamos en un tab oculto
-  const effectiveTab: FichaTabId = activeTab === 'inquisidor' && activeChar?.info.role !== 'inquisidor'
-    ? 'personaje'
-    : activeTab
+  // Inquis./Paria solo son visibles con la subclase correspondiente; Psíq. solo con
+  // Factor Psíquico (talento o carrera pertinente), nunca con subclase Paria.
+  const visibleTabs = TABS.filter(t => {
+    if (t.id === 'inquisidor') return activeChar?.info.subclass === 'inquisidor'
+    if (t.id === 'paria') return activeChar?.info.subclass === 'paria'
+    if (t.id === 'poderes') return hasPsychicAccess(activeChar)
+    return true
+  })
+  // Si el personaje activo cambia y el tab activo deja de estar disponible, no nos
+  // quedamos en un tab oculto.
+  const effectiveTab: FichaTabId = visibleTabs.some(t => t.id === activeTab)
+    ? activeTab
+    : 'personaje'
 
   return (
     <div className="flex flex-col flex-1">
