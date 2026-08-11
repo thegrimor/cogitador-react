@@ -4,7 +4,7 @@ import { addPlayer, fetchCampaignDetail, removePlayer } from '../../services/cam
 import { useConfirm } from '@/shared/hooks/useConfirm'
 import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { showToast } from '@/shared/components/Toast'
-import { MemberSummaryCard } from '../MemberSummaryCard'
+import { PlayerProfileView } from '../PlayerProfileView'
 import type { CampaignDetail } from '../../types/campanaTypes'
 
 interface Props {
@@ -51,27 +51,7 @@ export function JugadoresTab({ campaign, isManager }: Props) {
   }
 
   if (selectedMember) {
-    return (
-      <div className="flex flex-col gap-3">
-        <button
-          onClick={() => setSelectedId(null)}
-          className="self-start font-display text-[9px] uppercase tracking-[2px] text-parchment-dim hover:text-parchment transition-colors"
-        >
-          ← Jugadores
-        </button>
-        <MemberSummaryCard
-          member={selectedMember}
-          onRemove={isManager ? () => handleRemove(selectedMember.id, selectedMember.username) : undefined}
-        />
-        <ConfirmModal
-          isOpen={confirm.isOpen}
-          message={confirm.message}
-          onConfirm={confirm.onConfirm}
-          onCancel={confirm.onCancel}
-          confirmLabel="Quitar"
-        />
-      </div>
-    )
+    return <PlayerProfileView member={selectedMember} onBack={() => setSelectedId(null)} />
   }
 
   return (

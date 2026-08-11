@@ -26,7 +26,7 @@ Cada módulo existe como HTML funcional previo que sirve de referencia para la m
 
 ### Roles y partidas
 
-El backend maneja un `Role` global por cuenta: `ADMIN | MASTER | USER`. `MASTER` y `ADMIN` pueden crear partidas (`campana`) e incluir jugadores existentes por username/email; `ADMIN` gestiona todas las partidas, `MASTER` solo las suyas. Dentro de una partida, la ficha/séquito/proyectos de cada jugador se comparten en modo solo lectura con el resto de la partida (master incluido); la información del propio master **nunca** se comparte — no es miembro de su propia partida.
+El backend maneja un `Role` global por cuenta: `ADMIN | MASTER | USER`. `MASTER` y `ADMIN` pueden crear partidas (`campana`) e incluir jugadores existentes por username/email; `ADMIN` gestiona todas las partidas, `MASTER` solo las suyas. Dentro de una partida, la ficha/séquito/proyectos/notas de cada jugador se comparten en modo solo lectura con el resto de la partida (master incluido) — al entrar al perfil de un jugador se ve su app real, no un resumen (ver `PlayerProfileView`); la información del propio master **nunca** se comparte — no es miembro de su propia partida.
 
 `MASTER`/`ADMIN` no juegan personajes propios: no tienen tab Ficha (arrancan directo en el tab **Grupo**, que es `CampanaView` embebida en la `TabBar` — sus partidas y, dentro de cada una, el resto de jugadores), y sí conservan sus propios Proyectos/Séquito/Notas. `USER` conserva Ficha/Proyectos/Séquito/Notas de siempre y accede a su partida vía "Ver la campaña" en el `AccountMenu` del header (junto a tema y logout) — esa entrada del menú no aparece para `MASTER`/`ADMIN`, que ya tienen el tab. "Usuarios" (módulo `admin`) solo aparece para `ADMIN`.
 
@@ -170,18 +170,21 @@ src/
                                 # `onBack` opcional — con él es pantalla standalone (USER, vía
                                 # AccountMenu); sin él va embebida como tab "Grupo" (master/admin)
         CampaignList.tsx       # Listado de mis partidas + alta (solo ADMIN/MASTER)
-        MemberSummaryCard.tsx  # Cabecera (username + quitar) + ProfileSections de un jugador
-        ProfileSections.tsx    # Bloque solo-lectura reutilizado: ficha (personajes con nombre
-                                # real, no los 2 slots vacíos) + séquito + proyectos + notas
+        PlayerProfileView.tsx  # Perfil de un jugador = su app real (Ficha/Proyectos/Séquito/
+                                # Notas, las mismas vistas que usa él) sobre un store de Redux
+                                # propio y desechable precargado con sus 4 bloques de datos —
+                                # overlay a pantalla completa, solo lectura (banner + nunca
+                                # toca CloudSync ni el backend)
         tabs/
-          JugadoresTab.tsx     # Lista de jugadores (alta/baja si master/admin) + detalle al
-                                # pinchar uno (MemberSummaryCard de ese jugador)
+          JugadoresTab.tsx     # Lista de jugadores (alta/baja si master/admin) + al pinchar
+                                # uno, PlayerProfileView de ese jugador
           NotasGrupalesTab.tsx # Placeholder — sin modelo/API todavía
       services/
         campanaApi.ts     # Llamadas a /api/campaigns
         campanaSlice.ts   # Redux slice: campaigns, current, status, error
       types/
-        campanaTypes.ts   # CampaignSummary, CampaignDetail, CampaignMember (subconjuntos de solo lectura)
+        campanaTypes.ts   # CampaignSummary, CampaignDetail, CampaignMember (ficha/sequito/
+                           # proyectos/notas con los tipos reales de cada módulo)
       index.ts            # Barrel export: CampanaView, campanaReducer, resetCampana
     admin/
       components/
