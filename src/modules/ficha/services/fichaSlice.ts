@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import type {
   FichaState, Character, FallenCharacter, AttributeValues, XpLogEntry,
   Skill, Talent, Weapon, Armor, GearItem,
-  Mechadendrite, Augmentation, PsychicPower, CustomCurrency, InqMejora,
+  Mechadendrite, Augmentation, PsychicPower, CustomCurrency, InqMejora, PariahMejora,
 } from '../types/fichaTypes'
 import { ATTRIBUTES } from '@/core/data/darkheresy/attributes'
 import { normalizeName } from '@/core/data/darkheresy/careers'
@@ -40,6 +40,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
       ordo: info.ordo || '',
       counterpart: info.counterpart || '',
       branch: info.branch || '',
+      subclass: info.subclass || '',
     },
     attrs: buildDefaultAttrs(),
     wounds: { current: 0, max: 0 },
@@ -67,6 +68,7 @@ function buildDefaultCharacter(info: Character['info']): Character {
     influenceGeneral: '',
     influencePlanetary: '',
     inqMejoras: [],
+    pariahMejoras: [],
   }
 }
 
@@ -101,7 +103,7 @@ export const fichaSlice = createSlice({
         if (state.characters.some(c => c.info.role === role)) continue
         const blank = buildDefaultCharacter({
           name: '', rank: '1', career: '', homeworld: '',
-          experience: '0', xpSpent: '0', role, ordo: '', counterpart: '', branch: '',
+          experience: '0', xpSpent: '0', role, ordo: '', counterpart: '', branch: '', subclass: '',
         })
         state.characters.push(blank)
       }
@@ -342,7 +344,7 @@ export const fichaSlice = createSlice({
       const replacement = buildDefaultCharacter({
         name: '', rank: '1', career: char.info.career, homeworld: '',
         experience: String(xpInherited), xpSpent: '0',
-        role: 'sequito', ordo: char.info.ordo, counterpart: char.info.counterpart, branch: '',
+        role: 'sequito', ordo: char.info.ordo, counterpart: char.info.counterpart, branch: '', subclass: '',
       })
       state.characters.push(replacement)
       state.activeCharacterId = replacement.id
@@ -362,6 +364,23 @@ export const fichaSlice = createSlice({
     updateInqMejoraNotes(state, action: PayloadAction<{ charId: string; mejoraId: string; notes: string }>) {
       const char = state.characters.find(c => c.id === action.payload.charId)
       const mejora = char?.inqMejoras?.find(m => m.id === action.payload.mejoraId)
+      if (mejora) mejora.notes = action.payload.notes
+    },
+
+    addPariahMejora(state, action: PayloadAction<{ charId: string; mejora: Omit<PariahMejora, 'id'> }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (!char) return
+      if (!char.pariahMejoras) char.pariahMejoras = [] // personajes persistidos antes de esta migración
+      if (char.pariahMejoras.some(m => m.name === action.payload.mejora.name)) return
+      char.pariahMejoras.push({ id: uid(), ...action.payload.mejora })
+    },
+    removePariahMejora(state, action: PayloadAction<{ charId: string; mejoraId: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      if (char) char.pariahMejoras = (char.pariahMejoras ?? []).filter(m => m.id !== action.payload.mejoraId)
+    },
+    updatePariahMejoraNotes(state, action: PayloadAction<{ charId: string; mejoraId: string; notes: string }>) {
+      const char = state.characters.find(c => c.id === action.payload.charId)
+      const mejora = char?.pariahMejoras?.find(m => m.id === action.payload.mejoraId)
       if (mejora) mejora.notes = action.payload.notes
     },
 
@@ -394,6 +413,7 @@ export const {
   updateNotes,
   deleteCharacter, toggleFilterCareer, killCharacter,
   addInqMejora, removeInqMejora, updateInqMejoraNotes,
+  addPariahMejora, removePariahMejora, updatePariahMejoraNotes,
   hydrateFicha, resetFicha,
 } = fichaSlice.actions
 

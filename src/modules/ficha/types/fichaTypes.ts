@@ -22,6 +22,8 @@ export interface CharacterInfo {
   counterpart: string
   /** Rama elegida cuando el rango actual empata en tramo de PE con otra rama de la carrera */
   branch: string
+  /** '' | 'inquisidor' | 'paria' — subclase elegida, independiente de `role` (slot) */
+  subclass: string
 }
 
 export interface VitalState {
@@ -128,6 +130,15 @@ export interface InqMejora {
   notes: string
 }
 
+export interface PariahMejora {
+  id: string
+  name: string   // 'Intocable' | 'Nulo' | 'Paria'
+  cost: number   // 100 | 400 | 1000
+  req: string    // '—' | 'Intocable' | 'Nulo'
+  desc: string
+  notes: string
+}
+
 export interface Character {
   id: string
   info: CharacterInfo
@@ -157,8 +168,10 @@ export interface Character {
   psychBV: number
   psychDiscipline: string
   psychNotes: string
-  // Inquisidor (solo aplica al slot con role='inquisidor')
+  // Inquisidor (solo aplica si info.subclass === 'inquisidor')
   inqMejoras: InqMejora[]
+  // Paria (solo aplica si info.subclass === 'paria')
+  pariahMejoras: PariahMejora[]
   // Resources
   moneyThrones: number
   currencies: CustomCurrency[]

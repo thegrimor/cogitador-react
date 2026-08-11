@@ -231,6 +231,9 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
       role,
       ordo: asString(charInfo['ordo']),
       counterpart,
+      // El legacy no tenía subclase — se infiere 'inquisidor' si trae mejoras de Inquisidor,
+      // para no perder el acceso al tab tras la migración a subclase explícita.
+      subclass: rawInqTalents.length > 0 ? 'inquisidor' : '',
       // El legacy guarda el rango exacto en `career` ("Magos|10.000-14.999"), no
       // solo en `branch` (que suele venir null). Si hay rango con nombre, ese es
       // la rama elegida — si no se traspasa, getRankForXP() coge por defecto el
@@ -273,5 +276,6 @@ export function mapLegacyHtmlToCharacter(raw: unknown): Character {
     influenceGeneral: asString(r['influenceGeneral']),
     influencePlanetary: asString(r['influencePlanetary']),
     inqMejoras,
+    pariahMejoras: [],
   }
 }
