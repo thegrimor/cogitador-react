@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { ApiError } from '@/core/api/client'
 import * as authApi from './authApi'
 import type {
-  AuthState, ForgotPasswordInput, LoginInput, RegisterInput, ResetPasswordInput,
+  AuthState, LoginInput, RegisterInput, ResetPasswordInput,
 } from '../types/authTypes'
 
 const initialState: AuthState = { token: null, user: null, status: 'idle', error: null }
@@ -26,17 +26,6 @@ export const register = createAsyncThunk('auth/register', async (input: Register
     return rejectWithValue(errorMessage(err))
   }
 })
-
-export const forgotPassword = createAsyncThunk(
-  'auth/forgotPassword',
-  async (input: ForgotPasswordInput, { rejectWithValue }) => {
-    try {
-      return await authApi.forgotPasswordRequest(input)
-    } catch (err) {
-      return rejectWithValue(errorMessage(err))
-    }
-  },
-)
 
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
@@ -89,18 +78,6 @@ const authSlice = createSlice({
         state.user = action.payload.user
       })
       .addCase(register.rejected, (state, action) => {
-        state.status = 'error'
-        state.error = action.payload as string
-      })
-
-      .addCase(forgotPassword.pending, state => {
-        state.status = 'loading'
-        state.error = null
-      })
-      .addCase(forgotPassword.fulfilled, state => {
-        state.status = 'idle'
-      })
-      .addCase(forgotPassword.rejected, (state, action) => {
         state.status = 'error'
         state.error = action.payload as string
       })
