@@ -16,12 +16,8 @@ export interface RegisterInput {
   password: string
 }
 
-export interface ForgotPasswordInput {
-  email: string
-}
-
 export interface ResetPasswordInput {
-  token: string
+  identifier: string
   password: string
 }
 

@@ -1,6 +1,6 @@
 import { apiFetch } from '@/core/api/client'
 import type {
-  AuthResponse, ForgotPasswordInput, LoginInput, RegisterInput, ResetPasswordInput,
+  AuthResponse, LoginInput, RegisterInput, ResetPasswordInput,
 } from '../types/authTypes'
 
 export function registerRequest(input: RegisterInput) {
@@ -9,13 +9,6 @@ export function registerRequest(input: RegisterInput) {
 
 export function loginRequest(input: LoginInput) {
   return apiFetch<AuthResponse>('/api/auth/login', { method: 'POST', body: input })
-}
-
-export function forgotPasswordRequest(input: ForgotPasswordInput) {
-  return apiFetch<{ message: string; devToken?: string }>('/api/auth/forgot-password', {
-    method: 'POST',
-    body: input,
-  })
 }
 
 export function resetPasswordRequest(input: ResetPasswordInput) {

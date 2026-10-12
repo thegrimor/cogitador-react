@@ -21,8 +21,7 @@ JWT por header `Authorization: Bearer <token>`. Login con username **o** email +
 - `POST /api/auth/register` — `{ username, email, password }`
 - `POST /api/auth/login` — `{ identifier, password }`
 - `GET /api/auth/me` — requiere token
-- `POST /api/auth/forgot-password` — `{ email }`
-- `POST /api/auth/reset-password` — `{ token, password }`
+- `POST /api/auth/reset-password` — `{ identifier, password }` (username o email; sin verificación)
 
 > **Nota:** el flujo de recuperación genera y persiste el token, pero no hay
 > proveedor de email conectado todavía — el token se loguea por consola (y se

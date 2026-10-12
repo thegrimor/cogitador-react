@@ -3,9 +3,9 @@ import type { FormEvent } from 'react'
 import { useAppDispatch, useAppSelector } from '@/core/store/hooks'
 import { loginFully, registerFully } from '@/core/store/loginFully'
 import { showToast } from '@/shared/components/Toast'
-import { clearAuthError, forgotPassword, resetPassword } from '../services/authSlice'
+import { clearAuthError, resetPassword } from '../services/authSlice'
 
-type Mode = 'login' | 'register' | 'forgot' | 'reset'
+type Mode = 'login' | 'register' | 'reset'
 
 const INPUT_CLASS =
   'w-full bg-transparent font-rajdhani text-[15px] font-semibold text-parchment outline-none placeholder:text-parchment-dim/40'
@@ -56,8 +56,7 @@ export function AuthView() {
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
-  const [forgotEmail, setForgotEmail] = useState('')
-  const [resetToken, setResetToken] = useState('')
+  const [resetIdentifier, setResetIdentifier] = useState('')
   const [resetPasswordValue, setResetPasswordValue] = useState('')
 
   const loading = status === 'loading'
@@ -77,23 +76,12 @@ export function AuthView() {
     registerFully(dispatch, { username, email, password })
   }
 
-  async function handleForgot(e: FormEvent) {
-    e.preventDefault()
-    const result = await dispatch(forgotPassword({ email: forgotEmail }))
-    if (forgotPassword.fulfilled.match(result)) {
-      showToast(result.payload.message)
-      if (result.payload.devToken) {
-        setResetToken(result.payload.devToken)
-        setMode('reset')
-      }
-    }
-  }
-
   async function handleReset(e: FormEvent) {
     e.preventDefault()
-    const result = await dispatch(resetPassword({ token: resetToken, password: resetPasswordValue }))
+    const result = await dispatch(resetPassword({ identifier: resetIdentifier, password: resetPasswordValue }))
     if (resetPassword.fulfilled.match(result)) {
       showToast('Contraseña actualizada — inicia sesión')
+      setIdentifier(resetIdentifier)
       setPassword('')
       setResetPasswordValue('')
       setMode('login')
@@ -144,7 +132,7 @@ export function AuthView() {
             <SubmitButton disabled={loading}>{loading ? 'Verificando…' : 'Entrar'}</SubmitButton>
             <div className="flex items-center justify-between pt-1">
               <LinkButton onClick={() => changeMode('register')}>Crear cuenta</LinkButton>
-              <LinkButton onClick={() => changeMode('forgot')}>Olvidé mi contraseña</LinkButton>
+              <LinkButton onClick={() => changeMode('reset')}>Olvidé mi contraseña</LinkButton>
             </div>
           </form>
         )}
@@ -194,39 +182,15 @@ export function AuthView() {
           </form>
         )}
 
-        {mode === 'forgot' && (
-          <form onSubmit={handleForgot} className="flex flex-col gap-3">
-            <p className="font-mono text-xs text-parchment-dim">
-              Introduce tu email — si existe una cuenta, se genera un enlace de recuperación.
-            </p>
-            <Field label="Email">
-              <input
-                type="email"
-                value={forgotEmail}
-                onChange={e => setForgotEmail(e.target.value)}
-                placeholder="acolito@ordo.imperium"
-                autoComplete="email"
-                required
-                className={INPUT_CLASS}
-              />
-            </Field>
-            {error && <p className="font-mono text-xs text-crimson-bright">{error}</p>}
-            <SubmitButton disabled={loading}>{loading ? 'Enviando…' : 'Solicitar recuperación'}</SubmitButton>
-            <div className="flex items-center justify-between pt-1">
-              <LinkButton onClick={() => changeMode('login')}>Volver</LinkButton>
-              <LinkButton onClick={() => changeMode('reset')}>Ya tengo un código</LinkButton>
-            </div>
-          </form>
-        )}
-
         {mode === 'reset' && (
           <form onSubmit={handleReset} className="flex flex-col gap-3">
-            <Field label="Código de recuperación">
+            <Field label="Usuario o Email">
               <input
                 type="text"
-                value={resetToken}
-                onChange={e => setResetToken(e.target.value)}
-                placeholder="token recibido"
+                value={resetIdentifier}
+                onChange={e => setResetIdentifier(e.target.value)}
+                placeholder="acolito.designado"
+                autoComplete="username"
                 required
                 className={INPUT_CLASS}
               />
