@@ -8,6 +8,7 @@ export interface JwtPayload {
 }
 
 export function signToken(payload: JwtPayload): string {
+  if (!env.JWT_EXPIRES_IN) return jwt.sign(payload, env.JWT_SECRET);
   return jwt.sign(payload, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });

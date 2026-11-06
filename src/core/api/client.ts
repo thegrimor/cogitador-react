@@ -1,5 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
+export const UNAUTHORIZED_EVENT = 'cogitador:unauthorized'
+
 export class ApiError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -33,6 +35,10 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   const isJson = res.headers.get('content-type')?.includes('application/json')
   const payload: unknown = isJson ? await res.json() : undefined
+
+  if (res.status === 401 && token) {
+    window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
+  }
 
   if (!res.ok) {
     const message = isErrorPayload(payload) ? payload.error : `Error ${res.status}`
