@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { UNAUTHORIZED_EVENT } from '@/core/api/client'
 import { TabBar } from '@/shared/components/TabBar'
 import type { TabId } from '@/shared/components/TabBar'
 import { ThemePicker } from '@/shared/components/ThemePicker'
@@ -167,6 +168,13 @@ function AuthenticatedApp({ role }: AuthenticatedAppProps) {
 function App() {
   const token = useAppSelector(s => s.auth.token)
   const user = useAppSelector(s => s.auth.user)
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    const onUnauthorized = () => { void logoutFully(dispatch) }
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+  }, [dispatch])
 
   if (!token) {
     return (
